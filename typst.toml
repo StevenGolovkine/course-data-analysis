@@ -1,0 +1,7 @@
+[project]
+name = "course-data-analysis"
+version = "0.1.0"
+entrypoint = "main.typ"
+authors = ["Steven"]
+description = "Lecture notes for a data analysis course"
+
