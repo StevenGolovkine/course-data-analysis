@@ -1,6 +1,7 @@
-#import "../styles/notes.typ": note, example
+#import "../styles/notes.typ": note, example, theorem
 
-= Lecture 1: Course Overview
+
+= Introduction
 
 == Goals
 
@@ -18,7 +19,7 @@
 
 == Example
 
-#example[
+#theorem[
   Suppose we observe study hours and exam scores. A first analysis might ask
   whether higher study time is associated with higher scores, then check for
   confounders such as prior preparation, course load, or missing observations.

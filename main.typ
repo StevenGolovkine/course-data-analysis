@@ -1,23 +1,19 @@
 #import "config/course.typ": *
-#import "styles/notes.typ": apply_notes_style
+#import "styles/notes.typ": apply_notes_style, main-outline
 
 #show: apply_notes_style.with(
   title: course_title,
   author: course_author,
 )
 
-#align(center)[
-  #text(size: 22pt, weight: "bold")[#course_title]
-  #v(0.4em)
-  #course_term \
-  #course_author
-]
-
-#v(2em)
-
-#outline(title: [Contents])
+#main-outline()
 
 #pagebreak()
 
-#include "lectures/lecture-01.typ"
-
+#include "lectures/introduction.typ"
+#include "lectures/exploratory.typ"
+#include "lectures/dimension_reduction.typ"
+#include "lectures/supervised.typ"
+#include "lectures/unsupervised.typ"
+#include "lectures/missing_data.typ"
+#include "lectures/others.typ"

@@ -1,5 +1,4 @@
-#let course_title = "Data Analysis"
-#let course_author = "Instructor Name"
-#let course_term = "Term YYYY"
-#let course_code = "COURSE 000"
+#let course_title = "Analyse de données"
+#let course_author = "Steven Golovkine"
+
 
