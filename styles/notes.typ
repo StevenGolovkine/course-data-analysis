@@ -30,26 +30,34 @@
   } else {
     none
   }
-  let sections = query(heading.where(level: 2, outlined: true)).filter(it => {
-    let loc = it.location()
-    before-location(current, loc) and (next == none or before-location(loc, next))
-  })
+  let sections = query(heading.where(level: 2, outlined: true)).filter(
+    it => {
+      let loc = it.location()
+      (
+        before-location(current, loc) and 
+          (next == none or before-location(loc, next))
+      )
+    }
+  )
 
   if sections.len() > 0 {
     v(2.6em)
-    text(size: 11pt, weight: "bold", fill: rgb("#5f6f7a"))[Plan du chapitre]
+    text(size: 14pt, weight: "bold", fill: rgb("#5f6f7a"))[Plan du chapitre]
     v(0.8em)
     for section in sections {
       let loc = section.location()
       let nr = page-number-at(loc)
       outline-link(loc)[
         #block(width: 100%)[
-          #text(size: 11pt, fill: rgb("#24313a"))[#section.body]
+          #text(
+            size: 11pt, weight: "thin", fill: rgb("#24313a")
+          )[#section.body]
           #h(1fr)
-          #text(size: 10pt, fill: rgb("#6b7c86"))[#nr]
+          #text(
+            size: 10pt, weight: "thin", fill: rgb("#6b7c86")
+          )[#nr]
         ]
       ]
-      v(0.35em)
     }
   }
 }
@@ -66,12 +74,15 @@
       let nr = page-number-at(loc)
       outline-link(loc)[
         #block(width: 100%)[
-          #text(size: 11pt, fill: rgb("#24313a"))[#chapter.body]
+          #text(
+            size: 11pt, weight: "thin", fill: rgb("#24313a")
+          )[#chapter.body]
           #h(1fr)
-          #text(size: 10pt, fill: rgb("#6b7c86"))[#nr]
+          #text(
+            size: 10pt, weight: "thin", fill: rgb("#6b7c86")
+          )[#nr]
         ]
       ]
-      v(0.35em)
     }
   }
 }
@@ -80,7 +91,7 @@
   set document(title: title, author: author)
   set page(
     paper: "a4",
-    margin: (x: 1in, y: 0.9in),
+    margin: (x: 1in, y: 1in),
     numbering: "1",
   )
   set text(
