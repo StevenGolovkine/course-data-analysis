@@ -2,7 +2,7 @@
 
 = Analyse exploratoire
 
-== Le projet d'analyse de données
+== Introduction
 
 Un projet d'analyse de données suit généralement cinq étapes.
 
@@ -24,7 +24,7 @@ si elle porte une décision importante.
   clients sont susceptibles d'acheter un nouveau produit d'épargne ?"
 ]
 
-== Définir une bonne question
+=== Définir une bonne question
 
 Une question utile doit préciser la population, l'unité statistique, la variable
 ou la décision d'intérêt et le type de résultat attendu. On peut viser:
@@ -38,7 +38,33 @@ ou la décision d'intérêt et le type de résultat attendu. On peut viser:
 Une formulation claire évite les explorations sans direction et limite le risque
 de construire une méthode élégante qui ne répond pas au problème initial.
 
-== Qualité des données
+=== De la question à la méthode
+
+La question détermine les objets à définir: l'unité statistique, les variables,
+la distance éventuelle, la mesure d'erreur et le protocole de validation. Ces
+choix doivent être faits avant de comparer des méthodes, car ils déterminent ce
+qu'une méthode peut apprendre et comment son résultat sera jugé.
+
+Une analyse exploratoire n'est donc pas seulement une collection de graphiques.
+Elle sert à comprendre les données, à formuler des hypothèses, à repérer les
+problèmes de qualité et à préparer une modélisation défendable.
+
+=== Une posture critique
+
+Les données reflètent un processus de collecte. Elles peuvent contenir des
+omissions, des biais, des définitions ambiguës et des contraintes
+institutionnelles. Avant de modéliser, il faut donc demander ce que les données
+mesurent réellement et ce qu'elles ne mesurent pas.
+
+#example[
+  Dans une base client, une absence d'achat peut signifier un manque d'intérêt,
+  une rupture de stock, un problème d'accès au service ou simplement une
+  observation incomplète. Le même zéro apparent peut avoir plusieurs sens.
+]
+
+== Les données
+
+=== Qualité des données
 
 Les données sont le coeur de l'analyse. Même un modèle très sophistiqué ne peut
 pas corriger un échantillon non représentatif, une variable mal définie ou des
@@ -61,7 +87,7 @@ Lors de la première inspection, on vérifie notamment:
   modalités différentes créerait une structure artificielle.
 ]
 
-== Données tidy
+=== Données tidy
 
 Un tableau est dit *tidy* lorsque chaque variable est une colonne, chaque
 observation est une ligne et chaque cellule contient une seule valeur. Cette
@@ -72,7 +98,7 @@ Le format tidy n'est pas toujours le format de collecte. Il faut parfois pivoter
 un tableau, séparer une colonne composite, uniformiser des catégories, ou
 ramener plusieurs fichiers à une même unité statistique.
 
-== Unité statistique
+=== Unité statistique
 
 L'unité statistique est l'élément de base sur lequel porte une observation. Elle
 peut être un individu, une transaction, une entreprise, un pays, une image, un
@@ -85,7 +111,7 @@ pixel ou un document. Ce choix fixe le niveau d'agrégation de l'analyse.
   complètement.
 ]
 
-== Types de variables
+=== Types de variables
 
 Le type d'une variable détermine l'espace mathématique, les distances possibles
 et les modèles pertinents.
@@ -102,7 +128,7 @@ Une variable textuelle, une courbe, une image ou un réseau demande une
 représentation plus riche. Le choix de représentation est alors une partie
 centrale de l'analyse.
 
-== Espaces d'observation
+=== Espaces d'observation
 
 Une fois les variables définies, on choisit l'espace dans lequel vivent les
 observations. Une variable numérique peut être représentée dans les réels, ou
@@ -116,7 +142,9 @@ produit d'espaces: une observation est alors un vecteur de caractéristiques.
   représentation adaptée, par exemple un encodage binaire des modalités.
 ]
 
-== Distances et similarités
+== La distance
+
+=== Distances et similarités
 
 La plupart des méthodes du cours reposent sur une comparaison entre
 observations. Une distance mesure une dissemblance. Elle doit être non négative,
@@ -134,7 +162,7 @@ $ d_q(x, y) = (sum_(j=1)^p |x_j - y_j|^q)^(1 / q) $
 La distance de Manhattan correspond à $q = 1$ et la distance euclidienne à
 $q = 2$.
 
-== Effet de l'échelle
+=== Effet de l'échelle
 
 Les distances numériques sont sensibles aux unités. Une variable mesurée en
 dollars peut dominer une variable mesurée entre 0 et 1, même si elle n'est pas
@@ -147,7 +175,7 @@ calculer une distance:
 Cette étape permet de comparer des variations relatives plutôt que des unités
 brutes.
 
-== Variables qualitatives
+=== Variables qualitatives
 
 Pour des variables qualitatives, les distances numériques habituelles n'ont pas
 toujours de sens. On peut utiliser un encodage un-parmi-$K$ pour représenter une
@@ -163,7 +191,22 @@ $ J = M_11 / (M_11 + M_10 + M_01) $
 La distance associée est $1 - J$. Elle ignore les doubles absences, qui sont
 souvent moins informatives.
 
-== Modèle prédictif
+=== Choisir une distance
+
+Choisir une distance revient à choisir ce que signifie "se ressembler". Deux
+observations peuvent être proches selon leurs valeurs numériques, leurs
+catégories, leurs trajectoires temporelles ou leurs voisins dans un graphe. La
+distance doit donc être reliée à la question d'analyse.
+
+#note[
+  Une distance n'est jamais un détail technique. Elle peut changer les groupes
+  obtenus, les voisins les plus proches, les axes de réduction de dimension et
+  l'interprétation des résultats.
+]
+
+== Le calcul de l'erreur
+
+=== Modèle prédictif
 
 Une écriture générale pour les modèles prédictifs est:
 
@@ -176,7 +219,7 @@ expliquée, liée au bruit, aux variables absentes et à la variabilité naturel
 L'objectif est d'estimer $f$ à partir d'un échantillon. La question centrale
 devient alors: comment savoir si l'estimateur est bon ?
 
-== Mesures d'erreur
+=== Mesures d'erreur en régression
 
 Pour une réponse quantitative, on utilise souvent l'erreur quadratique moyenne:
 
@@ -184,13 +227,46 @@ $ "MSE" = (1 / n) sum_(i=1)^n (y_i - y_i^*)^2 $
 
 où $y_i^*$ est la prédiction pour l'observation $i$.
 
+On peut aussi utiliser l'erreur absolue moyenne, plus robuste aux grandes erreurs:
+
+$ "MAE" = (1 / n) sum_(i=1)^n |y_i - y_i^*| $
+
+Le choix entre MSE et MAE dépend du problème. La MSE pénalise fortement les
+grosses erreurs; la MAE mesure une erreur typique plus directement lisible.
+
+=== Mesures d'erreur en classification
+
 Pour une réponse qualitative, on peut utiliser le taux d'erreur:
 
 $ "ER" = (1 / n) sum_(i=1)^n 1_(y_i != y_i^*) $
 
 Il mesure la proportion de mauvaises classifications.
 
-== Compromis biais-variance
+Lorsque les classes sont déséquilibrées, le taux d'erreur global peut être
+trompeur. Il faut alors regarder la matrice de confusion, la sensibilité, la
+spécificité, la précision, le rappel ou d'autres mesures adaptées au coût des
+erreurs.
+
+#example[
+  Si 98 pour cent des transactions ne sont pas frauduleuses, un modèle qui prédit
+  toujours "non frauduleux" a 98 pour cent d'exactitude, mais il ne détecte
+  aucune fraude.
+]
+
+=== Coût des erreurs
+
+Une mesure d'erreur doit refléter la décision visée. Une erreur de 10 dollars,
+une erreur de diagnostic et une erreur d'affectation dans un groupe n'ont pas le
+même sens. Il faut donc choisir une perte compatible avec les conséquences
+pratiques de l'analyse.
+
+Dans certains problèmes, les erreurs sont asymétriques: un faux positif et un
+faux négatif n'ont pas le même coût. Dans ce cas, le seuil de décision et la
+mesure de performance doivent être discutés explicitement.
+
+== La validation
+
+=== Sur-ajustement et sous-ajustement
 
 Un modèle très simple peut sous-ajuster les données: il a un biais élevé et ne
 capture pas la structure réelle. Un modèle très flexible peut surajuster les
@@ -204,11 +280,22 @@ fluctuations de l'échantillon.
   généralise le mieux.
 ]
 
-== Validation et sur-ajustement
+=== Séparation des données
 
 Évaluer un modèle sur les données qui ont servi à l'entraîner donne une vision
-trop optimiste. On sépare donc les données en ensembles d'entraînement et de
-validation, ou on utilise la validation croisée.
+trop optimiste. On sépare donc les données en ensembles d'entraînement, de
+validation et de test.
+
+- L'ensemble d'entraînement sert à ajuster les modèles.
+- L'ensemble de validation sert à choisir les hyper-paramètres ou à comparer des
+  variantes.
+- L'ensemble de test sert à estimer la performance finale.
+
+Les transformations apprises à partir des données, comme la standardisation,
+l'imputation ou la sélection de variables, doivent être ajustées sur
+l'entraînement seulement, puis appliquées aux autres ensembles.
+
+=== Validation croisée
 
 Dans une validation croisée à $K$ plis, les observations sont divisées en $K$
 sous-ensembles. On entraîne le modèle sur $K - 1$ plis et on l'évalue sur le pli
@@ -217,19 +304,33 @@ restant. On répète l'opération pour chaque pli puis on moyenne les erreurs.
 En pratique, $K = 5$ ou $K = 10$ est un compromis courant entre stabilité et coût
 de calcul. Le cas $K = n$ correspond à la validation leave-one-out.
 
-== À retenir
+=== Interpréter la validation
+
+Une bonne performance de validation ne suffit pas. Il faut aussi vérifier que le
+protocole correspond à la situation future: mêmes sources de données, même
+période, mêmes règles de collecte et mêmes contraintes opérationnelles.
+
+Une validation temporelle, par groupe ou par source peut être nécessaire lorsque
+les observations ne sont pas échangeables. Par exemple, entraîner sur des données
+futures pour prédire le passé rendrait l'évaluation artificiellement optimiste.
+
+=== À retenir
 
 - Une analyse commence par une question précise.
 - Les choix d'unité statistique, de type de variables et de distance structurent
   toute la suite.
 - Les données doivent être inspectées avant la modélisation.
+- Une mesure d'erreur doit refléter la décision visée.
 - Un modèle doit être évalué sur des données non utilisées pour l'ajustement.
 - L'interprétation dépend autant du contexte que de la performance numérique.
 
-== Exercices
+#heading(level: 2, outlined: false)[Exercices]
 
 1. Choisissez un jeu de données et identifiez l'unité statistique, cinq
    variables et leur type.
 2. Donnez deux exemples où la distance euclidienne brute serait trompeuse.
 3. Expliquez la différence entre sur-ajustement et sous-ajustement.
 4. Décrivez une stratégie de validation pour choisir entre trois modèles.
+5. Pourquoi le taux d'erreur peut-il être trompeur avec des classes
+   déséquilibrées ?
+6. Donnez un exemple où la validation croisée ordinaire ne serait pas adaptée.

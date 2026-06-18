@@ -2,13 +2,17 @@
 
 = Autres méthodes
 
-== Révisions utiles
+== Révisions
 
 Les méthodes du cours reposent sur quelques outils d'algèbre linéaire, de
-probabilités et de programmation. Cette section rassemble les idées à garder
-actives pendant la lecture des chapitres précédents.
+probabilités, de statistiques et de programmation. Cette section rassemble les
+idées à garder actives pendant la lecture des chapitres précédents.
 
-== Algèbre linéaire
+Ces révisions ne sont pas séparées des méthodes. Elles expliquent pourquoi les
+algorithmes fonctionnent, ce qu'ils optimisent et dans quelles conditions leurs
+résultats sont interprétables.
+
+=== Algèbre linéaire
 
 Les données multivariées sont souvent représentées par une matrice: les lignes
 sont les observations et les colonnes sont les variables. Les transformations
@@ -28,7 +32,7 @@ alors le langage naturel de nombreuses méthodes.
 Ces résultats expliquent pourquoi l'ACP diagonalise une matrice de covariance et
 pourquoi les valeurs propres mesurent des parts de variance.
 
-== Valeurs propres et projection
+=== Valeurs propres et projection
 
 Une valeur propre $λ$ et un vecteur propre $u$ d'une matrice $A$ vérifient:
 
@@ -44,7 +48,20 @@ projection et les valeurs propres donnent l'importance de ces axes.
   l'analyse discriminante et de plusieurs méthodes factorielles.
 ]
 
-== Probabilités et statistiques
+=== Distances et géométrie
+
+Une distance encode une idée de similarité. Changer la distance peut changer
+complètement les voisins, les groupes, les projections ou les arbres obtenus.
+Pour des variables numériques standardisées, la distance euclidienne est souvent
+un point de départ. Pour des données binaires, textuelles ou mixtes, elle peut
+être inadaptée.
+
+La géométrie choisie doit correspondre à la question. Deux clients peuvent être
+proches par leurs montants d'achat, par leurs fréquences d'achat, par leurs
+catégories préférées ou par une combinaison pondérée de ces éléments. Il n'y a
+pas de distance neutre.
+
+=== Probabilités et statistiques
 
 Une variable aléatoire formalise un résultat incertain. Sa distribution indique
 les probabilités des valeurs possibles. L'espérance mesure une valeur moyenne,
@@ -59,18 +76,23 @@ Les notions d'indépendance, de covariance et de corrélation sont distinctes. U
 covariance nulle signifie absence de relation linéaire, pas nécessairement
 indépendance.
 
-== Estimation empirique
+=== Estimation empirique
 
-En pratique, les moyennes, variances et covariances sont inconnues. On les estime
-à partir d'un échantillon. La moyenne empirique résume la position centrale. La
-matrice de covariance empirique alimente directement plusieurs méthodes du
-cours, notamment l'ACP.
+En pratique, les moyennes, variances, covariances et taux d'erreur sont inconnus.
+On les estime à partir d'un échantillon. La moyenne empirique résume la position
+centrale. La matrice de covariance empirique alimente directement plusieurs
+méthodes du cours, notamment l'ACP.
 
 Il faut garder en tête que ces objets sont eux-mêmes estimés. Si l'échantillon
 est petit ou non représentatif, les axes, distances et modèles obtenus peuvent
 être instables.
 
-== Programmation
+L'évaluation prédictive suit la même logique. Un taux d'erreur mesuré sur un jeu
+de validation est une estimation de la performance future, pas une vérité exacte.
+La validation croisée réduit une partie de cette variabilité, mais ne corrige pas
+un échantillon mal défini.
+
+=== Programmation reproductible
 
 Le cours ne dépend pas d'un langage unique. R, Python, Julia et SAS peuvent
 servir à réaliser les exercices, mais R et Python sont les choix les plus
@@ -85,6 +107,28 @@ Quelques principes de programmation sont indépendants du langage:
 - fixer les graines aléatoires lorsque l'on compare des méthodes;
 - documenter les transformations appliquées aux données;
 - éviter de modifier manuellement les fichiers sources sans trace.
+
+Un résultat reproductible n'est pas seulement un résultat que l'on peut refaire.
+C'est aussi un résultat dont on peut comprendre les choix: données utilisées,
+variables exclues, transformations, modèles, paramètres et versions des outils.
+
+=== Synthèse méthodologique
+
+Une démarche rigoureuse commence par une exploration descriptive, s'appuie sur
+l'expertise du domaine, compare plusieurs approches, valide les résultats et
+documente les limites. Il n'existe pas d'algorithme universellement meilleur. Le
+principe de *no free lunch* rappelle qu'une méthode performante dans un cadre
+peut échouer dans un autre.
+
+Plusieurs thèmes restent centraux en pratique:
+
+- définir de bonnes variables explicatives, ou *feature engineering*;
+- détecter et traiter les valeurs aberrantes;
+- gérer les données manquantes;
+- construire un protocole entraînement-validation-test;
+- mesurer la représentativité des données;
+- surveiller un modèle après son déploiement;
+- communiquer l'incertitude à des non spécialistes.
 
 == Aspects éthiques
 
@@ -101,7 +145,18 @@ Une vigilance éthique est nécessaire dès la formulation de la question:
 - quelles erreurs sont les plus coûteuses ?
 - quelles personnes peuvent être affectées par ces erreurs ?
 
-== Confidentialité
+=== Finalité et proportionnalité
+
+Une analyse doit avoir une finalité claire. Collecter ou utiliser des données
+parce qu'elles sont disponibles ne suffit pas. Il faut relier les données à une
+question légitime, puis vérifier que le niveau de détail collecté est
+proportionné à cette question.
+
+La proportionnalité concerne aussi les modèles. Un modèle très intrusif ou très
+opaque peut être difficile à justifier si une règle plus simple produit une
+décision comparable avec moins de risques.
+
+=== Confidentialité
 
 L'anonymisation ne consiste pas seulement à retirer les noms. Des identifiants
 indirects, comme une date de naissance, un code postal ou une combinaison rare de
@@ -120,7 +175,7 @@ Pour réduire les risques, on peut:
 Le niveau de protection doit être adapté aux risques et à l'utilité attendue de
 l'analyse.
 
-== Biais et implications sociales
+=== Biais et implications sociales
 
 Un modèle peut être biaisé pour plusieurs raisons:
 
@@ -136,7 +191,19 @@ Un modèle peut être biaisé pour plusieurs raisons:
   comme certains parcours scolaires, emplois ou habitudes de consommation.
 ]
 
-== Réduire les biais
+=== Équité et performance
+
+L'équité ne se réduit pas à une seule métrique. On peut comparer les taux
+d'erreur, les faux positifs, les faux négatifs, la calibration ou l'accès à une
+décision favorable selon les groupes. Ces critères peuvent entrer en tension:
+améliorer l'un peut dégrader l'autre.
+
+Il faut donc expliciter le choix retenu et le relier au contexte. Dans un modèle
+de dépistage, un faux négatif peut être plus grave qu'un faux positif. Dans un
+modèle d'accès à un service, refuser à tort une personne peut avoir des
+conséquences sociales importantes.
+
+=== Réduire les biais
 
 Les interventions peuvent se faire à plusieurs moments.
 
@@ -150,28 +217,17 @@ Les interventions peuvent se faire à plusieurs moments.
 Aucune correction automatique ne remplace la compréhension du contexte et la
 discussion des conséquences.
 
-== Conclusion du cours
+=== Transparence et responsabilité
 
-Il n'existe pas d'algorithme universellement meilleur. Chaque jeu de données,
-chaque objectif et chaque contexte demandent un choix argumenté. Le principe de
-*no free lunch* rappelle qu'une méthode performante dans un cadre peut échouer
-dans un autre.
+Un résultat d'analyse doit être accompagné de ses conditions de validité: quelles
+données ont été utilisées, quelles hypothèses ont été faites, quelles variables
+ont été exclues, quelles erreurs restent probables et quelle décision sera prise
+à partir du résultat.
 
-Une démarche rigoureuse commence par une exploration descriptive, s'appuie sur
-l'expertise du domaine, compare plusieurs approches, valide les résultats et
-documente les limites.
-
-== Questions laissées ouvertes
-
-Plusieurs thèmes restent centraux en pratique:
-
-- définir de bonnes variables explicatives, ou *feature engineering*;
-- détecter et traiter les valeurs aberrantes;
-- gérer les données manquantes;
-- construire un protocole entraînement-validation-test;
-- mesurer la représentativité des données;
-- surveiller un modèle après son déploiement;
-- communiquer l'incertitude à des non spécialistes.
+La responsabilité ne disparaît pas parce qu'une méthode est automatique. Les
+personnes qui conçoivent, déploient ou utilisent un modèle doivent pouvoir
+expliquer son objectif, ses limites et les recours possibles pour les personnes
+affectées.
 
 #note[
   L'analyse de données est à la fois une science et une pratique. Elle demande
@@ -179,9 +235,11 @@ Plusieurs thèmes restent centraux en pratique:
   effets concrets des décisions prises à partir des résultats.
 ]
 
-== Exercices
+#heading(level: 2, outlined: false)[Exercices]
 
 1. Expliquez pourquoi les valeurs propres interviennent dans l'ACP.
 2. Donnez un exemple où une corrélation nulle ne signifie pas indépendance.
 3. Citez deux risques de ré-identification dans un jeu de données anonymisé.
 4. Formulez une question éthique à poser avant de déployer un modèle prédictif.
+5. Pourquoi le choix d'une distance est-il déjà un choix méthodologique ?
+6. Donnez un exemple de compromis possible entre performance globale et équité.

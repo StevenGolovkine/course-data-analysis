@@ -48,7 +48,7 @@
       let loc = section.location()
       let nr = page-number-at(loc)
       outline-link(loc)[
-        #block(width: 100%)[
+        #block(width: 100%, above: 0.8em, below: 0.8em)[
           #text(
             size: 11pt, weight: "thin", fill: rgb("#24313a")
           )[#section.body]
