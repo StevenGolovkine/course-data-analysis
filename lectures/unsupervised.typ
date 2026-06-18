@@ -196,10 +196,10 @@ par une loi normale multivariée avec sa moyenne, sa covariance et son poids.
 
 La densité du modèle peut s'écrire:
 
-$ f(x) = sum_(k=1)^K pi_k phi(x; mu_k, Sigma_k) $
+$ f(x) = sum_(k=1)^K pi_k phi_k(x) $
 
-où $pi_k$ est le poids du groupe $k$, $mu_k$ sa moyenne, $Sigma_k$ sa matrice de
-covariance et $phi$ la densité normale multivariée.
+où $pi_k$ est le poids du groupe $k$ et $phi_k$ la densité normale multivariée de
+moyenne $mu_k$ et de matrice de covariance $Sigma_k$.
 
 Chaque observation a alors des probabilités d'appartenance aux groupes, plutôt
 qu'une affectation strictement déterministe. On parle de classification souple.
