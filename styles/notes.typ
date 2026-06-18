@@ -123,7 +123,11 @@
       #align(center + horizon)[
         #block(width: 75%)[
           #text(size: 11pt, weight: "bold", fill: rgb("#7b9e89"))[
-            Chapitre #context counter(heading).display()
+            #if repr(it.body).starts-with("sequence([Annexe]") {
+              [Annexe]
+            } else {
+              [Chapitre #context counter(heading).display()]
+            }
           ]
 
           #v(1.1em)

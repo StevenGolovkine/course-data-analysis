@@ -17,3 +17,4 @@
 #include "lectures/unsupervised.typ"
 #include "lectures/missing_data.typ"
 #include "lectures/others.typ"
+#include "appendices/revisions.typ"
