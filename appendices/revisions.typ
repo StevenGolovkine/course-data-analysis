@@ -1,4 +1,4 @@
-#import "../styles/notes.typ": note, property-box, proof, set-qed-symbol, theorem
+#import "../styles/notes.typ": definition-box, property-box, proof, remark, set-qed-symbol, theorem
 
 #set-qed-symbol[$square$]
 
@@ -28,19 +28,26 @@ renverse l'ordre d'un produit:
 
 $ (A B)^top = B^top A^top. $
 
-Le produit scalaire de deux vecteurs $u, v in RR^n$ est $chevron.l u, v chevron.r = u^top v$. Il détermine la norme euclidienne $norm(u) = sqrt(u^top u)$ et l'orthogonalité: $u$ et $v$ sont orthogonaux lorsque $u^top v = 0$.
+#definition-box(supplement: "Définition")[
+Le *produit scalaire* de deux vecteurs $u, v in RR^n$ est
+$chevron.l u, v chevron.r = u^top v$. Il détermine la *norme euclidienne*
+$norm(u) = sqrt(u^top u)$. Les vecteurs $u$ et $v$ sont *orthogonaux* lorsque
+$u^top v = 0$.
+]
 
-#note[
+#remark[
   Avant tout calcul matriciel, il faut vérifier les dimensions. Cette habitude
   permet souvent de repérer une formule incorrecte sans effectuer le calcul.
 ]
 
 === Inverse d'une matrice
 
+#definition-box(supplement: "Définition")[
 Une matrice carrée $A$ est *inversible* s'il existe une matrice $A^(-1)$ telle
 que
 
 $ A A^(-1) = A^(-1) A = I_n. $
+]
 
 L'inverse matriciel permet notamment d'écrire la solution du système $A x = b$ sous la forme $x = A^(-1) b$. Cette écriture est utile pour raisonner, même si les logiciels résolvent habituellement le système directement, sans calculer explicitement l'inverse.
 
@@ -65,10 +72,12 @@ $B^(-1) A^(-1)$.
 
 === Déterminant et trace
 
+#definition-box(supplement: "Définition")[
 Le *déterminant* est un scalaire associé à une matrice carrée. Il mesure le facteur
 par lequel la transformation linéaire dilate les volumes; son signe contient en
 plus une information d'orientation. Une matrice est inversible si et seulement
 si son déterminant est non nul.
+]
 
 #property-box(supplement: "Propriétés")[
 Pour des matrices carrées $A$ et $B$,
@@ -90,10 +99,12 @@ ce qui donne la troisième identité puisque $det(A) != 0$.
 Voir #link("https://mbernste.github.io/posts/determinantsformula/")[ici] pour une démonstration plus détaillée.
 ]
 
+#definition-box(supplement: "Définition")[
 La *trace* d'une matrice carrée $A = (a_(i j))$ est la somme de ses éléments
 diagonaux:
 
 $ tr(A) = sum_(i=1)^n a_(i i). $
+]
 
 #property-box(supplement: "Propriétés")[
 Soit $A$ et $B$ appartenant à $cal(M)_n (RR)$, et $M$ et $N$ appartenant à $cal(M)_(n,p)(RR)$, la trace vérifie notamment
@@ -123,9 +134,8 @@ matricielle, par exemple dans les critères d'inertie ou d'erreur quadratique.
 
 === Matrices symétriques, définies positives et orthogonales
 
-Une matrice carrée $A$ est *symétrique* lorsque $A^top = A$. Les matrices de
-covariance et de corrélation sont symétriques, ce qui leur donne des propriétés
-spectrales particulièrement utiles pour l'analyse en composantes principales et les méthodes factorielles.
+#definition-box(supplement: "Définition")[
+Une matrice carrée $A$ est *symétrique* lorsque $A^top = A$.
 
 Une matrice symétrique $A$ est *définie positive* lorsque
 
@@ -137,6 +147,11 @@ $u^top A u >= 0$.
 Une matrice carrée $Q$ est *orthogonale* lorsque
 
 $ Q^top Q = Q Q^top = I_n. $
+]
+
+Les matrices de covariance et de corrélation sont symétriques, ce qui leur donne
+des propriétés spectrales particulièrement utiles pour l'analyse en composantes
+principales et les méthodes factorielles.
 
 #property-box(supplement: "Propriétés")[
 
@@ -173,6 +188,7 @@ ou une combinaison des deux.
 
 === Valeurs et vecteurs propres
 
+#definition-box(supplement: "Définition")[
 Soit $A in cal(M)_n (RR)$. Un scalaire $λ$ est une *valeur propre* de $A$ s'il
 existe un vecteur non nul $u in RR^n$ tel que
 
@@ -187,6 +203,7 @@ Pour tout vecteur non nul $u in RR^n$, la quantité
 $ R_A (u) = (u^top A u) / (u^top u) $
 
 est appelée *quotient de Rayleigh*. Dans le cas où $A$ est une matrice de covariance, le coefficient de Rayleigh est toujours positif ou nul. Il mesure la variance de la projection d'un vecteur aléatoire sur la direction $u$. C'est une propriété fondamentale de l'analyse en composantes principales.
+]
 
 #property-box(supplement: "Propriétés")[
 
@@ -235,6 +252,7 @@ $norm(u) = 1$.
 
 === Diagonalisation et décomposition spectrale
 
+#definition-box(supplement: "Définition")[
 Une matrice carrée $A$ est *diagonalisable* s'il existe une matrice inversible
 $P$ et une matrice diagonale $Λ$ telles que
 
@@ -243,6 +261,7 @@ $ A = P Λ P^(-1). $
 La diagonale de $Λ$ contient les valeurs propres de $A$ et les colonnes de $P$
 sont des vecteurs propres correspondants. Cette représentation ramène l'action
 de $A$ à des mises à l'échelle indépendantes dans les directions propres.
+]
 
 #theorem[Décomposition spectrale][
 Toute matrice symétrique réelle $A$ admet une décomposition
@@ -291,7 +310,12 @@ portées par les axes propres.
 
 === Projections et optimisation quadratique
 
-Si $u$ est un vecteur unitaire, le nombre $chevron.l u, x chevron.r = u^top x$ est la coordonnée de $x$ dans la direction $u$, et le vecteur $u u^top x$ est la projection orthogonale de $x$ sur cette direction.
+#definition-box(supplement: "Définition")[
+Si $u$ est un vecteur unitaire, le nombre
+$chevron.l u, x chevron.r = u^top x$ est la coordonnée de $x$ dans la direction
+$u$, et le vecteur $u u^top x$ est la *projection orthogonale* de $x$ sur cette
+direction.
+]
 
 #property-box(supplement: "Propriétés")[
 
@@ -310,7 +334,7 @@ Si $u$ est un vecteur unitaire, le nombre $chevron.l u, x chevron.r = u^top x$ e
 ]
 
 #proof(title: "Preuve")[
-Puisque les colonnes de $U$ sont orthonormées, $U^top U = I_k$. La
+Puisque les colonnes de $U$ sont orthonormées, $U^top U = I_p$. La
 matrice $P = U U^top$ est symétrique et idempotente:
 
 $ P^top = P quad "et" quad P^2 = U(U^top U)U^top = P. $
@@ -351,42 +375,358 @@ Ce principe relie directement l'algèbre linéaire aux méthodes d'analyse de do
 - dans plusieurs méthodes factorielles, une décomposition spectrale transforme
   un critère géométrique en coordonnées interprétables.
 
-#note[
+#remark[
   On peut retenir le schéma suivant: une matrice symétrique décrit une géométrie,
   ses vecteurs propres en donnent les directions privilégiées et ses valeurs
   propres quantifient l'importance de ces directions.
 ]
 
-== Probabilités et statistiques
+== Probabilités
 
-Une variable aléatoire formalise un résultat incertain. Sa distribution indique
-les probabilités des valeurs possibles. L'espérance mesure une valeur moyenne,
-la variance mesure la dispersion, et la covariance mesure la dépendance linéaire
-entre deux variables.
+Les probabilités fournissent un modèle mathématique de l'incertitude. Elles ne
+prédisent pas le résultat d'une expérience particulière, mais décrivent les
+résultats possibles et la fréquence avec laquelle ils devraient apparaître si
+l'expérience était répétée.
 
-Pour un vecteur aléatoire, la matrice de covariance résume les variances sur la
-diagonale et les covariances hors diagonale. La matrice de corrélation normalise
-ces covariances afin de comparer des variables sur des échelles différentes.
+=== Modéliser le hasard
 
-Les notions d'indépendance, de covariance et de corrélation sont distinctes. Une
-covariance nulle signifie absence de relation linéaire, pas nécessairement
-indépendance.
+#definition-box(supplement: "Définition")[
+L'*espace des possibles* $S$ est l'ensemble de tous les résultats possibles
+d'une expérience. Un *évènement* $E$ est un sous-ensemble de $S$.
 
-== Estimation empirique
+Une *mesure de probabilité* $PP$ associe un nombre $PP(E)$ à chaque évènement et
+vérifie les axiomes suivants:
 
-En pratique, les moyennes, variances, covariances et taux d'erreur sont inconnus.
-On les estime à partir d'un échantillon. La moyenne empirique résume la position
-centrale. La matrice de covariance empirique alimente directement plusieurs
-méthodes du cours, notamment l'ACP.
+1. $0 <= PP(E) <= 1$ pour tout évènement $E$;
+2. $PP(S) = 1$;
+3. si $E_1, E_2, dots$ sont mutuellement exclusifs, alors
 
-Il faut garder en tête que ces objets sont eux-mêmes estimés. Si l'échantillon
-est petit ou non représentatif, les axes, distances et modèles obtenus peuvent
-être instables.
+   $ PP(union.big_(i=1)^infinity E_i) = sum_(i=1)^infinity PP(E_i). $
+]
+
+#remark[
+  Pour un lancer de pièce, l'espace des possibles peut être formé des résultats
+  « pile » et « face ». Pour une durée de vie, il peut être $RR_+$. Le choix de
+  l'espace et des probabilités dépend du phénomène étudié et de l'information
+  disponible.
+]
+
+#definition-box(supplement: "Définition")[
+Soient $E$ et $F$ deux évènements tels que $PP(F) > 0$. La *probabilité
+conditionnelle* de $E$ sachant $F$ est
+
+$ PP(E | F) = PP(E ∩ F) / PP(F). $
+
+Les évènements $E$ et $F$ sont *indépendants* lorsque
+
+$ PP(E ∩ F) = PP(E) PP(F). $
+]
+
+#property-box(supplement: "Propriétés")[
+Si $PP(F) > 0$, alors
+
+$ PP(E ∩ F) = PP(E | F) PP(F). $
+
+De plus, $E$ et $F$ sont indépendants si et seulement si
+$PP(E | F) = PP(E)$.
+]
+
+#proof(title: "Preuve")[
+La première égalité est obtenue en multipliant la définition de
+$PP(E | F)$ par $PP(F)$. En la combinant avec
+$PP(E ∩ F) = PP(E) PP(F)$, puis en divisant par $PP(F)$, on obtient la
+caractérisation de l'indépendance.
+]
+
+=== Variables aléatoires
+
+Une variable aléatoire transforme le résultat d'une expérience en une valeur
+sur laquelle des calculs sont possibles. Sa distribution décrit les probabilités
+des valeurs ainsi obtenues.
+
+#definition-box(supplement: "Définition")[
+Une *variable aléatoire* $X$ est une fonction qui associe une valeur numérique à
+chaque résultat de l'expérience.
+
+La *distribution* d'une variable aléatoire $X$ est l'application qui associe à
+un ensemble $A$ la probabilité $PP(X in A)$.
+
+- La variable $X$ est *discrète* si elle prend un ensemble fini ou dénombrable de
+  valeurs. Sa distribution est alors déterminée par les nombres $PP(X = x)$.
+- La variable $X$ est *continue* s'il existe une densité $f$ telle que
+
+  $ PP(X in A) = integral_A f(x) dif x, $
+
+  avec $f(x) >= 0$ et $integral_(RR^d) f(x) dif x = 1$. Dans ce cas,
+  $PP(X = x) = 0$ pour toute valeur fixée $x$.
+]
+
+#definition-box(supplement: "Définition")[
+L'*espérance* de $X$, lorsqu'elle existe, est la moyenne de ses valeurs pondérées
+par leur probabilité. Elle est donnée par
+
+$ EE(X) = sum_x x PP(X = x) $
+
+dans le cas discret et par
+
+$ EE(X) = integral_(RR^d) x f(x) dif x $
+
+dans le cas continu.
+]
+
+#theorem[Transfert de l'espérance][
+Soit $g: RR^d arrow.r RR$ une fonction telle que $EE(g(X))$ existe.
+
+- Si $X$ est discrète,
+  $EE(g(X)) = sum_x g(x) PP(X = x)$.
+- Si $X$ est continue de densité $f$,
+  $EE(g(X)) = integral_(RR^d) g(x) f(x) dif x$.
+]
+
+#proof(title: "Preuve")[
+La variable $g(X)$ hérite de sa distribution de celle de $X$. Appliquer la
+définition de l'espérance à cette distribution revient à sommer ou à intégrer
+$g(x)$ selon la distribution de $X$, ce qui donne les deux formules.
+]
+
+#definition-box(supplement: "Définition")[
+Si $EE(X^2)$ existe, la *variance* de $X$ est
+
+$ "Var"(X) = EE((X - EE(X))^2). $
+
+Elle mesure la dispersion autour de l'espérance. L'*écart-type* est
+$σ(X) = sqrt("Var"(X))$ et s'exprime dans la même unité que $X$.
+]
+
+#property-box(supplement: "Propriétés")[
+Pour des variables aléatoires dont les moments nécessaires existent et pour des
+constantes $a$ et $b$,
+
+1. $EE(a X + b Y) = a EE(X) + b EE(Y)$;
+2. $"Var"(X) = EE(X^2) - EE(X)^2$;
+3. $"Var"(a X + b) = a^2 "Var"(X)$.
+]
+
+#proof(title: "Preuve")[
+La première identité découle de la linéarité des sommes et des intégrales. Pour
+la deuxième, on développe le carré dans la définition:
+
+$ EE((X - EE(X))^2)
+  = EE(X^2) - 2 EE(X) EE(X) + EE(X)^2
+  = EE(X^2) - EE(X)^2. $
+
+Enfin, $a X + b - EE(a X + b) = a(X - EE(X))$. Élever au carré et prendre
+l'espérance donne la troisième identité.
+]
+
+#definition-box(supplement: "Définition")[
+La *fonction de répartition* de $X$ est la fonction
+
+$ F_X(t) = PP(X <= t), quad t in RR. $
+
+Elle caractérise entièrement la distribution de $X$, qu'elle soit discrète,
+continue ou d'un autre type.
+]
+
+#definition-box(supplement: "Définition")[
+Deux variables aléatoires $X$ et $Y$ sont *indépendantes* si, pour tous ensembles
+$A$ et $B$, les évènements $X in A$ et $Y in B$ sont indépendants, c'est-à-dire
+
+$ PP(X in A, Y in B) = PP(X in A) PP(Y in B). $
+]
+
+#property-box(supplement: "Propriétés")[
+Si $X$ et $Y$ sont indépendantes, alors $g(X)$ et $h(Y)$ sont indépendantes pour
+toutes fonctions $g$ et $h$. De plus, lorsque les espérances existent,
+
+$ EE(X Y) = EE(X) EE(Y). $
+]
+
+#proof(title: "Preuve")[
+Les évènements définis à partir de $g(X)$ et de $h(Y)$ peuvent être réécrits comme
+des évènements portant séparément sur $X$ et sur $Y$; ils sont donc indépendants.
+La factorisation de la distribution conjointe permet ensuite de séparer la somme
+ou l'intégrale définissant $EE(X Y)$ en un produit de deux espérances.
+]
+
+=== Vecteurs aléatoires
+
+Un *vecteur aléatoire* rassemble plusieurs variables aléatoires:
+
+$ X = (X_1, dots, X_p)^top. $
+
+La distribution d'une composante $X_j$ est une distribution marginale. Si les
+composantes sont continues et indépendantes, leur densité conjointe se factorise:
+
+$ f_X(x_1, dots, x_p) = product_(j=1)^p f_(X_j)(x_j). $
+
+L'indépendance signifie que connaître certaines composantes n'apporte aucune
+information sur les autres. Elle est plus forte que l'absence de dépendance
+linéaire.
+
+=== Covariance et corrélation
+
+#definition-box(supplement: "Définition")[
+Pour deux variables aléatoires $X_1$ et $X_2$ ayant des moments d'ordre deux, la
+*covariance* est
+
+$ "Cov"(X_1, X_2)
+  = EE((X_1 - EE(X_1))(X_2 - EE(X_2))). $
+
+Lorsque les écarts-types sont non nuls, la *corrélation* est la covariance
+normalisée:
+
+$ "Corr"(X_1, X_2)
+  = "Cov"(X_1, X_2) / (σ(X_1) σ(X_2)). $
+
+Pour un vecteur $X in RR^p$ de moyenne $μ = EE(X)$, la matrice de covariance est
+
+$ Σ = "Cov"(X) = EE((X - μ)(X - μ)^top). $
+
+Sa diagonale contient les variances et ses éléments hors diagonale contiennent
+les covariances.
+]
+
+Une covariance ou une corrélation positive indique que les variables tendent à
+évoluer dans le même sens; un signe négatif indique qu'elles tendent à évoluer en
+sens opposés. La corrélation facilite les comparaisons parce qu'elle ne dépend
+pas des unités de mesure.
+
+#property-box(supplement: "Propriétés")[
+Pour des variables aléatoires ayant des moments d'ordre deux,
+
+1. $"Cov"(X, Y) = EE(X Y) - EE(X) EE(Y)$;
+2. $"Cov"(X, Y) = "Cov"(Y, X)$;
+3. $"Cov"(X + a Z, Y) = "Cov"(X, Y) + a "Cov"(Z, Y)$;
+4. si $X$ et $Y$ sont indépendantes, alors $"Cov"(X, Y) = 0$;
+5. $-1 <= "Corr"(X, Y) <= 1$ lorsque la corrélation est définie.
+]
+
+#proof(title: "Preuve")[
+La première identité s'obtient en développant le produit centré et en utilisant
+la linéarité de l'espérance. La deuxième découle de la commutativité du produit,
+et la troisième de la linéarité de l'espérance. Si $X$ et $Y$ sont indépendantes,
+$EE(X Y) = EE(X) EE(Y)$, ce qui prouve la quatrième propriété. Enfin,
+l'inégalité de Cauchy--Schwarz appliquée aux variables centrées donne
+
+$ |"Cov"(X, Y)| <= σ(X) σ(Y), $
+
+d'où la dernière propriété après division par les écarts-types.
+]
+
+#remark[
+  Une covariance nulle signifie seulement qu'aucune relation *linéaire* n'est
+  détectée. Elle n'implique généralement pas l'indépendance. L'implication
+  inverse est cependant vraie: l'indépendance entraîne une covariance nulle
+  lorsque les moments existent.
+]
+
+#remark[
+  *Loi normale multidimensionnelle.* Si $Σ$ est définie positive, on dit que
+  $X$ suit une loi normale de dimension $p$, de moyenne $μ$ et de covariance
+  $Σ$, lorsque sa densité est
+
+  $ f_X(x) = 1 / ((2 pi)^(p/2) det(Σ)^(1/2))
+    exp(-1/2 (x - μ)^top Σ^(-1) (x - μ)). $
+
+  On note alors $X tilde cal(N)_p (μ, Σ)$. Cette distribution intervient notamment
+  dans l'analyse discriminante et les modèles de mélanges gaussiens.
+]
+
+== Statistiques
+
+La statistique utilise les données observées pour décrire une population, estimer
+des quantités inconnues et évaluer l'incertitude associée à ces estimations. Elle
+relie ainsi les objets probabilistes théoriques aux calculs réalisés sur un
+échantillon.
+
+=== Échantillon et estimateurs
+
+#definition-box(supplement: "Définition")[
+Un *échantillon aléatoire* de taille $n$ issu d'une distribution est une suite
+$X_1, dots, X_n$ de variables aléatoires indépendantes ayant cette même
+distribution. Les valeurs effectivement observées sont notées
+$x_1, dots, x_n$.
+
+Un *estimateur* d'une quantité inconnue $θ$ est une fonction de l'échantillon. Il
+est donc lui-même aléatoire avant l'observation des données.
+]
+
+Supposons que les observations soient des vecteurs de $RR^p$ de moyenne $μ$ et
+de covariance $Σ$. L'estimateur usuel de la moyenne est la moyenne empirique:
+
+$ hat(μ) = overline(X) = 1 / n sum_(i=1)^n X_i. $
+
+La matrice de covariance empirique est
+
+$ hat(Σ) = 1 / (n - 1) sum_(i=1)^n
+  (X_i - overline(X))(X_i - overline(X))^top. $
+
+La division par $n - 1$, plutôt que par $n$, corrige le fait que la moyenne $μ$
+est elle-même remplacée par son estimateur $overline(X)$.
+
+#property-box(supplement: "Propriétés")[
+Si $X_1, dots, X_n$ sont indépendantes, de même moyenne $μ$ et de même covariance
+$Σ$, alors
+
+$ EE(hat(μ)) = μ quad "et" quad EE(hat(Σ)) = Σ. $
+
+Les estimateurs $hat(μ)$ et $hat(Σ)$ sont donc sans biais.
+]
+
+#proof(title: "Preuve")[
+La linéarité de l'espérance donne
+
+$ EE(hat(μ)) = 1 / n sum_(i=1)^n EE(X_i) = μ. $
+
+Posons $Z_i = X_i - μ$ et $overline(Z) = overline(X) - μ$. L'identité
+
+$ sum_(i=1)^n (X_i - overline(X))(X_i - overline(X))^top
+  = sum_(i=1)^n Z_i Z_i^top - n overline(Z) overline(Z)^top $
+
+et l'indépendance donnent
+$EE(sum_(i=1)^n Z_i Z_i^top) = n Σ$ ainsi que
+$EE(overline(Z) overline(Z)^top) = Σ / n$. L'espérance du membre de gauche vaut donc
+$(n - 1)Σ$. La division par $n - 1$ donne $EE(hat(Σ)) = Σ$.
+]
+
+=== Corrélation empirique
+
+Soit $D$ la matrice diagonale contenant les écarts-types empiriques:
+
+$ D = "diag"(sqrt(hat(Σ)_(1 1)), dots, sqrt(hat(Σ)_(p p))). $
+
+Si aucun de ces écarts-types n'est nul, la matrice de corrélation empirique est
+
+$ hat(R) = D^(-1) hat(Σ) D^(-1). $
+
+Cette normalisation place toutes les variables sur une échelle comparable. Elle
+est particulièrement importante lorsque les unités ou les ordres de grandeur
+diffèrent, par exemple avant une ACP fondée sur les corrélations.
+
+=== Interpréter une estimation
+
+Les moyennes, covariances, corrélations et taux d'erreur calculés sur un
+échantillon varieraient si l'on recueillait de nouvelles données. Une estimation
+doit donc toujours être interprétée avec sa variabilité et avec les conditions
+de collecte de l'échantillon.
+
+Si l'échantillon est petit, les estimations peuvent être instables. S'il n'est
+pas représentatif de la population ciblée, augmenter sa taille ne corrige pas
+nécessairement le biais de sélection. Les axes d'ACP, les distances, les groupes
+et les modèles prédictifs héritent directement de ces limites.
 
 L'évaluation prédictive suit la même logique. Un taux d'erreur mesuré sur un jeu
-de validation est une estimation de la performance future, pas une vérité exacte.
-La validation croisée réduit une partie de cette variabilité, mais ne corrige pas
-un échantillon mal défini.
+de validation estime une performance future; ce n'est pas une vérité exacte. La
+validation croisée réduit une partie de la variabilité de cette estimation, mais
+elle ne corrige ni un échantillon mal défini ni une fuite d'information entre
+l'entraînement et la validation.
+
+#remark[
+  Une formule correcte ne garantit pas une estimation pertinente. Il faut aussi
+  vérifier l'indépendance des observations, la représentativité de l'échantillon,
+  le mécanisme de données manquantes et la stabilité des résultats.
+]
 
 == Programmation reproductible
 
