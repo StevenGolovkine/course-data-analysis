@@ -1,4 +1,4 @@
-#import "../styles/notes.typ": definition-box, property-box, proof, remark, set-qed-symbol, theorem
+#import "../styles/notes.typ": definition-box, example, property-box, proof, remark, set-qed-symbol, theorem
 
 #set-qed-symbol[$square$]
 
@@ -394,8 +394,7 @@ l'expérience était répétée.
 L'*espace des possibles* $S$ est l'ensemble de tous les résultats possibles
 d'une expérience. Un *évènement* $E$ est un sous-ensemble de $S$.
 
-Une *mesure de probabilité* $PP$ associe un nombre $PP(E)$ à chaque évènement et
-vérifie les axiomes suivants:
+Une *mesure de probabilité* $PP$ associe un nombre $PP(E)$ à chaque évènement $E$ et vérifie les axiomes suivants:
 
 1. $0 <= PP(E) <= 1$ pour tout évènement $E$;
 2. $PP(S) = 1$;
@@ -452,8 +451,8 @@ La *distribution* d'une variable aléatoire $X$ est l'application qui associe à
 un ensemble $A$ la probabilité $PP(X in A)$.
 
 - La variable $X$ est *discrète* si elle prend un ensemble fini ou dénombrable de
-  valeurs. Sa distribution est alors déterminée par les nombres $PP(X = x)$.
-- La variable $X$ est *continue* s'il existe une densité $f$ telle que
+  valeurs. Sa distribution est alors déterminée par les scalaires $PP(X = x)$.
+- La variable $X$ est *continue* s'il existe une function $f$, appelée la *densité* de $X$, telle que
 
   $ PP(X in A) = integral_A f(x) dif x, $
 
@@ -477,16 +476,28 @@ dans le cas continu.
 #theorem[Transfert de l'espérance][
 Soit $g: RR^d arrow.r RR$ une fonction telle que $EE(g(X))$ existe.
 
-- Si $X$ est discrète,
+- Si $X$ est discrète, alors
   $EE(g(X)) = sum_x g(x) PP(X = x)$.
-- Si $X$ est continue de densité $f$,
+- Si $X$ est continue de densité $f$, alors
   $EE(g(X)) = integral_(RR^d) g(x) f(x) dif x$.
 ]
 
 #proof(title: "Preuve")[
-La variable $g(X)$ hérite de sa distribution de celle de $X$. Appliquer la
+La variable $g(X)$ hérite sa distribution de celle de $X$. Appliquer la
 définition de l'espérance à cette distribution revient à sommer ou à intégrer
 $g(x)$ selon la distribution de $X$, ce qui donne les deux formules.
+]
+
+#property-box(supplement: "Propriétés")[
+Soient $X$ et $Y$ deux variables aléatoires dont les espérances existent, et soit $a in RR$. Alors
+
+1. $EE(X + Y) = EE(X) + EE(Y)$;
+2. $EE(a X) = a EE(X)$.
+]
+
+#proof(title: "Preuve")[
+Ces deux identités découlent du théorème de transfert et de la linéarité des
+sommes dans le cas discret ou des intégrales dans le cas continu.
 ]
 
 #definition-box(supplement: "Définition")[
@@ -494,45 +505,57 @@ Si $EE(X^2)$ existe, la *variance* de $X$ est
 
 $ "Var"(X) = EE((X - EE(X))^2). $
 
-Elle mesure la dispersion autour de l'espérance. L'*écart-type* est
-$σ(X) = sqrt("Var"(X))$ et s'exprime dans la même unité que $X$.
+Elle mesure la dispersion autour de l'espérance. L'*écart-type* est défini par
+$sigma(X) = sqrt("Var"(X))$ et s'exprime dans la même unité que $X$.
 ]
 
 #property-box(supplement: "Propriétés")[
-Pour des variables aléatoires dont les moments nécessaires existent et pour des
+Pour une variable aléatoire $X$ dont les moments nécessaires existent et pour des
 constantes $a$ et $b$,
 
-1. $EE(a X + b Y) = a EE(X) + b EE(Y)$;
-2. $"Var"(X) = EE(X^2) - EE(X)^2$;
-3. $"Var"(a X + b) = a^2 "Var"(X)$.
+1. $"Var"(X) = EE(X^2) - EE(X)^2$;
+2. $"Var"(a X + b) = a^2 "Var"(X)$.
 ]
 
 #proof(title: "Preuve")[
-La première identité découle de la linéarité des sommes et des intégrales. Pour
-la deuxième, on développe le carré dans la définition:
+Pour la première identité, on développe le carré dans la définition:
 
 $ EE((X - EE(X))^2)
   = EE(X^2) - 2 EE(X) EE(X) + EE(X)^2
   = EE(X^2) - EE(X)^2. $
 
 Enfin, $a X + b - EE(a X + b) = a(X - EE(X))$. Élever au carré et prendre
-l'espérance donne la troisième identité.
+l'espérance donne la deuxième identité.
 ]
 
 #definition-box(supplement: "Définition")[
 La *fonction de répartition* de $X$ est la fonction
 
-$ F_X(t) = PP(X <= t), quad t in RR. $
+$ F_X (t) = PP(X <= t), quad t in RR. $
 
-Elle caractérise entièrement la distribution de $X$, qu'elle soit discrète,
-continue ou d'un autre type.
+Elle caractérise entièrement la distribution de $X$, qu'elle soit discrète ou
+continue.
 ]
 
 #definition-box(supplement: "Définition")[
 Deux variables aléatoires $X$ et $Y$ sont *indépendantes* si, pour tous ensembles
-$A$ et $B$, les évènements $X in A$ et $Y in B$ sont indépendants, c'est-à-dire
+$A$ et $B$, les évènements ${X in A}$ et ${Y in B}$ sont indépendants, c'est-à-dire
 
 $ PP(X in A, Y in B) = PP(X in A) PP(Y in B). $
+]
+
+#example[Deux lancers de pièce][
+On lance deux fois une pièce équilibrée. Soit $X$ l'indicatrice de l'évènement
+« obtenir face au premier lancer » et $Y$ l'indicatrice de l'évènement
+« obtenir face au second lancer ». Pour tous $x, y in brace.l 0, 1 brace.r$,
+
+$ PP(X = x, Y = y)
+  = 1 / 4
+  = 1 / 2 times 1 / 2
+  = PP(X = x) PP(Y = y). $
+
+La distribution conjointe se factorise donc en produit des distributions
+marginales: les variables $X$ et $Y$ sont indépendantes.
 ]
 
 #property-box(supplement: "Propriétés")[
@@ -544,25 +567,10 @@ $ EE(X Y) = EE(X) EE(Y). $
 
 #proof(title: "Preuve")[
 Les évènements définis à partir de $g(X)$ et de $h(Y)$ peuvent être réécrits comme
-des évènements portant séparément sur $X$ et sur $Y$; ils sont donc indépendants.
+des évènements portant séparément sur $X$ et sur $Y$. Ils sont donc indépendants.
 La factorisation de la distribution conjointe permet ensuite de séparer la somme
 ou l'intégrale définissant $EE(X Y)$ en un produit de deux espérances.
 ]
-
-=== Vecteurs aléatoires
-
-Un *vecteur aléatoire* rassemble plusieurs variables aléatoires:
-
-$ X = (X_1, dots, X_p)^top. $
-
-La distribution d'une composante $X_j$ est une distribution marginale. Si les
-composantes sont continues et indépendantes, leur densité conjointe se factorise:
-
-$ f_X(x_1, dots, x_p) = product_(j=1)^p f_(X_j)(x_j). $
-
-L'indépendance signifie que connaître certaines composantes n'apporte aucune
-information sur les autres. Elle est plus forte que l'absence de dépendance
-linéaire.
 
 === Covariance et corrélation
 
@@ -573,11 +581,10 @@ Pour deux variables aléatoires $X_1$ et $X_2$ ayant des moments d'ordre deux, l
 $ "Cov"(X_1, X_2)
   = EE((X_1 - EE(X_1))(X_2 - EE(X_2))). $
 
-Lorsque les écarts-types sont non nuls, la *corrélation* est la covariance
-normalisée:
+Lorsque les écarts-types sont non nuls, la *corrélation* est la covariance normalisée par les écarts-types:
 
 $ "Corr"(X_1, X_2)
-  = "Cov"(X_1, X_2) / (σ(X_1) σ(X_2)). $
+  = "Cov"(X_1, X_2) / (sigma(X_1) sigma(X_2)). $
 
 Pour un vecteur $X in RR^p$ de moyenne $μ = EE(X)$, la matrice de covariance est
 
@@ -588,7 +595,7 @@ les covariances.
 ]
 
 Une covariance ou une corrélation positive indique que les variables tendent à
-évoluer dans le même sens; un signe négatif indique qu'elles tendent à évoluer en
+évoluer dans le même sens. Un signe négatif indique qu'elles tendent à évoluer en
 sens opposés. La corrélation facilite les comparaisons parce qu'elle ne dépend
 pas des unités de mesure.
 
@@ -599,7 +606,7 @@ Pour des variables aléatoires ayant des moments d'ordre deux,
 2. $"Cov"(X, Y) = "Cov"(Y, X)$;
 3. $"Cov"(X + a Z, Y) = "Cov"(X, Y) + a "Cov"(Z, Y)$;
 4. si $X$ et $Y$ sont indépendantes, alors $"Cov"(X, Y) = 0$;
-5. $-1 <= "Corr"(X, Y) <= 1$ lorsque la corrélation est définie.
+5. lorsque la corrélation est définie, $-1 <= "Corr"(X, Y) <= 1$.
 ]
 
 #proof(title: "Preuve")[
@@ -609,7 +616,7 @@ et la troisième de la linéarité de l'espérance. Si $X$ et $Y$ sont indépend
 $EE(X Y) = EE(X) EE(Y)$, ce qui prouve la quatrième propriété. Enfin,
 l'inégalité de Cauchy--Schwarz appliquée aux variables centrées donne
 
-$ |"Cov"(X, Y)| <= σ(X) σ(Y), $
+$ |"Cov"(X, Y)| <= sigma(X) sigma(Y), $
 
 d'où la dernière propriété après division par les écarts-types.
 ]
@@ -617,21 +624,37 @@ d'où la dernière propriété après division par les écarts-types.
 #remark[
   Une covariance nulle signifie seulement qu'aucune relation *linéaire* n'est
   détectée. Elle n'implique généralement pas l'indépendance. L'implication
-  inverse est cependant vraie: l'indépendance entraîne une covariance nulle
+  inverse est cependant vraie : l'indépendance entraîne une covariance nulle
   lorsque les moments existent.
 ]
 
-#remark[
-  *Loi normale multidimensionnelle.* Si $Σ$ est définie positive, on dit que
-  $X$ suit une loi normale de dimension $p$, de moyenne $μ$ et de covariance
-  $Σ$, lorsque sa densité est
+=== Vecteurs aléatoires
+
+Un *vecteur aléatoire* rassemble plusieurs variables aléatoires:
+
+$ X = (X_1, dots, X_p)^top. $
+
+La distribution d'une composante $X_j$ est une *distribution marginale*. Si les
+composantes sont continues et indépendantes, leur densité conjointe se factorise:
+
+$ f_X (x_1, dots, x_p) = product_(j=1)^p f_(X_j)(x_j). $
+
+L'indépendance signifie que connaître certaines composantes n'apporte aucune
+information sur les autres. Elle est plus forte que l'absence de dépendance
+linéaire.
+
+#definition-box(supplement: "Définition")[
+  Si $Σ$ est définie positive, on dit que $X$ suit une loi normale de dimension $p$, de moyenne $μ$ et de covariance $Σ$, lorsque sa densité est
 
   $ f_X(x) = 1 / ((2 pi)^(p/2) det(Σ)^(1/2))
     exp(-1/2 (x - μ)^top Σ^(-1) (x - μ)). $
 
-  On note alors $X tilde cal(N)_p (μ, Σ)$. Cette distribution intervient notamment
-  dans l'analyse discriminante et les modèles de mélanges gaussiens.
+  On note alors $X tilde cal(N)_p (μ, Σ)$.
 ]
+
+Cette distribution intervient notamment dans l'analyse discriminante et les modèles de mélanges gaussiens.
+
+
 
 == Statistiques
 
@@ -655,15 +678,15 @@ est donc lui-même aléatoire avant l'observation des données.
 Supposons que les observations soient des vecteurs de $RR^p$ de moyenne $μ$ et
 de covariance $Σ$. L'estimateur usuel de la moyenne est la moyenne empirique:
 
-$ hat(μ) = overline(X) = 1 / n sum_(i=1)^n X_i. $
+$ hat(μ) = 1 / n sum_(i=1)^n X_i. $
 
 La matrice de covariance empirique est
 
 $ hat(Σ) = 1 / (n - 1) sum_(i=1)^n
-  (X_i - overline(X))(X_i - overline(X))^top. $
+  (X_i - hat(μ))(X_i - hat(μ))^top. $
 
 La division par $n - 1$, plutôt que par $n$, corrige le fait que la moyenne $μ$
-est elle-même remplacée par son estimateur $overline(X)$.
+est elle-même remplacée par son estimateur $hat(μ)$.
 
 #property-box(supplement: "Propriétés")[
 Si $X_1, dots, X_n$ sont indépendantes, de même moyenne $μ$ et de même covariance
@@ -679,26 +702,26 @@ La linéarité de l'espérance donne
 
 $ EE(hat(μ)) = 1 / n sum_(i=1)^n EE(X_i) = μ. $
 
-Posons $Z_i = X_i - μ$ et $overline(Z) = overline(X) - μ$. L'identité
+Posons $Z_i = X_i - μ$ et $overline(Z) = hat(mu) - μ$. L'identité
 
-$ sum_(i=1)^n (X_i - overline(X))(X_i - overline(X))^top
+$ sum_(i=1)^n (X_i - hat(mu))(X_i - hat(mu))^top
   = sum_(i=1)^n Z_i Z_i^top - n overline(Z) overline(Z)^top $
 
 et l'indépendance donnent
 $EE(sum_(i=1)^n Z_i Z_i^top) = n Σ$ ainsi que
-$EE(overline(Z) overline(Z)^top) = Σ / n$. L'espérance du membre de gauche vaut donc
-$(n - 1)Σ$. La division par $n - 1$ donne $EE(hat(Σ)) = Σ$.
+$EE(overline(Z) overline(Z)^top) = frac(Σ, n, style: "horizontal")$.
+L'espérance du membre de gauche vaut donc $(n - 1)Σ$. La division par $n - 1$ donne $EE(hat(Σ)) = Σ$.
 ]
 
 === Corrélation empirique
 
-Soit $D$ la matrice diagonale contenant les écarts-types empiriques:
+Soit $hat(D)$ la matrice diagonale contenant les écarts-types empiriques:
 
-$ D = "diag"(sqrt(hat(Σ)_(1 1)), dots, sqrt(hat(Σ)_(p p))). $
+$ hat(D) = "diag"(hat(Σ)^(1/2)_(1 1), dots, hat(Σ)^(1/2)_(p p)). $
 
 Si aucun de ces écarts-types n'est nul, la matrice de corrélation empirique est
 
-$ hat(R) = D^(-1) hat(Σ) D^(-1). $
+$ hat(R) = hat(D)^(-1) hat(Σ) hat(D)^(-1). $
 
 Cette normalisation place toutes les variables sur une échelle comparable. Elle
 est particulièrement importante lorsque les unités ou les ordres de grandeur
@@ -713,11 +736,11 @@ de collecte de l'échantillon.
 
 Si l'échantillon est petit, les estimations peuvent être instables. S'il n'est
 pas représentatif de la population ciblée, augmenter sa taille ne corrige pas
-nécessairement le biais de sélection. Les axes d'ACP, les distances, les groupes
+nécessairement le biais de sélection. Les axes de l'ACP, les distances, les groupes
 et les modèles prédictifs héritent directement de ces limites.
 
 L'évaluation prédictive suit la même logique. Un taux d'erreur mesuré sur un jeu
-de validation estime une performance future; ce n'est pas une vérité exacte. La
+de validation estime une performance future et n'est pas une vérité exacte. La
 validation croisée réduit une partie de la variabilité de cette estimation, mais
 elle ne corrige ni un échantillon mal défini ni une fuite d'information entre
 l'entraînement et la validation.
@@ -730,38 +753,169 @@ l'entraînement et la validation.
 
 == Programmation reproductible
 
-Le cours ne dépend pas d'un langage unique. R, Python, Julia et SAS peuvent
-servir à réaliser les exercices, mais R et Python sont les choix les plus
-courants pour l'analyse de données moderne.
+L'analyse de données ne dépend pas d'un langage unique. R, Python, Julia ou SAS
+peuvent servir à réaliser les analyses. Les outils changent, mais les principes
+restent les mêmes: il faut pouvoir retrouver les données utilisées, comprendre
+chaque transformation et reconstruire les résultats dans un environnement
+logiciel documenté.
 
-Quelques principes de programmation sont indépendants du langage:
+#definition-box(supplement: "Définition")[
+Une analyse est *reproductible* lorsqu'une autre personne peut, à partir des mêmes données, du même code et des mêmes instructions, reconstruire les résultats annoncés.
 
-- écrire un code lisible et reproductible;
-- nommer clairement les variables;
-- séparer importation, nettoyage, modélisation et visualisation;
-- conserver les paramètres importants dans un endroit explicite;
-- fixer les graines aléatoires lorsque l'on compare des méthodes;
-- documenter les transformations appliquées aux données;
-- éviter de modifier manuellement les fichiers sources sans trace.
+La reproductibilité exige donc au moins quatre éléments: les entrées, le code, la
+configuration de l'environnement et une procédure d'exécution explicite.
+]
 
-Un résultat reproductible n'est pas seulement un résultat que l'on peut refaire.
-C'est aussi un résultat dont on peut comprendre les choix: données utilisées,
-variables exclues, transformations, modèles, paramètres et versions des outils.
+Reproduire une analyse ne signifie pas seulement obtenir le même tableau final ou les mêmes graphiques finaux. Il faut aussi pouvoir comprendre les choix effectués: observations exclues, variables construites, traitement des données manquantes, paramètres, modèles comparés et critères de validation. Le guide #link(
+  "https://book.the-turing-way.org/reproducible-research/reproducible-research/"
+)[*The Turing Way*] propose une introduction plus complète à ces pratiques.
 
-== Synthèse méthodologique
+=== Organiser un projet
 
-Une démarche rigoureuse commence par une exploration descriptive, s'appuie sur
-l'expertise du domaine, compare plusieurs approches, valide les résultats et
-documente les limites. Il n'existe pas d'algorithme universellement meilleur. Le
-principe de *no free lunch* rappelle qu'une méthode performante dans un cadre
-peut échouer dans un autre.
+Toutes les composantes d'une analyse devraient être regroupées sous une racine
+de projet. Les chemins sont écrits relativement à cette racine plutôt qu'à un
+dossier propre à un ordinateur. Une organisation simple peut être:
 
-Plusieurs thèmes restent centraux en pratique:
+```text
+projet/
+├── README.md
+├── data/
+│   ├── raw/
+│   └── processed/
+├── src/
+├── reports/
+├── results/
+├── tests/
+```
 
-- définir de bonnes variables explicatives, ou *feature engineering*;
-- détecter et traiter les valeurs aberrantes;
-- gérer les données manquantes;
-- construire un protocole entraînement-validation-test;
-- mesurer la représentativité des données;
-- surveiller un modèle après son déploiement;
-- communiquer l'incertitude à des non spécialistes.
+Les noms exacts importent moins que la séparation des rôles:
+
+- `data/raw/` contient les données originales, conservées en lecture seule;
+- `data/processed/` contient des données produites par le code de nettoyage;
+- `src/` contient les fonctions et les étapes de calcul;
+- `reports/` contient les documents qui combinent explications, code et résultats;
+- `results/` contient les tableaux, figures ou modèles qui peuvent être régénérés;
+- `tests/` contient les vérifications automatiques;
+- `README.md` explique l'objectif du projet et la commande permettant de le
+  reconstruire.
+
+Le flux de calcul devrait donc aller des données brutes vers les résultats sans étape manuelle cachée. Une correction faite directement dans un tableur, une figure retouchée après sa création ou une valeur copiée à la main rompent cette chaîne. Si une intervention manuelle est incontournable, elle doit être consignée et transformée en instruction reproductible autant que possible.
+
+#remark[
+  Les données brutes constituent une entrée, pas un espace de travail. On ne les
+  écrase pas ! On produit une nouvelle version nettoyée tout en conservant la
+  source et la trace des transformations.
+]
+
+=== Code, paramètres et entrées
+
+Une analyse robuste sépare l'importation, la validation des données, le
+nettoyage, la construction des variables, la modélisation et la production des
+figures. Chaque étape reçoit des entrées identifiables et produit des sorties
+explicites. Cette séparation facilite la vérification et évite de devoir relancer
+des traitements coûteux qui n'ont pas changé.
+
+Les choix qui influencent les résultats ne devraient pas être dispersés dans le code. Les chemins, graines (_seed_), variables sélectionnées, hyperparamètres choisis et seuils des $p$-valeurs peuvent être regroupés au début d'un script ou dans un fichier de configuration. Il faut préférer des noms décrivant le rôle des objets à des noms courts dont le sens dépend du contexte.
+
+Quelques contrôles simples pour détecter rapidement les erreurs:
+
+- vérifier les noms et les types des colonnes à l'importation;
+- vérifier les unités, les catégories autorisées et les plages plausibles des différentes variables;
+- compter les lignes du jeu de données avant et après chaque filtrage ou jointure;
+- regarder les valeurs manquantes et les doublons;
+- tester les fonctions qui réalisent les transformations importantes;
+- arrêter l'exécution lorsqu'une hypothèse essentielle n'est pas satisfaite.
+
+=== Dépendances et environnement
+
+Un script correct aujourd'hui peut produire un autre résultat après la mise à jour d'une bibliothèque ou librairie. Il faut donc enregistrer les versions des dépendances et fournir un moyen de reconstruire l'environnement.
+
+- En R, #link("https://rstudio.github.io/renv/")[`renv`] crée un environnement
+  propre au projet. Le fichier `renv.lock` enregistre les versions, tandis que
+  `renv::snapshot()` et `renv::restore()` permettent respectivement de figer et
+  de restaurer cet environnement.
+- En Python, le module officiel #link(
+    "https://docs.python.org/3/library/venv.html"
+  )[`venv`] isole les bibliothèques d'un projet. Un gestionnaire tel que
+  #link("https://docs.astral.sh/uv/concepts/projects/sync/")[`uv`] peut en plus
+  verrouiller les dépendances dans `uv.lock` et synchroniser l'environnement.
+
+Il peut également être utile d'enregistrer les versions du langage, du système d'exploitation et, lorsque le calcul en dépend, des bibliothèques système ou du matériel. Un conteneur, type _Docker_, peut être justifié lorsque cette configuration est complexe, mais il ne remplace ni la documentation ni une organisation claire.
+
+#remark[
+  Un fichier qui énumère seulement les noms des bibliothèques ne suffit pas
+  toujours. Une reproduction fidèle demande généralement des versions précises
+  et une commande testée pour restaurer l'environnement.
+]
+
+=== Aléatoire et déterminisme
+
+Les séparations entraînement-test, la validation croisée, les initialisations et les simulations utilisent souvent des nombres pseudo-aléatoires. Pour comparer deux méthodes dans les mêmes conditions, il faut fixer et documenter une graine (_seed_) du générateur. Cela permet de reproduire exactement la même suite de nombres, ainsi que conserver les indices des partitions importantes.
+
+En R, `set.seed(2026)` initialise le générateur. La #link(
+  "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Random.html"
+)[documentation officielle sur les générateurs aléatoires] décrit aussi
+`RNGkind()` et `RNGversion()`. En Python avec NumPy, il est préférable de créer un
+générateur explicite, par exemple `rng = np.random.default_rng(2026)`; voir la
+#link("https://numpy.org/doc/stable/reference/random/generator.html")[documentation
+de `numpy.random.Generator`].
+
+Fixer une graine ne garantit toutefois pas une identité absolue entre toutes les
+machines et toutes les versions. L'algorithme du générateur, le parallélisme, les
+bibliothèques numériques et le matériel peuvent modifier l'ordre des opérations
+ou la suite produite. Pour une expérience importante, on documente donc la graine
+*et* l'environnement.
+
+=== Contrôle de version
+
+Un système de contrôle de version enregistre l'évolution des fichiers et permet de retrouver l'origine d'une modification. Avec Git, les changements sont regroupés en *commits* décrivant une étape cohérente. Le livre  #link("https://git-scm.com/book/fr/v2")[*Pro Git*] présente les notions de dépôt, historique, branche et collaboration.
+
+Quelques pratiques sont particulièrement utiles:
+
+- effectuer des commits petits et cohérents avec un message informatif;
+- relire les différences avant chaque commit;
+- versionner le code, la documentation et les fichiers de configuration;
+- utiliser `.gitignore` pour les environnements locaux et les sorties
+  régénérables;
+- ne jamais enregistrer de mot de passe, de jeton d'accès (_token_) ou de donnée
+  confidentielle dans le dépôt;
+- conserver une copie distante lorsque la politique de confidentialité le
+  permet.
+
+Git ne remplace pas une stratégie de sauvegarde ou d'archivage. Les données
+volumineuses, sensibles ou soumises à une licence peuvent nécessiter un stockage
+séparé. Le dépôt doit alors contenir les instructions et les identifiants
+permettant d'obtenir la bonne version des données, sans exposer leur contenu.
+
+=== Rapports exécutables
+
+Un rapport exécutable relie directement le texte, le code, les tableaux et les figures. Il réduit les erreurs de copier-coller et permet de régénérer les résultats lorsque les données ou les paramètres changent. Quarto prend en charge R, Python et Julia. Sa #link(
+  "https://quarto.org/docs/computations/execution-options.html"
+)[documentation sur l'exécution] explique notamment comment contrôler l'évaluation du code et l'affichage des résultats.
+
+Les carnets de notes (_notebooks_) interactifs restent vulnérables à un état caché: une cellule peut dépendre d'un objet créé plus tôt mais absent du document final. Avant de diffuser un rapport, il faut redémarrer l'environnement et exécuter le document complet, dans l'ordre, idéalement à partir d'une copie propre du projet.
+
+Une commande unique devrait suffire pour lancer l'analyse complète ou produire
+le rapport. Si plusieurs commandes sont nécessaires, leur ordre et leurs entrées
+doivent apparaître dans le `README.md`.
+
+=== Liste de vérification
+
+Avant de considérer une analyse comme reproductible, on vérifie que:
+
+    - les données sources et leur provenance sont identifiées;
+    - les transformations sont réalisées par du code versionné;
+    - les chemins sont relatifs à la racine du projet;
+    - les paramètres et les graines sont explicites;
+    - les versions des dépendances sont verrouillées;
+    - les sorties peuvent être supprimées puis régénérées;
+    - le rapport s'exécute dans un environnement propre;
+    - les hypothèses sur les données sont vérifiées automatiquement;
+    - le `README.md` décrit l'installation et l'exécution;
+    - les limites de reproduction sont documentées.
+
+#remark[
+  Le test le plus révélateur consiste à repartir d'une copie neuve du dépôt et à
+  suivre uniquement les instructions écrites. Toute intervention improvisée
+  signale une dépendance cachée qui doit être supprimée ou documentée.
+]
