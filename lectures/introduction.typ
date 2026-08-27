@@ -116,12 +116,9 @@ Le choix du critère d'adéquation du modèle dépend donc de l'usage du modèle
 
 === Généraliser
 
-Un modèle supervisé n'est pas jugé sur sa capacité à mémoriser les données
-d'apprentissage. Il doit généraliser à de nouvelles observations. C'est pourquoi
-on sépare les données en ensembles d'entraînement, de validation et de test, ou
-on utilise la validation croisée.
+Un modèle supervisé n'est pas jugé sur sa capacité à mémoriser les données d'apprentissage. Il doit être capable de généraliser à de nouvelles observations. C'est pourquoi on doit séparer les données en ensembles d'entraînement, de validation et de test, ou alors utiliser la validation croisée.
 
-Les rôles de ces données doivent rester distincts:
+Les rôles de ces ensembles de données doivent rester distincts:
 
 - l'ensemble d'entraînement sert à estimer les paramètres du modèle;
 - l'ensemble de validation ou la validation croisée sert à choisir la méthode,
