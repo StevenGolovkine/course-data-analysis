@@ -116,27 +116,21 @@ Le choix du critère d'adéquation du modèle dépend donc de l'usage du modèle
 
 === Généraliser
 
-Un modèle supervisé n'est pas jugé sur sa capacité à mémoriser les données d'apprentissage. Il doit être capable de généraliser à de nouvelles observations. C'est pourquoi on doit séparer les données en ensembles d'entraînement, de validation et de test, ou alors utiliser la validation croisée.
+Un modèle supervisé n'est pas jugé sur sa capacité à mémoriser les données d'apprentissage. Il doit en effet être capable de généraliser à de nouvelles observations. C'est pourquoi on doit séparer les données en ensembles d'entraînement, de validation et de test, ou alors utiliser la validation croisée.
 
 Les rôles de ces ensembles de données doivent rester distincts:
 
-- l'ensemble d'entraînement sert à estimer les paramètres du modèle;
-- l'ensemble de validation ou la validation croisée sert à choisir la méthode,
-  ses hyperparamètres et les transformations;
-- l'ensemble de test sert une seule fois à estimer la performance finale.
+- l'ensemble d'entraînement (_training set_) sert à estimer les paramètres du modèle;
+- l'ensemble de validation (_validation set_) ou la validation croisée (_cross-validation_) sert à choisir la méthode, ses hyperparamètres et les transformations;
+- l'ensemble de test (_test set_) sert une seule fois à estimer la performance finale.
 
-Le *sous-ajustement* survient lorsqu'un modèle trop rigide ne capture pas une
-structure importante. À l'inverse, le *sur-ajustement* survient lorsqu'un modèle
-trop flexible apprend les particularités de l'échantillon au lieu d'une relation
-stable. La meilleure performance d'entraînement n'est donc généralement pas le
-bon critère de sélection.
+Un *sous-ajustement* survient lorsqu'un modèle trop rigide ne capture pas une structure importante. À l'inverse, un *sur-ajustement* survient lorsqu'un modèle trop flexible apprend les particularités de l'échantillon d'entraînement au lieu d'une relation stable. La meilleure performance d'entraînement n'est donc généralement pas un bon critère de sélection.
 
 #remark[
   Toutes les opérations qui apprennent quelque chose des données —
   standardisation, sélection de variables, imputation ou réduction de dimension
   — doivent être ajustées uniquement sur les données d'entraînement. Les
-  effectuer avant la séparation crée une *fuite d'information* et donne une
-  évaluation trop optimiste.
+  effectuer avant la séparation crée une *fuite d'information* (_data leakage_) et donne une évaluation trop optimiste.
 ]
 
 == L'apprentissage non-supervisé
@@ -159,25 +153,16 @@ atypiques, des variables redondantes ou des relations inattendues.
 
 === Réduction de dimension
 
-La réduction de dimension remplace un grand nombre de variables par quelques
-axes ou représentations synthétiques. L'objectif est de visualiser, résumer ou
-préparer les données pour une autre méthode.
+La réduction de dimension a pour but de remplacer un grand nombre de variables par une représentation synthétique. L'objectif est de visualiser, résumer ou préparer les données pour une autre méthode. Les méthodes factorielles sont un exemple de réduction de dimension.
 
-L'ACP, l'AFC et l'ACM sont des exemples de méthodes factorielles. Elles ne
-répondent pas à une question prédictive directe; elles aident plutôt à comprendre
-la structure des données. La propriété préservée dépend de la méthode: l'ACP
-privilégie la variabilité des variables quantitatives, l'AFC étudie les profils
-d'un tableau de contingence et l'ACM décrit les associations entre variables
-qualitatives.
+L'analyse en composantes principales (ACP), l'analyse factorielle des correspondances (AFC) et l'analyse des correspondances multiples (ACM) sont des exemples de méthodes factorielles. Elles ne répondent pas à une question prédictive directe. Elles aident plutôt à comprendre la structure des données. La propriété préservée dépend de la méthode: l'ACP privilégie la variabilité des variables quantitatives, l'AFC étudie les profils d'un tableau de contingence et l'ACM décrit les associations entre variables qualitatives.
 
-Une représentation en deux dimensions reste une approximation. Il faut examiner
-la quantité d'information conservée et éviter d'interpréter une proximité ou une
-séparation qui serait mal représentée sur les axes affichés.
+Une représentation en deux dimensions reste une approximation. Il faut examiner la quantité d'information conservée et éviter d'interpréter une proximité ou une séparation qui serait mal représentée sur les axes affichés.
 
 === Regroupement
 
-Le regroupement, ou *clustering*, cherche à construire des groupes
-d'observations similaires. Les k-means, la classification hiérarchique et les
+Le regroupement (_clustering_) cherche à construire des groupes
+d'observations similaires. Les $k$-means, la classification hiérarchique et les
 mélanges de gaussiennes illustrent différentes manières de définir un groupe:
 proximité à un centre, hiérarchie de distances ou appartenance probabiliste.
 
