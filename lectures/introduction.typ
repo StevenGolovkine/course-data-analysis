@@ -161,10 +161,7 @@ Une représentation en deux dimensions reste une approximation. Il faut examiner
 
 === Regroupement
 
-Le regroupement (_clustering_) cherche à construire des groupes
-d'observations similaires. Les $k$-means, la classification hiérarchique et les
-mélanges de gaussiennes illustrent différentes manières de définir un groupe:
-proximité à un centre, hiérarchie de distances ou appartenance probabiliste.
+Le regroupement (_clustering_) cherche à construire des groupes d'observations similaires. La méthode $k$-means, la classification hiérarchique et les mélanges de gaussiennes illustrent différentes manières de définir un groupe: proximité à un centre, hiérarchie de distances ou appartenance probabiliste.
 
 Le résultat dépend de la représentation, de l'échelle des variables, de la
 mesure de dissimilarité et, souvent, du nombre de groupes demandé. Une variable
@@ -173,9 +170,7 @@ données ne sont pas standardisées. Le prétraitement fait donc partie intégra
 de la méthode de regroupement.
 
 #example[
-  Regrouper des clients selon leurs comportements d'achat est un problème non
-  supervisé: l'objectif est de découvrir des segments pertinents, pas de prédire
-  une étiquette connue à l'avance.
+  Regrouper des clients selon leurs comportements d'achat est un problème non supervisé. En effet, l'objectif est de découvrir des segments de clientèle pertinents, pas de prédire une étiquette connue à l'avance.
 ]
 
 === Interpréter sans réponse observée
@@ -190,41 +185,16 @@ collecte.
 
 On peut combiner trois formes de validation:
 
-- un critère *interne*, calculé à partir de la géométrie des données;
-- un critère *externe*, fondé sur une information qui n'a pas servi à construire
+- un critère interne, calculé à partir de la géométrie des données;
+- un critère externe, fondé sur une information qui n'a pas servi à construire
   la représentation;
-- une analyse de *stabilité*, qui vérifie si le résultat persiste lorsque
+- une analyse de stabilité, qui vérifie si le résultat persiste lorsque
   l'échantillon, les paramètres ou les variables changent légèrement.
 
 #remark[
-  En apprentissage non supervisé, plusieurs solutions peuvent être défendables.
-  L'objectif n'est pas de découvrir une partition nécessairement « vraie », mais
-  de produire une représentation utile, stable et interprétable pour la question
-  étudiée.
+  Dans un contexte d'apprentissage non supervisé, plusieurs solutions peuvent être défendables. L'objectif n'est pas de découvrir une partition nécessairement « vraie », mais de produire une représentation utile, stable et interprétable pour la question étudiée.
 ]
 
-=== Comparer les deux cadres
-
-#table(
-  columns: (1.15fr, 1.4fr, 1.4fr),
-  inset: 6pt,
-  align: left,
-  table.header(
-    [*Élément*],
-    [*Supervisé*],
-    [*Non supervisé*],
-  ),
-  [Données], [Couples $(x_i, y_i)$], [Observations $x_i$],
-  [But], [Prédire une réponse], [Décrire une structure],
-  [Exemples], [Régression, classification], [ACP, regroupement],
-  [Validation], [Erreur sur des données nouvelles],
-    [Inertie, séparation, stabilité, interprétation],
-)
-
-La frontière n'est pas toujours absolue. Une réduction de dimension peut servir
-de prétraitement à une classification, et une étiquette externe peut aider à
-interpréter des groupes sans avoir servi à les construire. Il faut néanmoins
-identifier clairement quelle information a été utilisée à chaque étape.
 
 == La modélisation
 
@@ -237,15 +207,14 @@ par l'obtention d'un score. Une démarche complète comporte généralement les
 1. *Formuler la question.* Définir la population, l'unité statistique, le
    résultat attendu et l'usage qui en sera fait.
 2. *Comprendre la collecte.* Documenter la provenance des données, la méthode
-   d'échantillonnage, les dates, les unités et les biais possibles.
-3. *Préparer et explorer.* Corriger les incohérences de manière reproductible,
-   étudier les valeurs manquantes et visualiser les distributions.
+   d'échantillonnage, les dates, les unités, les biais possibles, etc.
+3. *Préparer et explorer.* Corriger les incohérences du jeu de données de manière reproductible, étudier les valeurs manquantes et visualiser les distributions.
 4. *Choisir une représentation.* Sélectionner, transformer ou standardiser les
    variables selon la géométrie pertinente pour le problème.
 5. *Ajuster une ou plusieurs méthodes.* Estimer leurs paramètres et choisir
    leurs hyperparamètres sans consulter les données de test.
 6. *Valider.* Mesurer la performance, la stabilité et la sensibilité aux choix
-   effectués; comparer à une méthode de référence simple.
+   effectués, comparer à une méthode de référence simple.
 7. *Interpréter et communiquer.* Relier le résultat à la question, quantifier
    l'incertitude, expliciter les limites et rendre l'analyse reproductible.
 
@@ -256,12 +225,12 @@ l'évaluation finale demeure honnête.
 
 === Ce qu'il faut préciser
 
-Avant toute méthode, on doit expliciter plusieurs choix.
+Avant toute méthode, on doit expliciter plusieurs choix. En particulier, on doit se poser les questions suivantes:
 
-- Quelle est l'unité statistique: individu, pays, transaction, image, texte,
-  pixel, événement ?
-- Quelles variables décrivent chaque unité ?
-- Les variables sont-elles numériques, ordinales, nominales ou binaires ?
+- Quelle est l'unité statistique: individu, pays, transaction, texte,
+  pixel, ... ?
+- Quelles variables décrivent chaque observation ?
+- Les variables sont-elles numériques, ordinales, nominales, binaires, ... ?
 - L'espace de représentation est-il pertinent pour le problème ?
 - Quelle distance ou similarité entre deux observations a du sens ?
 - Quelle mesure d'erreur permettra d'évaluer le résultat ?
@@ -281,11 +250,7 @@ modifier un regroupement, et une mesure d'erreur peut favoriser un modèle plut�
 qu'un autre. Un bon protocole documente donc les choix de représentation et pas
 seulement le nom de l'algorithme.
 
-Un *paramètre* est estimé à partir des données d'entraînement, comme un
-coefficient de régression ou le centre d'un groupe. Un *hyperparamètre* contrôle
-la méthode avant cet ajustement, comme le nombre de groupes ou la force d'une
-régularisation. Cette distinction explique pourquoi les hyperparamètres doivent
-être choisis par validation plutôt qu'en regardant la performance de test.
+Un *paramètre* est estimé à partir des données d'entraînement, comme un coefficient de régression ou le centre d'un groupe. Un *hyperparamètre* contrôle la méthode avant cet ajustement, comme le nombre de groupes ou la force d'une régularisation. Cette distinction explique pourquoi les hyperparamètres doivent être choisis en utilisant un jeu de validation plutôt qu'en regardant la performance de test.
 
 === Interprétation et limites
 
@@ -297,61 +262,34 @@ conditions de validité: quelles hypothèses ont été faites, quelles données 
 du résultat.
 
 Dans #link("https://doi.org/10.1201/9780429029608")[*Statistical Rethinking*],
-Richard McElreath met en garde contre les conseils statistiques trop généraux:
+Richard McElreath met en garde contre les conseils statistiques trop généraux :
 une recette fondée sur quelques caractéristiques superficielles du problème ne
 peut pas remplacer la connaissance scientifique du contexte. Autrement dit, la
 personne qui analyse les données doit justifier ses choix au lieu d'invoquer une
 méthode comme une autorité automatique.
 
-Le dessin #link("https://xkcd.com/1838/")[« Machine Learning » de xkcd] illustre
-avec humour le même danger: une procédure complexe peut sembler mystérieuse si
-l'on ne comprend ni ses entrées, ni son mécanisme, ni la manière dont son résultat
-a été évalué.
-
 #remark[
-  Il n'existe pas de méthode universellement meilleure. Une méthode excellente
-  sur un problème peut être mauvaise sur un autre. La compétence centrale est de
-  relier la question, les données, la méthode et l'interprétation.
+  Il n'existe pas de méthode universellement meilleure (_no free lunch theorem_). Une méthode excellente sur un problème peut être mauvaise sur un autre. La compétence centrale est de relier la question, les données, la méthode et l'interprétation.
 ]
 
 === Une analyse responsable
 
-La performance moyenne ne résume pas toutes les conséquences d'un modèle. Avant
-un déploiement, il faut aussi examiner:
+Avant une mise en production, les questions suivantes peuvent aider à repérer un biais  ou plusieurs biais dans l'analyse:
 
-- qui est représenté dans les données et qui ne l'est pas;
-- si les erreurs touchent certains groupes plus souvent ou plus gravement;
-- si les variables utilisées constituent des mesures valides du phénomène;
-- si la décision peut être expliquée, contestée ou corrigée;
-- si la collecte, le partage et la conservation respectent la confidentialité;
-- si les conditions futures ressemblent suffisamment aux données
-  d'apprentissage.
+- *Biais de représentation ou de sélection* — Qui est représenté dans les
+  données et qui ne l'est pas?
+- *Biais d'évaluation* — Les erreurs touchent-elles certains groupes plus souvent
+  ou plus gravement?
+- *Biais de mesure ou de variable substitutive* — Les variables utilisées
+  constituent-elles des mesures valides du phénomène?
+- *Biais d'automatisation ou de déploiement* — La décision peut-elle être
+  expliquée, contestée ou corrigée?
+- *Biais de collecte ou d'auto-sélection* — La confidentialité de la collecte
+  influence-t-elle la participation?
+- *Biais temporel ou dérive de distribution* — Les données d'apprentissage
+  représentent-elles encore les conditions futures?
 
 Une association découverte dans un échantillon peut résulter d'un biais de
 sélection, d'une variable confondante ou d'une mesure imparfaite. La prudence ne
 consiste pas à refuser toute conclusion, mais à formuler une conclusion dont la
 force correspond réellement à l'information disponible.
-
-#heading(level: 2, outlined: false)[Questions rapides]
-
-1. Donnez, à partir d'un même jeu de données, un exemple de question descriptive,
-   exploratoire, prédictive et causale.
-2. Pour un jeu de données de votre choix, identifiez l'unité statistique, le
-   nombre $n$ d'observations et le nombre $p$ de variables.
-3. Expliquez pourquoi une corrélation observée ne suffit pas à conclure à une
-   relation causale.
-4. Classez les problèmes suivants comme régression, classification ou
-   apprentissage non supervisé: prédire un revenu, détecter une fraude et
-   construire des profils de consommation.
-5. Pourquoi la performance sur les données d'entraînement ne permet-elle pas de
-   juger la généralisation d'un modèle?
-6. Donnez un exemple de fuite d'information entre les données d'entraînement et
-   de test.
-7. Pourquoi l'apprentissage non supervisé est-il plus difficile à évaluer qu'une
-   classification supervisée?
-8. Donnez un exemple de transformation ou de mesure de distance qui pourrait
-   changer le résultat d'une analyse.
-9. Une analyse sans modèle probabiliste explicite est-elle pour autant sans
-   hypothèses? Justifiez.
-10. Citez deux limites qui devraient accompagner la communication d'un résultat
-    prédictif.
