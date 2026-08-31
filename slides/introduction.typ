@@ -51,39 +51,17 @@
   inset: (x: 8pt, y: 3pt),
   radius: 10pt,
   fill: fill,
-)[#text(size: 10.5pt, weight: "bold", fill: white)[#body]]
-
-#let step(number, title, body) = block(
-  width: 100%,
-  height: 0.95in,
-  inset: 8pt,
-  radius: 4pt,
-  fill: rgb("#f7f9fa"),
-  stroke: 0.6pt + rgb("#d8e0e3"),
-  breakable: false,
-)[
-  #box(
-    width: 1.6em,
-    height: 1.6em,
-    fill: accent,
-    radius: 50%,
-    inset: 0pt,
-  )[#align(center + horizon)[#text(size: 10pt, weight: "bold", fill: white)[#number]]]
-  #h(0.45em)
-  #text(size: 12.5pt, weight: "bold", fill: ink)[#title]
-  #v(0.2em)
-  #text(size: 10.5pt, fill: muted)[#body]
-]
+)[#text(size: 14pt, weight: "bold", fill: white)[#body]]
 
 #show: metropolis-theme.with(
   aspect-ratio: "16-9",
   footer: self => [STT-2200 · #course_title],
   config-info(
     title: [#course_title],
-    subtitle: [Introduction],
+    subtitle: [STT-2200],
     author: [#course_author],
     date: [Automne 2026],
-    institution: [STT-2200],
+    institution: [Université Laval],
   ),
 )
 
@@ -99,7 +77,7 @@
   columns: (1fr, 1fr),
   gutter: 0.85em,
   card([1 · Partir d'une question], [
-    Unités statistiques, variables, matrice de données et types de questions.
+    Unités statistiques, variables, données et types de questions.
   ], height: 1.08in),
   card([2 · Apprentissage supervisé], [
     Régression, classification, généralisation et évaluation.
@@ -107,15 +85,16 @@
   card([3 · Apprentissage non supervisé], [
     Réduction de dimension, regroupement et interprétation.
   ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.08in),
-  card([4 · Modéliser avec rigueur], [
+  card([4 · Modéliser], [
     Démarche d'analyse, validation, limites et biais.
   ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.08in),
 )
 
+#pause
 #v(0.8em)
 #align(center)[
-  #text(size: 16pt, weight: "bold", fill: accent-dark)[
-    Question → données → représentation → méthode → décision
+  #text(size: 20pt, weight: "bold", fill: accent-dark)[
+    question → données → représentation → méthode → décision
   ]
 ]
 
@@ -127,11 +106,13 @@
   #block(width: 88%, inset: 14pt, radius: 6pt, fill: pale)[
     #align(center)[
       #text(size: 22pt, weight: "bold", fill: accent-dark)[
-        Extraire de l'information d'un jeu de données
+        Extraire de l'information d'un jeu de données.
       ]
     ]
   ]
 ]
+
+#pause
 
 #v(0.7em)
 
@@ -149,8 +130,9 @@
 #v(0.7em)
 #text(size: 14pt, fill: muted)[
   L'analyse de données est proche de l'apprentissage statistique et du
-  #emph[machine learning]. Le point de départ reste toutefois une question,
-  pas un algorithme.
+  #emph[machine learning].
+
+  Le point de départ reste toutefois une question, pas un algorithme.
 ]
 
 == Du terrain à la matrice
@@ -160,16 +142,16 @@
   gutter: 1.1em,
   [
     #auto-card([Unité statistique], [
-      L'objet élémentaire étudié : personne, pays, transaction, image, journée…
-    ], height: 0.88in)
+      L'objet élémentaire étudié : personne, pays, transaction, image, journée, ...
+    ], height: 1in)
     #v(0.6em)
     #auto-card([Observation], [
       Toutes les valeurs mesurées sur une unité statistique.
-    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 0.88in)
+    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1in)
     #v(0.6em)
     #auto-card([Variable], [
-      Une caractéristique commune aux unités : revenu, catégorie, durée…
-    ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.88in)
+      Une caractéristique commune aux unités statistiques: revenu, catégorie, durée, ...
+    ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1in)
   ],
   [
     #align(center)[
@@ -187,11 +169,6 @@
         card([$n$ lignes], [Une ligne par observation.], height: 0.85in),
         card([$p$ colonnes], [Une colonne par variable.], height: 0.85in),
       )
-      #v(0.65em)
-      #text(size: 12.5pt, fill: muted)[
-        La nature des variables détermine les résumés, les graphiques et les
-        distances qui ont un sens.
-      ]
     ]
   ],
 )
@@ -202,68 +179,75 @@
   columns: (1fr, 1fr),
   gutter: 0.8em,
   card([Décrire], [
-    *Question* — Que s'est-il passé?
+    *Question* — Que s'est-il passé ?
 
     *Sortie* — Résumés, distributions, comparaisons.
   ], height: 1.28in),
   card([Explorer], [
-    *Question* — Quelle structure se dégage?
+    *Question* — Quelle structure se dégage ?
 
-    *Sortie* — Axes, groupes, associations, anomalies.
+    *Sortie* — Axes factoriels, groupes, associations, anomalies.
   ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.28in),
   card([Prédire], [
-    *Question* — Que vaudra la réponse pour une nouvelle observation?
+    *Question* — Que vaudra la réponse pour une nouvelle observation ?
 
     *Sortie* — Valeur, classe ou probabilité prédite.
   ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.28in),
   card([Expliquer une intervention], [
-    *Question* — Que changerait une action?
+    *Question* — Que changerait une action ?
 
     *Sortie* — Effet causal sous des hypothèses explicites.
   ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.28in),
 )
 
+#pause
+
 #v(0.6em)
 #align(center)[
-  #tag([Association ≠ prédiction ≠ causalité], fill: rgb("#b45309"))
+  #text(size: 20pt, weight: "bold", fill: accent-dark)[
+    Association ≠ prédiction ≠ causalité
+  ]
 ]
 
-== Exemple directeur : l'espérance de vie
+== Exemple : l'espérance de vie
 
 #grid(
   columns: (0.9fr, 1.4fr),
   gutter: 1em,
   [
-    #auto-card([Une observation], [Un pays membre de l'ONU.])
+    #auto-card([Une unité], [Un pays membre de l'ONU.])
     #v(0.55em)
-    #auto-card([Variables], [
+    #auto-card([Variables possible], [
       - espérance de vie;
       - PIB par habitant;
       - dépenses de santé;
       - fertilité;
       - urbanisation;
       - niveau d'éducation.
-    ], fill: pale-blue, stroke: rgb("#c7d8e4"))
+    ], fill: pale-purple, stroke: rgb("#d9cbe4"))
   ],
   [
     #auto-card([Questions possibles], [
       #grid(
         columns: (auto, 1fr),
         gutter: 0.4em,
-        tag([D]), [Quelle est la distribution entre les pays?],
-        tag([E], fill: rgb("#7c3aed")), [Quels pays ont des profils similaires?],
-        tag([E], fill: rgb("#7c3aed")), [Peut-on résumer les indicateurs par deux axes?],
-        tag([P], fill: rgb("#2563eb")), [Peut-on prévoir l'espérance de vie?],
-        tag([C], fill: rgb("#b45309")), [Une hausse des dépenses de santé la ferait-elle augmenter?],
+        tag([D]), [Quelle est la distribution entre les pays ?],
+        tag([E], fill: rgb("#7c3aed")), [Quels pays ont des profils similaires ?],
+        tag([E], fill: rgb("#7c3aed")), [Peut-on résumer les indicateurs par deux axes factoriels ?],
+        tag([P], fill: rgb("#2563eb")), [Peut-on prévoir l'espérance de vie ?],
+        tag([C], fill: rgb("#b45309")), [Une hausse des dépenses de santé ferait-elle augmenter l'espérance de vie ?],
       )
     ], fill: rgb("#f7f9fa"), stroke: rgb("#d8e0e3"))
-    #v(0.65em)
-    #text(size: 12pt, fill: muted)[
-      Le même tableau peut soutenir plusieurs analyses. L'objectif choisi
-      détermine les hypothèses et la validation nécessaires.
-    ]
   ],
 )
+
+#pause
+
+#text(size: 14pt, fill: muted)[
+  Le même jeu de données peut soutenir plusieurs analyses.
+
+  L'objectif choisi détermine les hypothèses et la validation nécessaires.
+]
 
 == Avant de choisir une méthode
 
@@ -281,6 +265,8 @@
   ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.05in),
 )
 
+#pause
+
 #v(0.8em)
 
 #grid(
@@ -288,12 +274,14 @@
   gutter: 0.6em,
   card([Méthode], [Ajuster un modèle ou construire une représentation.], height: 0.88in),
   text(size: 23pt, fill: accent)[↔],
-  card([Critère], [Évaluer la performance, la stabilité et l'utilité.], height: 0.88in),
+  card([Critère], [Évaluer la performance, la stabilité et l'utilité de la méthode.], height: 0.88in),
 )
+
+#pause
 
 #v(0.75em)
 #align(center)[
-  #text(size: 16pt, weight: "bold", fill: accent-dark)[
+  #text(size: 20pt, weight: "bold", fill: accent-dark)[
     Une méthode sophistiquée peut répondre parfaitement à la mauvaise question.
   ]
 ]
@@ -307,7 +295,7 @@
   gutter: 1em,
   [
     #auto-card([Données d'apprentissage], [
-      Des couples $(x_i, y_i)$, pour $i = 1, dots, n$.
+      Des pairs d'observations $(x_i, y_i)$, pour $i = 1, dots, n$ :
 
       - $x_i in RR^p$ : variables explicatives;
       - $y_i$ : réponse observée.
@@ -326,9 +314,8 @@
         #align(center)[#text(size: 25pt)[$Y = f(X) + epsilon$]]
       ]
       #v(0.8em)
-      #text(size: 12.5pt, fill: muted)[
-        $f$ porte la structure systématique. $epsilon$ rassemble le bruit, les
-        variables absentes et la variabilité non expliquée.
+      #text(size: 14pt, fill: muted)[
+        $f$ représente la structure systématique. $epsilon$ contient le bruit, les variables absentes et la variabilité non expliquée.
       ]
     ]
   ],
@@ -340,28 +327,35 @@
   columns: (1fr, 1fr),
   gutter: 0.9em,
   card([Régression], [
-    #tag([Réponse quantitative])
+    #align(center)[
+      #tag([Réponse quantitative])
+    ]
 
     *Exemples* — prix, température, durée, revenu.
 
     *Critères* — erreur quadratique moyenne, erreur absolue moyenne.
 
-    *Question* — « Combien? »
+    *Question* — « Combien ? »
   ], height: 2.25in),
   card([Classification], [
-    #tag([Réponse qualitative], fill: rgb("#2563eb"))
+    #align(center)[
+      #tag([Réponse qualitative], fill: rgb("#2563eb"))
+    ]
 
     *Exemples* — fraude, diagnostic, type de document.
 
     *Critères* — exactitude, sensibilité, spécificité, précision, rappel.
 
-    *Question* — « Quelle classe? »
+    *Question* — « Quelle classe ? »
   ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.25in),
 )
+
+#pause
 
 #v(0.7em)
 #auto-card([Le critère dépend de l'usage], [
   Une erreur rare mais grave peut compter davantage que le taux d'erreur moyen.
+
   Avec des classes déséquilibrées, l'exactitude globale peut être trompeuse.
 ], fill: pale-orange, stroke: rgb("#ead4ad"))
 
@@ -371,29 +365,33 @@
   columns: (1fr, auto, 1fr, auto, 1fr),
   gutter: 0.45em,
   align: horizon,
-  card([Entraînement], [Estimer les paramètres du modèle.], height: 1.08in),
+  card([Jeu d'entraînement], [Estimer les paramètres du modèle.], height: 1.08in),
   text(size: 22pt, fill: accent)[→],
-  card([Validation], [Choisir la méthode et ses hyperparamètres.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.08in),
+  card([Jeu de validation], [Choisir la méthode et ses hyperparamètres.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.08in),
   text(size: 22pt, fill: accent)[→],
-  card([Test], [Estimer une seule fois la performance finale.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.08in),
+  card([Jeu de test], [Estimer une seule fois la performance finale.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.08in),
 )
+
+#pause
 
 #v(0.9em)
 
 #grid(
   columns: (1fr, 1fr),
   gutter: 0.8em,
-  card([Sous-ajustement], [
-    Modèle trop rigide : il manque une structure importante.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.95in),
-  card([Sur-ajustement], [
-    Modèle trop flexible : il mémorise les particularités de l'entraînement.
-  ], fill: rgb("#fcecec"), stroke: rgb("#ecc1c1"), height: 0.95in),
+  card([Sous-ajustement → modèle trop rigide], [
+    Il manque une structure importante.
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1in),
+  card([Sur-ajustement → modèle trop flexible], [
+    Il mémorise les particularités de l'entraînement.
+  ], fill: rgb("#fcecec"), stroke: rgb("#ecc1c1"), height: 1in),
 )
+
+#pause
 
 #v(0.65em)
 #align(center)[
-  #text(size: 16pt, weight: "bold", fill: accent-dark)[
+  #text(size: 20pt, weight: "bold", fill: accent-dark)[
     Bonne performance d'entraînement ≠ bonne généralisation
   ]
 ]
@@ -405,20 +403,22 @@
   gutter: 0.9em,
   card([Procédure biaisée], [
     1. Imputer ou standardiser tout le jeu de données.
-    2. Séparer ensuite entraînement et test.
+    2. Séparer ensuite les jeux d'entraînement et de test.
     3. Obtenir un score artificiellement optimiste.
   ], fill: rgb("#fcecec"), stroke: rgb("#ecc1c1"), height: 1.65in),
   card([Procédure correcte], [
     1. Séparer les données.
-    2. Ajuster les transformations sur l'entraînement.
-    3. Appliquer ces transformations au test.
+    2. Ajuster les transformations sur le jeu d'entraînement.
+    3. Appliquer ces transformations au jeu de test.
   ], fill: pale, stroke: rgb("#bedbd5"), height: 1.65in),
 )
 
+#pause
+
 #v(0.8em)
 #auto-card([Règle pratique], [
-  Toute opération qui « apprend » des données — imputation, standardisation,
-  sélection de variables ou réduction de dimension — appartient au protocole
+  Toute opération qui « apprend » des données (imputation, standardisation,
+  sélection de variables ou réduction de dimension) appartient au protocole
   d'entraînement.
 ], fill: pale-blue, stroke: rgb("#c7d8e4"))
 
@@ -436,7 +436,7 @@
     #v(0.65em)
     #auto-card([Objectif], [
       Construire une représentation qui révèle des régularités utiles.
-    ], fill: pale-purple, stroke: rgb("#d9cbe4"))
+    ], fill: pale-blue, stroke: rgb("#c7d8e4"))
   ],
   [
     #auto-card([Ce que l'on cherche], [
@@ -449,11 +449,12 @@
   ],
 )
 
+#pause
+
 #v(0.75em)
 #align(center)[
-  #text(size: 15.5pt, weight: "bold", fill: accent-dark)[
-    Sans réponse observée, la validation dépend davantage de la stabilité et de
-    l'interprétation.
+  #text(size: 20pt, weight: "bold", fill: accent-dark)[
+    Sans réponse observée, la validation de la méthode dépend davantage de la stabilité et de l'interprétation.
   ]
 ]
 
@@ -472,6 +473,8 @@
   ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.02in),
 )
 
+#pause
+
 #v(0.8em)
 
 #grid(
@@ -482,9 +485,11 @@
   card([ACM], [Variables qualitatives; décrire les associations.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.08in),
 )
 
+#pause
+
 #v(0.7em)
-#text(size: 13pt, fill: muted)[
-  Une projection en deux dimensions est une approximation : une proximité mal
+#text(size: 14pt, fill: muted)[
+  Une projection en dimension réduite est une approximation : une proximité mal
   représentée sur les axes ne doit pas être surinterprétée.
 ]
 
@@ -497,7 +502,7 @@
     #auto-card([Trois conceptions d'un groupe], [
       - proximité à un centre : $k$-means;
       - hiérarchie de distances : classification hiérarchique;
-      - appartenance probabiliste : mélanges.
+      - appartenance probabiliste : modèles de mélange.
     ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2.05in)
   ],
   [
@@ -507,14 +512,14 @@
       - mesure de dissimilarité;
       - nombre de groupes demandé;
       - initialisation de l'algorithme.
-    ], fill: rgb("#f7f9fa"), stroke: rgb("#d8e0e3"), height: 2.05in)
+    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.05in)
   ],
 )
 
 #v(0.75em)
 #auto-card([Exemple], [
   Regrouper des clients selon leurs achats vise à découvrir des segments
-  pertinents — pas à prédire une étiquette connue à l'avance.
+  pertinents, pas à prédire une étiquette connue à l'avance.
 ], fill: pale-orange, stroke: rgb("#ead4ad"))
 
 == Valider sans réponse observée
@@ -533,6 +538,8 @@
   ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.18in),
 )
 
+#pause
+
 #v(0.9em)
 #align(center)[
   #block(width: 86%, inset: 13pt, radius: 6pt, fill: pale-orange, stroke: 0.8pt + rgb("#ead4ad"))[
@@ -542,42 +549,47 @@
       ]
       #v(0.25em)
       #text(size: 12.5pt, fill: ink)[
-        On recherche une représentation utile, stable et interprétable — pas
+        On recherche une représentation utile, stable et interprétable, et pas
         nécessairement une partition « vraie ».
       ]
     ]
   ]
 ]
 
-= Modéliser avec rigueur
+= Modéliser
 
 == Une démarche complète
 
 #grid(
-  columns: (1fr, 1fr, 1fr, 1fr),
-  gutter: 0.45em,
-  step([1], [Question], [Population, unité, résultat attendu.]),
-  step([2], [Collecte], [Provenance, échantillonnage, unités.]),
-  step([3], [Préparer], [Nettoyer, explorer, documenter.]),
-  step([4], [Représenter], [Transformer, standardiser, sélectionner.]),
+  columns: (1fr, auto, 1fr, auto, 1fr),
+  column-gutter: 0.5em,
+  row-gutter: 0.5em,
+  align: horizon,
+
+  card([1 · Question], [Population, unité, résultat attendu.], height: 0.82in),
+  text(size: 22pt, fill: accent)[→],
+  card([2 · Collecte], [Provenance, échantillonnage, unités.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 0.82in),
+  text(size: 22pt, fill: accent)[→],
+  card([3 · Préparer], [Nettoyer, explorer, documenter.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.82in),
+
+  [], [], [], [],
+  align(center)[#text(size: 22pt, fill: accent)[↓]],
+
+  card([6 · Valider], [Performance, stabilité, sensibilité.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 0.82in),
+  text(size: 22pt, fill: accent)[←],
+  card([5 · Ajuster], [Estimer les paramètres du modèle.], height: 0.82in),
+  text(size: 22pt, fill: accent)[←],
+  card([4 · Représenter], [Transformer, standardiser, sélectionner.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.82in),
+
+  align(center)[#text(size: 22pt, fill: accent)[↓]], [], [], [], [],
+
+  card([7 · Communiquer], [Interpréter, limiter, reproduire.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.82in),
+  text(size: 22pt, fill: accent)[→],
+  card([1 · Question], [Population, unité, résultat attendu.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.82in),
+  text(size: 22pt, fill: accent)[→],
+  text(size: 22pt, fill: accent)[...]
 )
 
-#v(0.6em)
-
-#grid(
-  columns: (1fr, 1fr, 1fr),
-  gutter: 0.5em,
-  step([5], [Ajuster], [Estimer les paramètres du modèle.]),
-  step([6], [Valider], [Performance, stabilité, sensibilité.]),
-  step([7], [Communiquer], [Interpréter, limiter, reproduire.]),
-)
-
-#v(0.8em)
-#align(center)[
-  #text(size: 16pt, weight: "bold", fill: accent-dark)[
-    Une analyse est une boucle : un diagnostic peut ramener à une étape antérieure.
-  ]
-]
 
 == Représentation, méthode et critère
 
@@ -592,22 +604,27 @@
   card([Critère], [Erreur, stabilité, interprétabilité.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.95in),
 )
 
+#pause 
+
 #v(0.9em)
 #grid(
   columns: (1fr, 1fr),
   gutter: 0.8em,
   card([Paramètre], [
-    Estimé à partir des données d'entraînement : coefficient, centre d'un groupe…
+    Estimé à partir des données d'entraînement : coefficient, centroïde…
   ], height: 1.05in),
   card([Hyperparamètre], [
     Choisi par validation : nombre de groupes, force de régularisation…
   ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.05in),
 )
 
+#pause 
+
 #v(0.65em)
-#text(size: 13pt, fill: muted)[
-  Changer un seul de ces éléments peut changer le résultat. Un protocole doit
-  documenter les choix, pas seulement le nom de l'algorithme.
+#text(size: 14pt, fill: muted)[
+  Changer un seul de ces éléments peut changer le résultat.
+  
+  Un protocole doit documenter les choix, pas seulement le nom de l'algorithme.
 ]
 
 == Une analyse responsable
@@ -623,27 +640,11 @@
   card([Dérive temporelle], [Les données représentent-elles encore les conditions futures?], fill: rgb("#f7f9fa"), stroke: rgb("#d8e0e3"), height: 1.18in),
 )
 
+#pause 
+
 #v(0.65em)
 #align(center)[
-  #text(size: 14.5pt, weight: "bold", fill: accent-dark)[
+  #text(size: 20pt, weight: "bold", fill: accent-dark)[
     La force de la conclusion doit correspondre à l'information réellement disponible.
   ]
-]
-
-== À retenir
-
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 0.8em,
-  card([1], [La question précède l'algorithme.], height: 1.05in),
-  card([2], [La représentation des données fait partie du modèle.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.05in),
-  card([3], [Le supervisé prédit une réponse; le non supervisé construit une représentation.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.05in),
-  card([4], [La validation doit reproduire l'usage futur des résultats.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.05in),
-  card([5], [Une bonne performance ne garantit ni causalité ni équité.], fill: rgb("#fcecec"), stroke: rgb("#ecc1c1"), height: 1.05in),
-  card([6], [Une analyse convaincante explicite ses hypothèses et ses limites.], fill: rgb("#f7f9fa"), stroke: rgb("#d8e0e3"), height: 1.05in),
-)
-
-#v(0.65em)
-#align(center)[
-  #text(size: 18pt, weight: "bold", fill: accent-dark)[Questions?]
 ]
