@@ -45,28 +45,23 @@ de construire une méthode élégante qui ne répond pas au problème initial.
 
 === Les quatre objets d'une méthode
 
-Une fois la question fixée, une méthode d'analyse peut être décrite par quatre
-objets complémentaires:
+Une fois la question fixée, une méthode d'analyse peut être décrite par quatre objets complémentaires:
 
 1. un *espace d'observation* qui représente les données;
-2. une *distance* ou une similarité qui formalise la ressemblance (ou dissimilitude) entre observations;
+2. une *distance* (ou une similarité) qui formalise la  dissimilitude (ou ressemblance) entre observations;
 3. un *modèle* ou un algorithme qui extrait une structure;
-4. une *fonction de coût* qui mesure la qualité de la solution.
+4. une *fonction de coût* (ou de perte) qui mesure la qualité de la solution.
 
 Changer un seul de ces objets peut modifier le résultat. Deux algorithmes
-identiques appliqués à deux représentations ou avec deux distances différentes ne
-répondent pas exactement à la même question.
+identiques appliqués à deux représentations ou avec deux distances différentes ne répondent pas exactement à la même question et ne donneront pas la même réponse.
 
 === De la question à la méthode
 
-La question détermine les objets à définir: l'unité statistique, les variables,
-la distance éventuelle, la mesure d'erreur et le protocole de validation. Ces
-choix doivent être faits avant de comparer des méthodes, car ils déterminent ce
-qu'une méthode peut apprendre et comment son résultat sera jugé.
+La question détermine les objets à définir: l'unité statistique, les variables, l'espace d'observation, la distance éventuelle, le modèle, la mesure d'erreur et le protocole de validation. Ces choix doivent être faits avant de comparer des méthodes, car ils déterminent ce qu'une méthode peut apprendre et comment son résultat sera jugé.
 
-Une analyse exploratoire n'est donc pas seulement une collection de graphiques.
+Une analyse exploratoire n'est donc pas seulement un ensemble de graphiques.
 Elle sert à comprendre les données, à formuler des hypothèses, à repérer les
-problèmes de qualité et à préparer une modélisation défendable.
+problèmes de qualité de données et à préparer une modélisation défendable.
 
 === Une posture critique
 
@@ -86,14 +81,10 @@ mesurent réellement et ce qu'elles ne mesurent pas.
 Une analyse ne se termine pas lorsque le modèle est choisi. Pour qu'une méthode
 soit utilisée, il faut automatiser la collecte, le nettoyage, la transformation
 et la production des résultats. Cette chaîne de calcul, souvent appelée
-*pipeline*, relève en partie de l'ingénierie des données. Elle doit être testée,
+_pipeline_, relève en partie de l'ingénierie des données. Elle doit être testée,
 documentée et reproductible.
 
-Après le déploiement, on surveille à la fois la qualité des données d'entrée et
-la performance du modèle. La distribution des variables peut évoluer avec le
-temps: on parle de *dérive des données* (*data drift*). La relation entre les
-variables explicatives et la réponse peut elle aussi changer. Il faut alors
-réévaluer les hypothèses, réentraîner le modèle ou revoir la question initiale.
+Après le déploiement, on doit surveiller à la fois la qualité des données d'entrée et la performance du modèle. La distribution des variables peut évoluer avec le temps: on parle de dérive des données (_data drift_). La relation entre les variables explicatives et la réponse peut elle aussi changer. Il faut alors réévaluer les hypothèses, réentraîner le modèle ou revoir la question initiale.
 
 #remark[
   Un bon modèle n'est pas seulement performant au moment de sa validation. Il
@@ -108,11 +99,11 @@ Les données sont le coeur de l'analyse. Même un modèle très sophistiqué ne 
 pas corriger un échantillon non représentatif, une variable mal définie ou des
 erreurs systématiques de collecte.
 
-Lors de la première inspection, on vérifie notamment:
+Ainsi, lors de la première inspection, on doit notamment vérifier :
 
 - la représentativité de la population cible;
-- les valeurs manquantes et leur codage;
-- les doublons et les incohérences;
+- les valeurs manquantes et leur encodage;
+- les doublons et les incohérences dans les observations;
 - les unités et les changements d'échelle;
 - les valeurs extrêmes;
 - les modalités rares ou trop nombreuses;
@@ -122,8 +113,8 @@ Lors de la première inspection, on vérifie notamment:
 #pagebreak(weak: true)
 #block(breakable: false)[
   #example[
-    Dans une base client, les codes "NA", "N/A", "?", chaîne vide et "Inconnu"
-    peuvent tous représenter une absence d'information. Les traiter comme cinq
+    Dans une base client, les codes "NA", "N/A", "?" et "Inconnu"
+    peuvent tous représenter une absence d'information. Les traiter comme quatre
     modalités différentes créerait une structure artificielle.
   ]
 ]
@@ -135,15 +126,12 @@ d'expériences ou de dépôts publics. Quelques points de départ utiles sont
 #link("https://datasetsearch.research.google.com/")[Google Dataset Search],
 #link("https://archive.ics.uci.edu/")[UCI Machine Learning Repository],
 #link("https://www.kaggle.com/datasets")[Kaggle] et
-#link("https://physionet.org/")[PhysioNet]. Pour des données officielles, on
-privilégie notamment #link("https://www.statcan.gc.ca/fr/debut")[Statistique
-Canada], #link("https://www.data.gouv.fr/")[data.gouv.fr] ou
-#link("https://data.gov/")[Data.gov].
+#link("https://physionet.org/")[PhysioNet]. Pour des données officielles, on peut notamment regarder #link("https://www.statcan.gc.ca/fr/debut")[Statistique Canada] pour les données canadiennes, #link("https://www.data.gouv.fr/")[data.gouv.fr] pour les données françaises et #link("https://data.gov/")[Data.gov] pour les données américaines.
 
-Trouver un fichier ne suffit pas. Il faut documenter:
+Cependant, trouver des données ne suffit pas. Il faut documenter
 
 - la source, la licence et la date d'accès;
-- la population visée et la méthode d'échantillonnage;
+- la population visée et l'éventuelle méthode d'échantillonnage;
 - la période et le territoire couverts;
 - la définition des variables et leurs unités;
 - les filtres, exclusions et transformations déjà appliqués;
@@ -157,10 +145,7 @@ Trouver un fichier ne suffit pas. Il faut documenter:
 
 === Constitution de la base
 
-Les données arrivent sous des formats variés. En R, `readr` lit les fichiers
-texte, `readxl` les classeurs Excel, `haven` les fichiers SAS et SPSS, et
-`jsonlite` les objets JSON. En Python, `pandas` et `polars` couvrent la plupart
-des formats tabulaires usuels.
+Les données peuvent arriver sous des formats variés. En R, le package `readr` lit les fichiers texte, le package `readxl` les classeurs Excel, `haven` les fichiers SAS et SPSS, et `jsonlite` les objets JSON. En Python, les libraries `pandas` et `polars` couvrent la plupart des formats tabulaires usuels.
 
 #align(center)[
   #table(
@@ -177,23 +162,19 @@ des formats tabulaires usuels.
 ]
 
 Lors de l'importation, on fixe explicitement les types, l'encodage des
-caractères, les séparateurs décimaux et les symboles de valeurs manquantes. On
-conserve les données brutes en lecture seule et on produit une table nettoyée
-par une suite de transformations versionnées.
+caractères (par exemple, `encoding = "UTF-8"` pour des données contentant des accents), les séparateurs décimaux (par exemple, `decimal = ","` pour des données avec une virgule comme séparateur décimal) et les symboles de valeurs manquantes (par exemple, `na = c("", "NA")`). Il est important de conserver les données brutes en lecture seule et de produire une table nettoyée par une suite de transformations versionnées.
 
 === Données tidy
 
 #definition-box(supplement: "Définition")[
-  Un tableau est dit *tidy* lorsque chaque variable est une colonne, chaque
+  Un tableau est dit _tidy_ lorsque chaque variable est une colonne, chaque
   observation est une ligne et chaque cellule contient une seule valeur.
 ]
 
 Cette organisation facilite l'exploration, la visualisation, la modélisation et
-la reproductibilité.
+la reproductibilité. La suite de package `tidyverse` en R et `pandas` en Python fournit des outils pour manipuler les données dans ce format. La plupart des méthodes d'analyse reposent sur cette structure (_data frame_), mais certaines méthodes plus anciennes ou spécialisées peuvent exiger un format différent.
 
-Le format tidy n'est pas toujours le format de collecte. Il faut parfois pivoter
-un tableau, séparer une colonne composite, uniformiser des catégories, ou
-ramener plusieurs fichiers à une même unité statistique.
+Le format _tidy_ n'est pas toujours le format de collecte. Il faut parfois pivoter un tableau, séparer une colonne composite, uniformiser des catégories, ou ramener plusieurs fichiers à une même unité statistique.
 
 === Unité statistique
 
@@ -203,15 +184,11 @@ ramener plusieurs fichiers à une même unité statistique.
   l'analyse.
 ]
 
-Elle peut être un individu, une transaction, une entreprise, un pays, une
-image, un pixel ou un document. L'unité statistique n'est donc pas imposée par
-le fichier: elle résulte de la question posée.
+L'unité statistique peut être un individu, une transaction, une entreprise, un pays, une image, un pixel ou un document. L'unité statistique n'est donc pas imposée par le fichier : elle résulte de la question posée.
 
 #example[
   Dans une base d'images médicales, on peut prendre l'image comme unité pour
-  classer un diagnostic. On peut aussi prendre le pixel comme unité pour une
-  tâche de segmentation. Les variables et les méthodes changent alors
-  complètement.
+  classer ou prédire un diagnostic. On peut aussi prendre le pixel comme unité pour une tâche de segmentation. Les variables et les méthodes changent alors complètement.
 ]
 
 #remark[
@@ -225,13 +202,10 @@ le fichier: elle résulte de la question posée.
 Le type d'une variable détermine l'espace mathématique, les distances possibles
 et les modèles pertinents.
 
-- Une variable numérique mesure une quantité: âge, revenu, température, masse.
-- Une variable ordinale possède des modalités ordonnées sans écart mesurable:
-  faible, moyen, élevé.
-- Une variable nominale symétrique possède des modalités sans ordre et de statut
-  comparable: nationalité, programme d'étude.
-- Une variable nominale asymétrique possède une modalité de référence ou de
-  défaut: présence ou absence d'un symptôme, transaction frauduleuse ou non.
+- Une variable numérique (ou quantitative) mesure une quantité: âge, revenu, température, masse.
+- Une variable nominale symétrique (ou qualitative) possède des modalités sans ordre et de statut comparable: nationalité, programme d'étude.
+- Une variable nominale asymétrique possède une modalité de référence ou de défaut: présence ou absence d'un symptôme, transaction frauduleuse ou non.
+- Une variable ordinale possède des modalités ordonnées sans écart mesurable: faible, moyen, élevé ou jamais, parfois, souvent.
 
 Une variable textuelle, une courbe, une image ou un réseau demande une
 représentation plus riche. Le choix de représentation est alors une partie
@@ -246,63 +220,67 @@ centrale de l'analyse.
 
 === Espaces d'observation
 
-Une fois les variables définies, on choisit l'espace dans lequel vivent les
-observations. Une variable numérique peut être représentée dans les réels, ou
-dans un intervalle si des contraintes physiques existent. Une variable nominale
-vit dans un ensemble fini de modalités. Plusieurs variables conduisent à un
-produit d'espaces. Si la variable $j$ prend ses valeurs dans $cal(X)_j$, alors
-l'espace d'observation complet est
+Une fois les variables définies, on choisit l'espace dans lequel vivent les observations. Une variable numérique peut être représentée dans les réels $RR$, ou dans un intervalle si des contraintes physiques existent. Une variable nominale vit dans un ensemble fini de modalités. Plusieurs variables conduisent à un produit d'espaces. Si la variable $j$ prend ses valeurs dans $cal(X)_j$, alors l'espace d'observation complet est
 
 $ cal(X) = cal(X)_1 times cal(X)_2 times dots times cal(X)_p. $
 
-Lorsque les $p$ variables sont numériques, on obtient généralement
-$cal(X) = RR^p$. Une courbe peut plutôt être vue comme un élément d'un espace de
-fonctions continues $cal(C)([a,b])$, tandis qu'un texte peut être représenté par
-une séquence de symboles, un sac de mots ou un vecteur numérique construit à
-partir du corpus.
+Lorsque les $p$ variables sont numériques, on obtient généralement $cal(X) = RR^p$. Une courbe peut plutôt être vue comme un élément d'un espace de fonctions continues $cal(C)([a,b])$, tandis qu'un texte peut être représenté par une séquence de symboles, un sac de mots (_bag of words_) ou un vecteur numérique construit à partir du corpus.
+
+#example[
+  *Variables numériques et mixtes.* Si une personne est décrite par son âge,
+  son revenu annuel et sa taille, une représentation naturelle est
+  $cal(X)=RR_+^3$. Si l'on ajoute une région appartenant à un ensemble fini
+  $cal(R)$ et un niveau de satisfaction ordinal dans
+  $cal(S)={"faible", "moyen", "élevé"}$, alors
+
+  $ cal(X)=RR_+^3 times cal(R) times cal(S). $
+
+  L'observation n'est plus un simple vecteur numérique: elle combine plusieurs
+  types d'espaces.
+]
+
+#example[
+  *Images.* Pour un pixel couleur dont les intensités sont ramenées entre $0$ et $1$, l'espace d'observation est $[0,1]^3$. Si l'unité statistique est plutôt une image couleur de hauteur $h$ et de largeur $w$, l'espace devient $[0,1]^(h times w times 3)$. Le même fichier conduit donc à deux espaces différents selon la question étudiée.
+]
+
+#example[
+  *Courbes et signaux.* Une trajectoire de température observée en continu pendant une journée peut être modélisée dans $cal(C)([0,24])$. Mesurée à $T$ instants seulement, elle est plutôt représentée dans $RR^T$.
+]
 
 #note[
-  Le choix de l'espace n'est pas neutre. Encoder les couleurs rouge, vert et
-  bleu par 1, 2 et 3 impose un ordre qui n'existe pas. Il vaut mieux utiliser une
-  représentation adaptée, par exemple un encodage binaire des modalités.
+  Le choix de l'espace n'est pas neutre. En effet, encoder les couleurs rouge, vert et bleu par 1, 2 et 3 impose un ordre qui n'existe pas. Il vaut mieux utiliser une représentation adaptée, par exemple un encodage binaire des modalités.
 ]
 
 == La distance
 
 === Distances et similarités
 
-La plupart des méthodes du cours reposent sur une comparaison entre
-observations. Une distance mesure une dissemblance: plus elle est grande, plus
-les objets sont considérés comme éloignés.
+Une grande partie des méthodes d'analys de données reposent sur une comparaison entre observations. Une distance mesure une dissemblance : plus elle est grande, plus les observations sont considérés comme éloignés.
 
 #definition-box(supplement: "Définition")[
   Une fonction $d: cal(X) times cal(X) arrow.r RR$ est une *distance* si, pour
-  tous $x,y,z in cal(X)$,
+  tout $x,y,z in cal(X)$,
 
-  1. $d(x,y) >= 0$;
-  2. $d(x,y) = 0 <=> x = y$;
-  3. $d(x,y) = d(y,x)$;
-  4. $d(x,y) <= d(x,z) + d(z,y)$.
-
-  La dernière condition est l'*inégalité triangulaire*.
+  1. Non-négativité : $d(x,y) >= 0$;
+  2. Séparation : $d(x,y) = 0 <=> x = y$;
+  3. Symétrie : $d(x,y) = d(y,x)$;
+  4. Inégalité triangulaire : $d(x,y) <= d(x,z) + d(z,y)$.
 ]
 
-Pour deux vecteurs numériques $x$ et $y$, la distance euclidienne s'écrit:
+Pour deux vecteurs numériques $x$ et $y$, la *distance euclidienne* s'écrit:
 
 $ d(x, y) = sqrt(sum_(j=1)^p (x_j - y_j)^2) $
 
-Plus généralement, la distance de Minkowski d'ordre $q >= 1$ est:
+Plus généralement, la *distance de Minkowski* d'ordre $q >= 1$ est:
 
-$ d_q(x, y) = (sum_(j=1)^p |x_j - y_j|^q)^(1 / q) $
+$ d_q (x, y) = (sum_(j=1)^p |x_j - y_j|^q)^(1 / q) $
 
-La distance de Manhattan correspond à $q = 1$ et la distance euclidienne à
+La *distance de Manhattan* correspond à $q = 1$ et la distance euclidienne à
 $q = 2$. Lorsque $0 < q < 1$, la formule définit encore une dissemblance, mais
 elle ne vérifie généralement pas l'inégalité triangulaire.
 
 #example[
-  Pour $x=(162.1,66.8)$ et $y=(175.8,81.6)$, décrivant une taille en centimètres
-  et une masse en kilogrammes, on obtient environ
-  $d_2(x,y)=20.16$ et $d_1(x,y)=28.5$. Ces nombres dépendent des unités choisies.
+  Pour $x=(162.1,66.8)^top$ et $y=(175.8,81.6)^top$, décrivant une taille en centimètres et une masse en kilogrammes, on obtient $d_2(x,y)=20.16$ et $d_1(x,y)=28.5$. Ces nombres dépendent des unités choisies.
 ]
 
 Une *similarité* augmente au contraire lorsque les observations se ressemblent.
@@ -312,7 +290,7 @@ $s(x,x)=1$. Toute distance peut, par exemple, produire la similarité
 $ s(x,y) = 1 / (1 + d(x,y)). $
 
 La quantité $1-s(x,y)$ est une dissemblance, mais pas nécessairement une
-distance: l'inégalité triangulaire doit toujours être vérifiée séparément.
+distance : l'inégalité triangulaire doit toujours être vérifiée séparément.
 
 === Effet de l'échelle
 
@@ -324,10 +302,9 @@ calculer une distance:
 - centrer: retirer la moyenne;
 - réduire: diviser par l'écart-type.
 
-Pour la variable $j$, on pose $z_j(x)=(x_j-mu_j)/sigma_j$. La distance
-euclidienne entre observations standardisées devient
+Pour la variable $j$, on pose $z_j (x)= frac((x_j-mu_j), sigma_j, style: "horizontal")$. La distance euclidienne entre observations standardisées devient
 
-$ d_z(x,y) = sqrt(sum_(j=1)^p ((x_j-y_j)/sigma_j)^2). $
+$ d_z (x,y) = sqrt(sum_(j=1)^p ((x_j-y_j)/sigma_j)^2). $
 
 Le centrage disparaît dans la différence, tandis que la réduction pondère
 chaque écart par la variabilité de sa variable.
@@ -342,7 +319,7 @@ chaque écart par la variabilité de sa variable.
   écart-type devient $sigma'_j=|b_j| sigma_j$. Par conséquent,
 
   $ ((x'_j-y'_j)/sigma'_j)^2
-    = ((b_j(x_j-y_j))/(|b_j|sigma_j))^2
+    = ((|b_j| (x_j-y_j))/(|b_j|sigma_j))^2
     = ((x_j-y_j)/sigma_j)^2. $
 
   Chaque terme de la somme est inchangé; la distance l'est donc aussi.
