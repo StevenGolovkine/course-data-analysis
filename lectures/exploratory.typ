@@ -331,43 +331,36 @@ différence d'un écart-type n'a pas la même signification dans tous les domain
 
 === Variables qualitatives
 
-Pour des variables qualitatives, les distances numériques habituelles n'ont pas
-toujours de sens. On peut utiliser un encodage un-parmi-$K$ pour représenter une
-variable à $K$ modalités par un vecteur binaire. Cela évite d'introduire un
-ordre artificiel.
+Pour des variables qualitatives, les distances numériques habituelles n'ont pas toujours de sens. On peut utiliser un encodage un-parmi-$K$ (_one-hot encoding_) pour représenter une variable à $K$ modalités par un vecteur binaire. Cela évite d'introduire un ordre artificiel.
 
 #example[
-  Pour $cal(X)={"rouge", "vert", "bleu"}$, l'encodage un-parmi-$K$ associe
-  $(1,0,0)$ au rouge, $(0,1,0)$ au vert et $(0,0,1)$ au bleu. Toutes les
-  modalités restent alors à la même distance les unes des autres.
+  Pour $cal(X)={"rouge", "vert", "bleu"}$, l'encodage un-parmi-$K$ associe le vecteur $(1,0,0)^top$ au rouge, le vecteur $(0,1,0)^top$ au vert et le vecteur $(0,0,1)^top$ au bleu. Toutes les modalités restent alors à la même distance les unes des autres.
 ]
 
 #definition-box(supplement: "Définition")[
   Pour deux vecteurs qualitatifs $x,y in cal(X)^p$, la *distance de Hamming* est
 
-  $ d_H(x,y) = sum_(j=1)^p 1_(x_j != y_j). $
+  $ d_H (x,y) = sum_(j=1)^p 1(x_j != y_j). $
 
   Elle compte le nombre de désaccords. La proportion d'accords
-  $s(x,y)=p^(-1) sum_j 1_(x_j=y_j)$ fournit une similarité comprise entre
+  $s(x,y)=p^(-1) sum_j 1(x_j=y_j)$ fournit une similarité comprise entre
   $0$ et $1$.
 ]
 
 #example[
   Si Alice et Bob diffèrent par la couleur et les cheveux, mais partagent la
-  même couleur des yeux, alors $d_H("Alice","Bob")=2$ sur trois variables et
+  même couleur des yeux, alors $d_H ("Alice","Bob")=2$ sur trois variables et
   leur proportion d'accords vaut $1/3$.
 ]
 
 Pour des variables binaires rares ou asymétriques, les doubles absences sont
 souvent peu informatives. On définit $M_11$ comme le nombre de présences
 communes, $M_10$ et $M_01$ comme les désaccords, et $M_00$ comme le nombre de
-doubles absences. L'indice de Jaccard se concentre sur les présences:
+doubles absences. L'*indice de Jaccard* se concentre sur les présences :
 
 $ J = M_11 / (M_11 + M_10 + M_01) $
 
-La distance associée est $d_J=1-J$. Pour deux questionnaires binaires
-$x=(1,0,1,0,0)$ et $y=(1,0,0,1,0)$, on a $M_11=1$, $M_10=M_01=1$ et
-$M_00=2$, donc $J=1/3$ et $d_J=2/3$.
+La distance associée est $d_J=1-J$. Pour deux vecteurs binaires $x=(1,0,1,0,0)^top$ et $y=(1,0,0,1,0)^top$, on a $M_11=1$, $M_10=M_01=1$ et $M_00=2$, donc $J=1/3$ et $d_J=2/3$.
 
 === Choisir une distance
 
