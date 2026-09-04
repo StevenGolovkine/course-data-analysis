@@ -760,51 +760,32 @@ adaptée:
 
 Des découpages comme 60 %--20 %--20 % ou 70 %--15 %--15 % constituent des points de départ, pas des règles universelles. Avec beaucoup de données, une petite proportion peut déjà fournir un test très précis. Avec peu de données, on conserve souvent 70 % ou 80 % des observations pour l'apprentissage et on remplace l'ensemble de validation unique par une validation croisée.
 
-Le choix doit porter sur les effectifs réellement informatifs plutôt que sur les seuls pourcentages. Un test contenant 20% des observations peut rester inutilisable s'il ne contient que deux cas positifs ou un seul groupe. Il faut aussi conserver les indices de la séparation et fixer la graine aléatoire afin de rendre l'analyse reproductible.
+Le choix doit porter sur les effectifs réellement informatifs plutôt que sur les seuls pourcentages. Un jeu de test contenant 20% des observations peut rester inutilisable s'il ne contient que deux cas positifs ou un seul groupe. Il faut aussi conserver les indices de la séparation et fixer la graine aléatoire afin de rendre l'analyse reproductible.
 
-Une séparation unique présente deux limites. D'abord, la performance mesurée
-dépend des observations tirées pour la validation ou le test. Ensuite, réserver
-des données réduit la taille de l'échantillon disponible pour l'apprentissage.
-La validation croisée atténue la première difficulté et exploite plus
-efficacement les données d'entraînement.
+Une séparation unique présente deux limites. D'abord, la performance mesurée dépend des observations tirées pour le jeu de validation ou le jeu de test. Ensuite, réserver des données réduit la taille de l'échantillon disponible pour l'apprentissage. La validation croisée atténue la première difficulté et exploite plus efficacement les données d'entraînement.
 
 ==== Prévenir les fuites de données
 
-Les transformations apprises à partir des données font partie du modèle. La
-standardisation, l'imputation, la sélection de variables, la réduction de
-dimension et le suréchantillonnage doivent donc être ajustés sur l'entraînement
-seulement, puis appliqués sans réajustement à la validation et au test. En
-validation croisée, ces opérations doivent être réestimées à l'intérieur de
-chaque pli.
+Les transformations apprises à partir des données font partie du modèle. La standardisation, l'imputation, la sélection de variables, la réduction de dimension et le suréchantillonnage doivent donc être ajustés sur le jeu d'entraînement seulement, puis appliqués sans réajustement au jeu de validation et au jeu de test.
 
 #example[
-  *Standardisation.* Pour centrer une variable, on calcule sa moyenne dans
-  l'ensemble d'entraînement. Utiliser la moyenne de toute la base transmet au
-  modèle une information sur la distribution du jeu de test, même si les
-  valeurs de la réponse n'ont pas été utilisées.
+  *Standardisation.* Pour centrer une variable, on calcule sa moyenne dans le jeu d'entraînement. Utiliser la moyenne de toute la base de données transmet au modèle une information sur la distribution du jeu de test, même si les valeurs de la réponse n'ont pas été utilisées.
 ]
 
 #remark[
-  On parle de *fuite de données* dès qu'une information indisponible au moment
-  de la prédiction influence l'apprentissage ou le choix du modèle. La fuite
-  peut venir du test, d'une date future, d'une observation du même individu ou
-  d'une variable construite après l'événement à prédire. Le jeu de test ne doit
-  être consulté qu'une fois tous les choix méthodologiques arrêtés.
+  On parle de fuite de données (_data leakage_) dès qu'une information indisponible au moment de la prédiction influence l'apprentissage ou le choix du modèle. La fuite peut venir du jeu de test, d'une date future, d'une observation du même individu ou d'une variable construite après l'événement à prédire. Le jeu de test ne doit être consulté qu'une fois tous les choix méthodologiques arrêtés.
 ]
 
 === Validation croisée
 
 Une séparation unique entre entraînement et validation peut donner un résultat
 très dépendant du hasard du découpage. La validation croisée réutilise les
-données de développement plusieurs fois afin que chaque observation serve à la
+données d'entraînement plusieurs fois afin que chaque observation serve à la
 validation, tout en étant prédite par un modèle qui ne l'a pas utilisée pour son
 ajustement.
 
 #definition-box(supplement: "Définition")[
-  Dans une *validation croisée à $K$ plis*, les indices des observations sont
-  répartis en $K$ ensembles disjoints $I_1, dots, I_K$. Pour le pli $k$, on
-  ajuste un modèle $hat(f)^(-k)$ sur toutes les observations sauf celles de
-  $I_k$, puis on calcule son erreur sur $I_k$.
+  Dans une *validation croisée à $K$ plis* (_$K$-fold cross-validation_), les indices des observations sont répartis en $K$ ensembles disjoints $I_1, dots, I_K$. Pour le pli $k$, on ajuste un modèle $hat(f)^(-k)$ sur toutes les observations sauf celles de $I_k$, puis on calcule son erreur sur $I_k$.
 
   Si $n_k$ est la taille du pli et $L$ la fonction d'erreur, de coût ou de
   perte, l'erreur du pli est
@@ -813,10 +794,11 @@ ajustement.
 
   L'estimation globale pondère chaque pli par son effectif:
 
-  $ hat("Err")_("CV") = sum_(k=1)^K n_k / n "Err"_k. $
+  $ hat("Err")_("CV") = 1 / n sum_(k=1)^K n_k "Err"_k. $
 
   Lorsque les plis ont la même taille, cette expression devient simplement
-  $hat("Err")_("CV")=1/K sum_(k=1)^K "Err"_k$.
+
+  $ hat("Err")_("CV")=1/K sum_(k=1)^K "Err"_k. $
 ]
 
 Le calcul suit quatre étapes:
@@ -826,7 +808,7 @@ Le calcul suit quatre étapes:
 3. prédire les observations du pli laissé de côté et calculer leur erreur;
 4. regrouper les prédictions hors échantillon ou moyenner les erreurs des plis.
 
-Les prédictions ainsi obtenues sont dites *hors pli* (_out-of-fold_). Chaque
+Les prédictions ainsi obtenues sont dites hors pli (_out-of-fold_). Chaque
 observation possède une prédiction issue d'un modèle qui ne l'a pas vue pendant
 l'entraînement. Elles permettent de calculer une mesure globale comme la MSE,
 la MAE, le taux d'erreur ou l'aire sous une courbe ROC.
@@ -860,17 +842,13 @@ chaque ajustement, la variabilité de l'estimation et le coût de calcul.
     [*$K$*], [*Avantage principal*], [*Limite principale*],
     [5], [Calcul relativement rapide], [Entraînement sur 80 % des données],
     [10], [Bon compromis général], [Deux fois plus d'ajustements qu'à cinq plis],
-    [$n$], [Entraînement sur $n-1$ observations], [Calcul coûteux et erreurs fortement corrélées],
+    [$n$], [Entraînement sur $n-1$ obs], [Calcul coûteux et erreurs corrélées],
   )
 ]
 
-Les choix $K=5$ et $K=10$ sont courants, mais ne sont pas universels. Le cas
-$K=n$, appelé validation *leave-one-out*, entraîne un modèle pour chaque
-observation. Son biais d'évaluation est souvent faible puisque presque toutes
-les données servent à chaque ajustement, mais son coût est élevé et sa variance
-peut l'être aussi, car les ensembles d'entraînement se ressemblent fortement.
+Les choix $K=5$ et $K=10$ sont courants, mais ne sont pas universels. Le cas $K=n$, appelé validation _leave-one-out_, entraîne un modèle pour chaque observation. Son biais d'évaluation est souvent faible puisque presque toutes les données servent à chaque ajustement, mais son coût computationnel est élevé et sa variance peut l'être aussi, car les ensembles d'entraînement se ressemblent fortement.
 
-La *validation croisée répétée* recommence un découpage à cinq ou dix plis avec
+La validation croisée répétée recommence un découpage à cinq ou dix plis avec
 plusieurs graines aléatoires, puis moyenne les résultats. Elle réduit la
 dépendance envers une seule partition au prix d'un nombre plus élevé
 d'ajustements. Par exemple, une validation à cinq plis répétée dix fois exige 50
@@ -887,7 +865,7 @@ observations, ce qui rend la comparaison moins sensible au hasard du découpage.
   plis. Pour chaque degré, cinq modèles sont ajustés et leurs erreurs sont
   moyennées. On choisit le degré dont l'erreur moyenne est la plus faible, ou un
   degré plus simple dont l'erreur reste très proche du minimum. La procédure
-  choisie est ensuite réajustée sur toutes les données de développement.
+  choisie est ensuite réajustée sur toutes les données d'entraînement.
 ]
 
 La standardisation, l'imputation, la sélection de variables et toute autre
@@ -903,44 +881,15 @@ Les plis doivent reproduire la situation dans laquelle le modèle sera utilisé:
 - des plis *stratifiés* préservent la proportion des classes;
 - des plis *groupés* gardent ensemble toutes les observations d'une même unité;
 - des plis *temporels* utilisent uniquement le passé pour prédire une période
-  ultérieure;
-- des plis par site ou par région mesurent la capacité de transfert à une
-  nouvelle source de données.
+  ultérieure.
 
 Une validation croisée aléatoire ordinaire suppose implicitement que les
 observations sont échangeables. Elle n'est donc pas adaptée telle quelle aux
 séries temporelles, aux données spatiales autocorrélées ou aux mesures répétées
 sur les mêmes individus.
 
-#remark[
-  Utiliser la même validation croisée pour choisir un modèle et annoncer sa
-  performance finale produit une estimation optimiste. La *validation croisée
-  imbriquée* emploie une boucle intérieure pour régler les hyper-paramètres et
-  une boucle extérieure pour évaluer toute la procédure de sélection. Lorsqu'un
-  jeu de test indépendant a été réservé dès le départ, celui-ci joue plutôt le
-  rôle d'évaluation finale et ne doit être consulté qu'après la sélection.
-]
-
 Il est utile de rapporter la moyenne des erreurs, leur dispersion entre les
 plis et les effectifs concernés. Toutefois, les erreurs des plis ne sont pas
 indépendantes puisque leurs ensembles d'entraînement se chevauchent. Leur
 écart-type décrit la stabilité observée, mais ne constitue pas automatiquement
 un intervalle de confiance valide pour la performance future.
-
-=== Interpréter la validation
-
-Une bonne performance de validation ne suffit pas. Il faut aussi vérifier que le
-protocole correspond à la situation future: mêmes sources de données, même
-période, mêmes règles de collecte et mêmes contraintes opérationnelles.
-
-Une validation temporelle, par groupe ou par source peut être nécessaire lorsque
-les observations ne sont pas échangeables. Par exemple, entraîner sur des données
-futures pour prédire le passé rendrait l'évaluation artificiellement optimiste.
-
-- Pour des séries temporelles, on respecte l'ordre chronologique.
-- Pour plusieurs mesures d'une même personne, on place toutes ses mesures dans
-  le même pli.
-- Pour des données provenant de sites différents, on peut valider par site afin
-  d'évaluer le transport du modèle.
-- Pour une classification déséquilibrée, on stratifie si possible les plis afin
-  de préserver les proportions de classes.
