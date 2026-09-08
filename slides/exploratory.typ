@@ -426,8 +426,7 @@
 
 #v(0.7em)
 #card([Exemple], [
-  Dans un profil « âge, revenu, achats », le revenu exprimé en dollars domine
-  souvent la distance brute. Standardiser change les voisins jugés les plus proches.
+  Dans une observation « âge, revenu, achats », le revenu exprimé en dollars domine souvent la distance brute. Standardiser change les voisins jugés les plus proches.
 ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in)
 
 == Les présences rares changent la distance
@@ -436,43 +435,95 @@
   columns: (1fr, 1fr),
   gutter: 0.8em,
   card([Hamming], [
-    $d_H(x,y)=sum_(j=1)^p 1(x_j != y_j)$
+    #align(center)[$d_H (x,y)=sum_(j=1)^p 1(x_j != y_j)$]
 
     Compte tous les désaccords entre variables qualitatives.
-  ], height: 1.62in),
+  ], height: 2in),
   card([Jaccard], [
-    $J=M_11/(M_11+M_10+M_01)$
+    #align(center)[$J=M_11/(M_11+M_10+M_01)$]
 
     Ignore les doubles absences lorsque seules les présences sont informatives.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.62in),
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2in),
 )
 
-#v(0.65em)
-#takeaway([
-  Pour des paniers d'achat très clairsemés, deux absences communes disent peu.
-], fill: pale-orange)
+
+
+== Les quantités de l'indice de Jaccard
+
+#grid(
+  columns: (1.1fr, 1fr),
+  gutter: 0.85em,
+  [
+    #align(center)[
+      #set text(size: 12.5pt)
+      #set par(justify: false)
+      #table(
+        columns: (0.6fr, 1fr, 1fr),
+        align: center + horizon,
+        inset: 9pt,
+        stroke: 0.7pt + rgb("#cfd8dc"),
+        fill: (x, y) => {
+          if y == 0 or x == 0 {
+            rgb("#eef3f1")
+          } else if x == 1 and y == 1 {
+            pale
+          } else if x == 2 and y == 2 {
+            rgb("#f7f9fa")
+          } else {
+            pale-orange
+          }
+        },
+        [], [*$y_j=1$*], [*$y_j=0$*],
+        [*$x_j=1$*], [*$M_11$* #linebreak() Présence commune], [*$M_10$* #linebreak() Présent dans $x$ seulement],
+        [*$x_j=0$*], [*$M_01$* #linebreak() Présent dans $y$ seulement], [*$M_00$* #linebreak() Absence commune],
+      )
+    ]
+
+    #v(0.55em)
+    #text(size: 17pt, fill: muted)[
+      $M_(a b)$ compte les positions où $x_j=a$ et $y_j=b$.
+    ]
+  ],
+  [
+    #formula([
+      $J = M_11/(M_11+M_10+M_01) quad "et" quad d_J=1-J$
+    ], height: 0.88in)
+
+    #v(0.55em)
+    #card([Exemple], [
+      #align(center)[
+        $x=(1,0,1,0,0)^top, quad y=(1,0,0,1,0)^top$
+        #v(0.45em)
+        $M_11=1, quad M_10=1, quad M_01=1, quad M_00=2$
+        #v(0.45em)
+        $J=1/3 quad "et" quad d_J=2/3$
+      ]
+    ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2.02in, body-size: 16pt)
+  ],
+)
+
 
 == Choisir une distance, c'est choisir un sens
 
 #grid(
   columns: (1fr, 1fr, 1fr),
   gutter: 0.65em,
-  card([Profils numériques], [
+  card([Quantitative], [
     Euclidienne standardisée si les dimensions doivent peser de façon comparable.
-  ], height: 1.62in, body-size: 11.5pt),
-  card([Paniers d'achat], [
+  ], height: 1.62in, body-size: 15pt),
+  card([Qualitative], [
     Jaccard si les achats communs comptent davantage que les absences communes.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.62in, body-size: 11.5pt),
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.62in, body-size: 15pt),
   card([Données mixtes], [
-    Combiner distances numériques et qualitatives avec des poids justifiés.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.62in, body-size: 11.5pt),
+    Combiner distances numériques, qualitatives ou autres avec des poids justifiés.
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.62in, body-size: 15pt),
 )
 
 #v(0.8em)
-#card([Question à poser], [
+#card([Question à se poser], [
   Deux observations proches doivent-elles partager des valeurs, des catégories,
   une trajectoire, des voisins ou une conséquence pratique?
-], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.02in)
+], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.25in)
 
 = Mesurer l'erreur
 
