@@ -600,29 +600,73 @@ sens opposés. La corrélation facilite les comparaisons parce qu'elle ne dépen
 pas des unités de mesure.
 
 #property-box(supplement: "Propriétés")[
-Pour des variables aléatoires ayant des moments d'ordre deux,
+Soient $X$, $Y$ et $Z$ des variables aléatoires ayant des moments d'ordre deux,
+et soient $a,b,c,d in RR$. Alors
 
 1. $"Cov"(X, Y) = EE(X Y) - EE(X) EE(Y)$;
 2. $"Cov"(X, Y) = "Cov"(Y, X)$;
-3. $"Cov"(X + a Z, Y) = "Cov"(X, Y) + a "Cov"(Z, Y)$;
-4. si $X$ et $Y$ sont indépendantes, alors $"Cov"(X, Y) = 0$;
-5. lorsque la corrélation est définie, $-1 <= "Corr"(X, Y) <= 1$.
+3. $"Cov"(a X+b,c Y+d)=a c "Cov"(X,Y)$;
+4. $"Cov"(X+Y,Z)="Cov"(X,Z)+"Cov"(Y,Z)$;
+5. $"Cov"(X,Y+Z)="Cov"(X,Y)+"Cov"(X,Z)$;
+6. si $X$ et $Y$ sont indépendantes, alors $"Cov"(X, Y) = 0$.
 ]
 
 #proof(title: "Preuve")[
 La première identité s'obtient en développant le produit centré et en utilisant
-la linéarité de l'espérance. La deuxième découle de la commutativité du produit,
-et la troisième de la linéarité de l'espérance. Si $X$ et $Y$ sont indépendantes,
-$EE(X Y) = EE(X) EE(Y)$, ce qui prouve la quatrième propriété. Enfin,
-l'inégalité de Cauchy--Schwarz appliquée aux variables centrées donne
+la linéarité de l'espérance. La symétrie découle de la commutativité du produit.
+Comme
+
+$ a X+b-EE(a X+b)=a(X-EE(X)) $
+
+et de même pour $c Y+d$, le produit des variables centrées est multiplié par
+$a c$, ce qui prouve la troisième propriété. Les quatrième et cinquième
+identités suivent de la distributivité du produit et de la linéarité de
+l'espérance. Enfin, si $X$ et $Y$ sont indépendantes,
+$EE(X Y)=EE(X) EE(Y)$, donc leur covariance est nulle.
+]
+
+#property-box(supplement: "Propriétés")[
+Pour des variables aléatoires $X$, $Y$, et $X_1,dots,X_p$ ayant des moments
+d'ordre deux et des constantes $a_1,dots,a_p$,
+
+1. $"Var"(X+Y)="Var"(X)+"Var"(Y)+2"Cov"(X,Y)$;
+2. $"Var"(X-Y)="Var"(X)+"Var"(Y)-2"Cov"(X,Y)$;
+3. plus généralement,
+
+   $ "Var"(sum_(i=1)^p a_i X_i)
+     = sum_(i=1)^p a_i^2 "Var"(X_i)
+     + 2 sum_(i<j) a_i a_j "Cov"(X_i,X_j); $
+
+4. si les $X_i$ sont deux à deux non corrélées, alors
+
+   $ "Var"(sum_(i=1)^p a_i X_i)
+     = sum_(i=1)^p a_i^2 "Var"(X_i); $
+
+5. lorsque la corrélation est définie,
+   $-1 <= "Corr"(X,Y) <= 1$.
+]
+
+#proof(title: "Preuve")[
+Comme $"Var"(U)="Cov"(U,U)$, la bilinéarité et la symétrie donnent
+
+$ "Var"(X+Y)
+  = "Cov"(X+Y,X+Y)
+  = "Var"(X)+"Var"(Y)+2"Cov"(X,Y). $
+
+Remplacer $Y$ par $-Y$ donne la deuxième formule. Le même développement appliqué
+à $sum_i a_i X_i$ produit les termes diagonaux
+$a_i^2"Var"(X_i)$ et deux fois chaque terme croisé
+$a_i a_j"Cov"(X_i,X_j)$. Ces termes croisés disparaissent lorsque les variables
+sont deux à deux non corrélées. Enfin, l'inégalité de Cauchy--Schwarz appliquée
+aux variables centrées donne
 
 $ |"Cov"(X, Y)| <= sigma(X) sigma(Y), $
 
-d'où la dernière propriété après division par les écarts-types.
+d'où la dernière propriété après division par les écarts-types non nuls.
 ]
 
 #remark[
-  Une covariance nulle signifie seulement qu'aucune relation *linéaire* n'est
+  Une covariance nulle signifie seulement qu'aucune relation linéaire n'est
   détectée. Elle n'implique généralement pas l'indépendance. L'implication
   inverse est cependant vraie : l'indépendance entraîne une covariance nulle
   lorsque les moments existent.
@@ -642,6 +686,78 @@ $ f_X (x_1, dots, x_p) = product_(j=1)^p f_(X_j)(x_j). $
 L'indépendance signifie que connaître certaines composantes n'apporte aucune
 information sur les autres. Elle est plus forte que l'absence de dépendance
 linéaire.
+
+#property-box(supplement: "Propriétés")[
+*Espérance.* Soient $X$ et $Y$ deux vecteurs aléatoires de
+$RR^p$ dont les espérances existent. Alors
+
+1. $EE(X)=(EE(X_1),dots,EE(X_p))^top$;
+2. pour toute matrice $A in RR^(q times p)$ et tout vecteur $b in RR^q$,
+
+   $ EE(A X+b)=A EE(X)+b; $
+3. $EE(X+Y)=EE(X)+EE(Y)$.
+]
+
+#proof(title: "Preuve")[
+La première identité suit de la définition composante par composante de
+l'espérance. La linéarité de l'espérance scalaire appliquée à chaque composante
+donne ensuite
+
+$ EE(A X+b)=A EE(X)+b. $
+
+La même linéarité, appliquée aux composantes de $X+Y$, donne la dernière
+identité.
+]
+
+#property-box(supplement: "Propriétés")[
+*Variance.* Soient $X$ et $Y$ deux vecteurs aléatoires de $RR^p$ ayant des
+moments d'ordre deux, et posons $Σ="Var"(X)="Cov"(X)$. Alors
+
+1. pour $A in RR^(q times p)$ et $b in RR^q$,
+   $"Var"(A X+b)=A Σ A^top$;
+2. pour tout $a in RR^p$,
+
+   $ "Var"(a^top X)=a^top Σ a; $
+
+3. en définissant la covariance croisée par
+
+   $ "Cov"(X,Y)=EE((X-EE(X))(Y-EE(Y))^top), $
+
+   on a $"Cov"(Y,X)="Cov"(X,Y)^top$ et
+
+   $ "Var"(X+Y)
+     = "Var"(X)+"Var"(Y)+"Cov"(X,Y)+"Cov"(Y,X); $
+
+4. si $X$ et $Y$ sont indépendants, alors
+
+   $ "Var"(X+Y)="Var"(X)+"Var"(Y). $
+]
+
+#proof(title: "Preuve")[
+En notant $μ=EE(X)$, le vecteur transformé centré vaut
+
+$ A X+b-EE(A X+b)=A(X-μ). $
+
+Par conséquent,
+
+$ "Var"(A X+b)
+  = EE(A(X-μ)(X-μ)^top A^top)
+  = A Σ A^top. $
+
+La propriété sur $a^top X$ est le cas particulier $A=a^top$. Pour la somme,
+on développe le produit extérieur centré:
+
+$ "Var"(X+Y)
+  = EE(((X-EE(X))+(Y-EE(Y)))
+    ((X-EE(X))+(Y-EE(Y)))^top). $
+
+Transposer la définition de $"Cov"(X,Y)$ donne
+$"Cov"(Y,X)="Cov"(X,Y)^top$. Les quatre termes du développement sont
+respectivement $"Var"(X)$, $"Cov"(X,Y)$, $"Cov"(Y,X)$ et $"Var"(Y)$.
+Lorsque $X$ et $Y$ sont indépendants, la factorisation des espérances annule les
+deux termes croisés.
+]
+
 
 #definition-box(supplement: "Définition")[
   Si $Σ$ est définie positive, on dit que $X$ suit une loi normale de dimension $p$, de moyenne $μ$ et de covariance $Σ$, lorsque sa densité est
