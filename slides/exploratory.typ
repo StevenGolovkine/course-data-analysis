@@ -20,8 +20,8 @@
   fill: pale,
   stroke: rgb("#bedbd5"),
   height: auto,
-  title-size: 15pt,
-  body-size: 12.3pt,
+  title-size: 20pt,
+  body-size: 18pt,
 ) = block(
   width: 100%,
   height: height,
@@ -104,13 +104,13 @@
   gutter: 0.65em,
   card([1 · Question], [
     Objectif, population, unité et décision.
-  ], height: 1.02in),
+  ], height: 1.5in),
   card([2 · Données], [
     Qualité, provenance et représentation.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.02in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.5in),
   card([3 · Distance], [
     Traduire ce que signifie « se ressembler ».
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.02in),
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.5in),
 )
 
 #v(0.65em)
@@ -119,17 +119,13 @@
   columns: (1fr, 1fr),
   gutter: 0.65em,
   card([4 · Erreur], [
-    Mesurer la qualité et le coût des décisions.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.02in),
+    Mesurer et refléter la qualité et le coût des décisions.
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in),
   card([5 · Validation], [
-    Estimer la performance sur de nouvelles données.
-  ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.02in),
+    Estimer la performance sur de nouvelles observations.
+  ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.5in),
 )
 
-#v(0.75em)
-#takeaway([
-  Une méthode n'est défendable que si ses choix répondent à la question.
-])
 
 = De la question à la méthode
 
@@ -139,15 +135,15 @@
   columns: (1fr, auto, 1fr, auto, 1fr, auto, 1fr, auto, 1fr),
   gutter: 0.28em,
   align: horizon,
-  card([1], [Définir l'objectif.], height: 0.95in, title-size: 17pt, body-size: 10.8pt),
+  card([1 · Définir l'objectif], [], height: 0.95in, title-size: 17pt, body-size: 10.8pt),
   text(size: 19pt, fill: accent)[→],
-  card([2], [Collecter et préparer.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 0.95in, title-size: 17pt, body-size: 10.8pt),
+  card([2 · Collecter et préparer], [], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 0.95in, title-size: 17pt, body-size: 10.8pt),
   text(size: 19pt, fill: accent)[→],
-  card([3], [Élaborer et valider.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.95in, title-size: 17pt, body-size: 10.8pt),
+  card([3 · Élaborer et valider], [], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.95in, title-size: 17pt, body-size: 10.8pt),
   text(size: 19pt, fill: accent)[→],
-  card([4], [Mettre en œuvre.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.95in, title-size: 17pt, body-size: 10.8pt),
+  card([4 · Mettre en œuvre], [], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.95in, title-size: 17pt, body-size: 10.8pt),
   text(size: 19pt, fill: accent)[→],
-  card([5], [Suivre et améliorer.], fill: pale-red, stroke: rgb("#ecc1c1"), height: 0.95in, title-size: 17pt, body-size: 10.8pt),
+  card([5 · Suivre et améliorer], [], fill: pale-red, stroke: rgb("#ecc1c1"), height: 0.95in, title-size: 17pt, body-size: 10.8pt),
 )
 
 #v(0.85em)
@@ -156,14 +152,11 @@
   gutter: 0.8em,
   card([La partie visible], [
     Le modèle peut parfois tenir en quelques lignes de code.
-  ], height: 1.18in),
-  card([Le travail déterminant], [
+  ], height: 1.5in),
+  card([Mais le travail déterminant], [
     Formats, unités, valeurs manquantes, doublons, catégories et documentation.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.18in),
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in),
 )
-
-#v(0.65em)
-#takeaway([L'analyse exploratoire relie les données à une décision explicite.])
 
 == Une bonne question contraint l'analyse
 
@@ -175,20 +168,20 @@
     - *Unité* — que représente une ligne?
     - *Cible* — quelle variable ou décision?
     - *Résultat* — description, comparaison, prédiction ou segmentation?
-  ], height: 2.35in),
+  ], height: 3in),
   [
     #card([Trop vague], [
       « Analyser les données clients. »
-    ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 0.86in)
+    ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.2in)
     #v(0.55em)
     #card([Opérationnelle], [
-      « Peut-on prédire quels clients achèteront le nouveau produit d'épargne? »
-    ], fill: pale, stroke: rgb("#bedbd5"), height: 1.18in)
+      « Peut-on prédire quels clients achèteront le nouveau produit d'épargne ? »
+    ], fill: pale, stroke: rgb("#bedbd5"), height: 1.4in)
   ],
 )
 
 #v(0.7em)
-#text(size: 14pt, fill: muted)[
+#text(size: 20pt, fill: muted)[
   Une question précise limite les explorations sans direction et détermine le
   protocole d'évaluation.
 ]
@@ -199,17 +192,17 @@
   columns: (1fr, 1fr),
   gutter: 0.72em,
   card([Espace d'observation], [
-    Comment représenter chaque unité statistique?
-  ], height: 1.12in),
+    Comment représenter chaque unité statistique ?
+  ], height: 1.4in),
   card([Distance ou similarité], [
-    Quelles différences doivent compter?
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.12in),
+    Quelles différences doivent compter ?
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.4in),
   card([Modèle ou algorithme], [
-    Quelle structure veut-on extraire?
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.12in),
+    Quelle structure veut-on extraire ?
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.4in),
   card([Erreur, coût ou perte], [
-    Comment reconnaître une bonne solution?
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.12in),
+    Comment reconnaître une bonne solution ?
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.4in),
 )
 
 #v(0.65em)
@@ -223,28 +216,28 @@
   columns: (1fr, 1fr),
   gutter: 0.8em,
   card([Avant de modéliser], [
-    - Que mesure réellement chaque variable?
-    - Qui manque dans l'échantillon?
-    - Que signifie une absence ou un zéro?
-    - Quelles contraintes ont façonné la collecte?
-  ], height: 2.05in),
-  card([Après le déploiement], [
+    - Que mesure réellement chaque variable ?
+    - Qui manque dans l'échantillon ?
+    - Que signifie une absence ou un zéro ?
+    - Quelles contraintes y a-t-il ?
+  ], height: 2.5in),
+  card([Après le déploiement du modèle], [
     - Surveiller les entrées.
     - Détecter la dérive des données.
     - Réévaluer les hypothèses.
     - Réentraîner ou revoir la question.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.05in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.5in),
 )
 
 #v(0.7em)
 #card([Exemple], [
   Une absence d'achat peut traduire un manque d'intérêt, une rupture de stock,
   un problème d'accès ou une observation incomplète.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.95in)
+], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in)
 
 = Représenter les données
 
-== La qualité précède la sophistication
+== Il est plus important d'avoir des données de qualité qu'un modèle sophistiqué
 
 #grid(
   columns: (1fr, 1fr),
@@ -254,22 +247,22 @@
     - unité statistique;
     - dépendance entre observations;
     - déséquilibre des classes.
-  ], height: 1.8in),
+  ], height: 2in),
   card([Valeurs et formats], [
     - valeurs manquantes;
     - doublons et incohérences;
     - unités et échelles;
     - valeurs extrêmes et modalités rares.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.8in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2in),
 )
 
 #v(0.7em)
 #card([Un piège courant], [
   Les codes `NA`, `N/A`, `?` et `Inconnu` peuvent représenter la même
-  absence. Les conserver comme quatre catégories crée une structure artificielle.
-], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.02in)
+  absence. Les conserver comme quatre catégories distinctes crée une structure artificielle.
+], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.5in)
 
-== La provenance donne du sens aux valeurs
+== La provenance des données leur donne du sens
 
 #grid(
   columns: (0.9fr, 1.3fr),
@@ -279,8 +272,9 @@
     - enquêtes;
     - capteurs;
     - expériences;
-    - dépôts publics.
-  ], height: 2.12in),
+    - dépôts publics;
+    - etc.
+  ], height: 2.5in),
   card([Que faut-il documenter?], [
     - source, licence et date d'accès;
     - population et échantillonnage;
@@ -288,37 +282,37 @@
     - définition et unité des variables;
     - filtres, exclusions et transformations;
     - changements de collecte.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2.12in),
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2.5in),
 )
 
 #v(0.7em)
-#takeaway([
-  Conserver les données brutes; produire la base analysée par transformations versionnées.
-])
+#card([Une recommandation importante], [
+  Conserver les données brutes et produire la base analysée par transformations versionnées.
+], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.5in)
 
-== Une ligne, une unité; une colonne, une variable
+== Une ligne = une unité et une colonne = une variable
 
 #grid(
   columns: (1fr, 1.08fr),
   gutter: 0.9em,
   [
-    #card([Données tidy], [
+    #card([Données _tidy_], [
       - une variable par colonne;
       - une observation par ligne;
       - une seule valeur par cellule.
     ], height: 1.6in)
     #v(0.6em)
     #card([Le format de collecte], [
-      Il faut parfois pivoter, séparer une colonne ou réunir plusieurs fichiers.
-    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.05in)
+      Il faut parfois pivoter le tableau de données, séparer une colonne en deux ou réunir plusieurs fichiers.
+    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.7in)
   ],
   card([L'unité statistique], [
     L'objet élémentaire sur lequel porte l'observation.
 
-    Individu, transaction, pays, image, pixel, document…
-
     Elle fixe le niveau d'agrégation et dépend de la question, pas seulement du fichier.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 2.95in),
+
+    Par exemple: individu, transaction, pays, image, pixel, document…
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 3.8in),
 )
 
 == Le type d'une variable limite les opérations
@@ -327,17 +321,20 @@
   columns: (1fr, 1fr, 1fr, 1fr),
   gutter: 0.5em,
   card([Numérique], [
-    Âge, revenu, température.
-  ], height: 1.18in, body-size: 11.4pt),
+    Ex: Revenu.
+  ], height: 1.18in),
   card([Nominale], [
-    Région, programme d'étude.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.18in, body-size: 11.4pt),
-  card([Binaire asymétrique], [
-    Fraude ou symptôme rare.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.18in, body-size: 11.4pt),
+    Ex: Région.
+  ], fill: pale-blue,
+    stroke: rgb("#c7d8e4"),
+    height: 1.18in,
+  ),
+  card([Binaire], [
+    Ex: Fraude.
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.18in),
   card([Ordinale], [
-    Faible, moyen, élevé.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.18in, body-size: 11.4pt),
+    Ex: Satisfaction.
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.18in),
 )
 
 #v(0.75em)
@@ -347,11 +344,11 @@
   card([Coder n'est pas mesurer], [
     Associer 1, 2 et 3 à des modalités conserve parfois un ordre, mais ne rend
     pas les écarts comparables.
-  ], height: 1.25in),
-  card([Objets riches], [
+  ], height: 1.8in),
+  card([Objets plus complexes], [
     Texte, courbe, image et réseau demandent une représentation adaptée avant
     toute distance ou modélisation.
-  ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.25in),
+  ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.8in),
 )
 
 == L'espace d'observation formalise les données
@@ -365,14 +362,14 @@
   columns: (1fr, 1fr, 1fr),
   gutter: 0.65em,
   card([Variables numériques], [
-    $p$ mesures donnent souvent $cal(X)=RR^p$.
-  ], height: 1.35in),
+    Ex: $cal(X)=RR^p$
+  ], height: 1.5in),
   card([Données mixtes], [
-    $RR_+^3 times cal(R) times cal(S)$ combine quantités et catégories.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.35in),
+    Ex: $RR_+^3 times cal(R) times cal(S)$
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.5in),
   card([Objets structurés], [
-    Courbe dans $cal(C)([a,b])$, image dans $[0,1]^(h times w times 3)$.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.35in),
+    Ex: Courbe dans $cal(C)([a,b])$
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.5in),
 )
 
 #v(0.7em)
@@ -382,7 +379,7 @@
 
 = Mesurer les ressemblances
 
-== Une distance formalise « proche »
+== Une distance formalise la notion de « proche »
 
 #grid(
   columns: (1.05fr, 1fr),
@@ -394,17 +391,17 @@
     2. $d(x,y)=0 <=> x=y$
     3. $d(x,y)=d(y,x)$
     4. $d(x,y) <= d(x,z)+d(z,y)$
-  ], height: 2.55in),
+  ], height: 3in),
   [
     #card([Distance], [
       Plus elle augmente, plus les observations sont dissemblables.
-    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.12in)
+    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2in)
     #v(0.55em)
     #card([Similarité], [
       Plus elle augmente, plus les observations se ressemblent.
 
-      $s(x,y)=1/(1+d(x,y))$
-    ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.28in)
+      #align(center)[$s(x,y)=1/(1+d(x,y))$]
+    ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2in)
   ],
 )
 
@@ -414,24 +411,24 @@
   columns: (1fr, 1fr),
   gutter: 0.8em,
   card([Minkowski], [
-    $d_q(x,y)=(sum_(j=1)^p |x_j-y_j|^q)^(1/q)$
+    #align(center)[$d_q (x,y)=(sum_(j=1)^p |x_j-y_j|^q)^(1/q)$]
 
-    $q=1$: Manhattan
+    $q=1$: Distance de Manhattan
 
-    $q=2$: euclidienne
-  ], height: 1.75in),
+    $q=2$: Distance euclidienne
+  ], height: 2.2in),
   card([Standardisation], [
-    $z_j(x)=(x_j-mu_j)/sigma_j$
+    #align(center)[$z_j (x)=(x_j-mu_j)/sigma_j$]
 
     Chaque différence est mesurée en nombre d'écarts-types.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.75in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.2in),
 )
 
 #v(0.7em)
 #card([Exemple], [
   Dans un profil « âge, revenu, achats », le revenu exprimé en dollars domine
   souvent la distance brute. Standardiser change les voisins jugés les plus proches.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.02in)
+], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in)
 
 == Les présences rares changent la distance
 
