@@ -1,28 +1,10 @@
+
 # Analyse exploratoire — démonstrations R pour le cours STT-2200
 #
-# Ce script accompagne :
-#   - lectures/exploratory.typ
-#   - slides/exploratory.typ
-#
-# Il est conçu pour être exécuté section par section pendant un cours. Il utilise
-# uniquement les fonctions de base de R afin de rester facile à reproduire.
-# Dans RStudio, les graphiques s'affichent automatiquement. Avec Rscript, les
-# calculs sont exécutés sans ouvrir de périphérique graphique.
-
 options(width = 90, digits = 4)
 
-GRAINE <- 2200L
-AFFICHER_GRAPHIQUES <- interactive()
-set.seed(GRAINE)
-
-section <- function(titre) {
-  cat("\n", strrep("=", 78), "\n", titre, "\n", strrep("=", 78), "\n",
-      sep = "")
-}
-
-sous_section <- function(titre) {
-  cat("\n--- ", titre, " ---\n", sep = "")
-}
+graine_defaut <- 2200L
+set.seed(graine_defaut)
 
 pourcentage <- function(x, chiffres = 1L) {
   paste0(formatC(100 * x, format = "f", digits = chiffres), " %")
@@ -30,8 +12,6 @@ pourcentage <- function(x, chiffres = 1L) {
 
 
 # 1. REPRÉSENTER ET INSPECTER LES DONNÉES -----------------------------------
-
-section("1. Représentation, qualité et unité statistique")
 
 # Chaque ligne devrait représenter un client. Cette petite base brute contient
 # pourtant un doublon, plusieurs codes de valeurs manquantes et des modalités
@@ -44,11 +24,13 @@ clients_bruts <- data.frame(
   achat = c("Oui", "non", "NON", "oui", "Oui", "?")
 )
 
-sous_section("Inspection de la base brute")
 print(clients_bruts)
 cat("Identifiants dupliqués : ",
-    paste(unique(clients_bruts$id_client[duplicated(clients_bruts$id_client)]),
-          collapse = ", "), "\n", sep = "")
+  paste(
+    unique(clients_bruts$id_client[duplicated(clients_bruts$id_client)]),
+    collapse = ", "
+  ), "\n", sep = ""
+)
 
 normaliser_manquants <- function(x) {
   x <- trimws(as.character(x))
@@ -64,34 +46,30 @@ clients$revenu <- as.numeric(gsub(" ", "", clients$revenu, fixed = TRUE))
 clients$region <- tools::toTitleCase(tolower(clients$region))
 clients$achat <- factor(tolower(clients$achat), levels = c("non", "oui"))
 
-# Le traitement d'un doublon dépend du sens de l'unité statistique. Ici, les deux
-# lignes du client 102 décrivent la même unité et l'une est plus complète. Nous
-# la conservons. Dans une analyse réelle, cette règle doit être documentée.
+# Le traitement d'un doublon dépend du sens de l'unité statistique. Ici, les
+# deux lignes du client 102 décrivent la même unité et l'une est plus complète.
+# Nous la conservons. Dans une analyse réelle, cette règle doit être documentée.
 completude <- rowSums(!is.na(clients))
 clients <- clients[order(clients$id_client, -completude), ]
 clients <- clients[!duplicated(clients$id_client), ]
 clients <- clients[order(clients$id_client), ]
 
-sous_section("Base nettoyée et types des variables")
 print(clients)
 str(clients)
+
 cat("Valeurs manquantes par variable :\n")
 print(colSums(is.na(clients)))
 
 # Une modalité nominale ne doit pas être codée 1, 2, 3 comme si elle était
 # ordonnée. model.matrix() produit un encodage binaire sans imposer cet ordre.
 encodage_region <- model.matrix(~ region - 1, data = clients)
-sous_section("Encodage un-parmi-K de la région")
 print(encodage_region)
 
-# Question à poser en classe : que changerait-on si l'unité statistique était la
-# transaction plutôt que le client? Les doublons d'identifiants deviendraient-ils
-# encore des doublons?
+# Que changerait-on si l'unité statistique était la transaction plutôt que le
+# client ? Les doublons d'identifiants deviendraient-ils encore des doublons?
 
 
 # 2. DISTANCES ET SIMILARITÉS ------------------------------------------------
-
-section("2. Distances, similarités et effet de l'échelle")
 
 distance_minkowski <- function(x, y, q = 2) {
   stopifnot(length(x) == length(y), q >= 1)
@@ -101,13 +79,11 @@ distance_minkowski <- function(x, y, q = 2) {
 x <- c(taille_cm = 162.1, masse_kg = 66.8)
 y <- c(taille_cm = 175.8, masse_kg = 81.6)
 
-sous_section("Distances de Manhattan et euclidienne")
-cat("Manhattan (q = 1) : ", distance_minkowski(x, y, q = 1), "\n", sep = "")
-cat("Euclidienne (q = 2) : ", distance_minkowski(x, y, q = 2), "\n", sep = "")
-cat("Similarité 1 / (1 + d2) : ",
-    1 / (1 + distance_minkowski(x, y, q = 2)), "\n", sep = "")
+cat("Manhattan (q = 1) : ", distance_minkowski(x, y, q = 1))
+cat("Euclidienne (q = 2) : ", distance_minkowski(x, y, q = 2))
+cat("Similarité 1 / (1 + d2) : ", 1 / (1 + distance_minkowski(x, y, q = 2)))
 
-# Dans cet exemple, le revenu est exprimé en dollars et domine la distance brute.
+# Dans cet exemple, le revenu exprimé en dollars domine la distance brute.
 # La standardisation mesure plutôt les écarts en nombres d'écarts-types.
 profils <- data.frame(
   age = c(23, 48, 46, 50, 25),
@@ -118,10 +94,10 @@ profils <- data.frame(
 
 distances_brutes <- as.matrix(dist(profils, method = "euclidean"))
 profils_standardises <- scale(profils)
-distances_standardisees <- as.matrix(dist(profils_standardises,
-                                          method = "euclidean"))
+distances_standardisees <- as.matrix(
+  dist(profils_standardises, method = "euclidean")
+)
 
-sous_section("Le plus proche voisin dépend de l'échelle")
 cat("Depuis A, sans standardisation : ",
     names(which.min(distances_brutes["A", -1])), "\n", sep = "")
 cat("Depuis A, après standardisation : ",
@@ -141,8 +117,6 @@ distance_hamming <- function(x, y) {
 
 x_qualitatif <- c("bleus", "bruns", "courts")
 y_qualitatif <- c("bleus", "noirs", "longs")
-
-sous_section("Distance de Hamming")
 cat("Nombre de désaccords : ",
     distance_hamming(x_qualitatif, y_qualitatif), " sur ",
     length(x_qualitatif), " variables\n", sep = "")
@@ -170,7 +144,6 @@ x_binaire <- c(1, 0, 1, 0, 0)
 y_binaire <- c(1, 0, 0, 1, 0)
 exemple_jaccard <- jaccard(x_binaire, y_binaire)
 
-sous_section("Indice et distance de Jaccard")
 print(exemple_jaccard$quantites)
 cat("Similarité de Jaccard : ", exemple_jaccard$similarite, "\n", sep = "")
 cat("Distance de Jaccard : ", exemple_jaccard$distance, "\n", sep = "")
@@ -181,40 +154,38 @@ cat("Distance de Hamming : ", distance_hamming(x_binaire, y_binaire), "\n",
 # son dénominateur, ce qui est utile pour des présences rares comme des achats.
 
 
-# 3. ERREURS EN RÉGRESSION ---------------------------------------------------
-
-section("3. Mesures d'erreur en régression")
-
+# 3. ERREURS DE REGRESSION --------------------------------------------------
 mse <- function(observe, predit) mean((observe - predit)^2)
 mae <- function(observe, predit) mean(abs(observe - predit))
 
 # Le modèle A est exact quatre fois, mais commet une très grande erreur. Le
 # modèle B fait une erreur modérée sur chaque observation.
 observe <- rep(10, 5)
-predit_A <- c(10, 10, 10, 10, 0)
-predit_B <- rep(7, 5)
+predit_a <- c(10, 10, 10, 10, 0)
+predit_b <- rep(7, 5)
 
 comparaison_regression <- data.frame(
   modele = c("A : une erreur extrême", "B : erreurs régulières"),
-  MSE = c(mse(observe, predit_A), mse(observe, predit_B)),
-  MAE = c(mae(observe, predit_A), mae(observe, predit_B))
+  MSE = c(mse(observe, predit_a), mse(observe, predit_b)),
+  MAE = c(mae(observe, predit_a), mae(observe, predit_b))
 )
 
 print(comparaison_regression)
-cat("La MAE préfère A, tandis que la MSE préfère B. Le critère exprime donc une",
-    " préférence sur le coût des erreurs.\n", sep = "")
+cat(
+  "La MAE préfère A, tandis que la MSE préfère B. Le critère exprime donc une",
+  " préférence sur le coût des erreurs.\n", sep = ""
+)
 
 
 # 4. ERREUR DE CLASSIFICATION ET MATRICE DE CONFUSION -----------------------
-
-section("4. Taux d'erreur et mesures de classification")
 
 division_sure <- function(numerateur, denominateur) {
   if (denominateur == 0) NA_real_ else numerateur / denominateur
 }
 
-mesures_binaires <- function(observe, predit,
-                             positif = "fraude", negatif = "legitime") {
+mesures_binaires <- function(
+  observe, predit, positif = "fraude", negatif = "legitime"
+) {
   stopifnot(length(observe) == length(predit))
 
   observe <- as.character(observe)
@@ -260,7 +231,6 @@ classe_predite <- c(
 )
 
 evaluation_fraude <- mesures_binaires(classe_observee, classe_predite)
-sous_section("Modèle de détection de fraude")
 print(evaluation_fraude$matrice)
 print(data.frame(
   mesure = names(evaluation_fraude$mesures),
@@ -272,10 +242,9 @@ print(data.frame(
 # Un classifieur qui prédit toujours la classe majoritaire obtient seulement 2 %
 # d'erreur, mais sa sensibilité est nulle : il ne détecte aucune fraude.
 prediction_majoritaire <- rep("legitime", length(classe_observee))
-evaluation_majoritaire <- mesures_binaires(classe_observee,
-                                           prediction_majoritaire)
-
-sous_section("Pourquoi le taux d'erreur global peut tromper")
+evaluation_majoritaire <- mesures_binaires(
+  classe_observee, prediction_majoritaire
+)
 print(rbind(
   modele = evaluation_fraude$mesures,
   toujours_legitime = evaluation_majoritaire$mesures
@@ -292,10 +261,14 @@ cout_classification <- function(evaluation) {
 
 comparaison_couts <- data.frame(
   strategie = c("Modèle", "Toujours légitime"),
-  taux_erreur = c(evaluation_fraude$mesures["taux_erreur"],
-                  evaluation_majoritaire$mesures["taux_erreur"]),
-  cout = c(cout_classification(evaluation_fraude),
-           cout_classification(evaluation_majoritaire))
+  taux_erreur = c(
+    evaluation_fraude$mesures["taux_erreur"],
+    evaluation_majoritaire$mesures["taux_erreur"]
+  ),
+  cout = c(
+    cout_classification(evaluation_fraude),
+    cout_classification(evaluation_majoritaire)
+  )
 )
 print(comparaison_couts)
 cat("Le modèle fait davantage d'erreurs au total, mais réduit ici le coût des",
@@ -303,8 +276,6 @@ cat("Le modèle fait davantage d'erreurs au total, mais réduit ici le coût des
 
 
 # 5. COMPROMIS BIAIS-VARIANCE ----------------------------------------------
-
-section("5. Compromis biais-variance")
 
 # Vérification numérique de l'exemple présenté dans les notes.
 methodes <- data.frame(
@@ -331,7 +302,7 @@ predictions_x0 <- matrix(
   dimnames = list(NULL, paste0("degre_", degres))
 )
 
-set.seed(GRAINE + 1L)
+set.seed(graine_defaut + 1L)
 for (b in seq_len(n_repetitions)) {
   donnees_b <- data.frame(x = runif(40, -1, 1))
   donnees_b$y <- fonction_reelle(donnees_b$x) + rnorm(40, sd = sigma)
@@ -354,12 +325,11 @@ resume_biais_variance$erreur_attendue <- with(
   biais_carre + variance + bruit
 )
 
-sous_section("Décomposition estimée au point x0 = 0,35")
 print(resume_biais_variance)
 
-# Sur un échantillon fixe, l'erreur d'entraînement tend à diminuer avec le degré,
-# tandis que l'erreur sur de nouvelles données peut remonter.
-set.seed(GRAINE + 2L)
+# Sur un échantillon fixe, l'erreur d'entraînement tend à diminuer avec le
+# degré, tandis que l'erreur sur de nouvelles données peut remonter.
+set.seed(graine_defaut + 2L)
 entrainement_poly <- data.frame(x = runif(45, -1, 1))
 entrainement_poly$y <- fonction_reelle(entrainement_poly$x) +
   rnorm(nrow(entrainement_poly), sd = sigma)
@@ -379,45 +349,43 @@ erreurs_flexibilite <- do.call(rbind, lapply(degres, function(d) {
   )
 }))
 
-sous_section("Erreur d'entraînement et erreur de généralisation")
 print(erreurs_flexibilite)
 
-if (AFFICHER_GRAPHIQUES) {
-  matplot(
-    resume_biais_variance$degre,
-    resume_biais_variance[, c("biais_carre", "variance", "erreur_attendue")],
-    type = "l", lwd = 2, lty = 1,
-    col = c("#d95f02", "#1b9e77", "#24313a"),
-    xlab = "Degré du polynôme", ylab = "Composante de l'erreur"
-  )
-  legend(
-    "topleft",
-    legend = c("Biais²", "Variance", "Erreur attendue"),
-    col = c("#d95f02", "#1b9e77", "#24313a"),
-    lwd = 2, bty = "n"
-  )
+matplot(
+  resume_biais_variance$degre,
+  resume_biais_variance[, c("biais_carre", "variance", "erreur_attendue")],
+  type = "l", lwd = 2, lty = 1,
+  col = c("#d95f02", "#1b9e77", "#24313a"),
+  xlab = "Degré du polynôme", ylab = "Composante de l'erreur"
+)
+legend(
+  "topleft",
+  legend = c("Biais²", "Variance", "Erreur attendue"),
+  col = c("#d95f02", "#1b9e77", "#24313a"),
+  lwd = 2, bty = "n"
+)
 
-  matplot(
-    erreurs_flexibilite$degre,
-    erreurs_flexibilite[, c("MSE_entrainement", "MSE_test")],
-    type = "b", pch = c(16, 17), lty = 1, lwd = 2,
-    col = c("#60747d", "#e67e22"),
-    xlab = "Degré du polynôme", ylab = "MSE"
-  )
-  legend(
-    "topleft", legend = c("Entraînement", "Nouvelles données"),
-    col = c("#60747d", "#e67e22"), pch = c(16, 17), lwd = 2, bty = "n"
-  )
-}
+matplot(
+  erreurs_flexibilite$degre,
+  erreurs_flexibilite[, c("MSE_entrainement", "MSE_test")],
+  type = "b", pch = c(16, 17), lty = 1, lwd = 2,
+  col = c("#60747d", "#e67e22"),
+  xlab = "Degré du polynôme", ylab = "MSE"
+)
+legend(
+  "topleft", legend = c("Entraînement", "Nouvelles données"),
+  col = c("#60747d", "#e67e22"), pch = c(16, 17), lwd = 2, bty = "n"
+)
+
 
 
 # 6. SÉPARER LES DONNÉES ET ÉVITER LES FUITES -------------------------------
 
-section("6. Entraînement, validation et test")
-
-separation_stratifiee <- function(y, proportion_entrainement = 0.60,
-                                  proportion_validation = 0.20,
-                                  graine = GRAINE) {
+separation_stratifiee <- function(
+  y, proportion_entrainement = 0.60,
+  proportion_validation = 0.20,
+  graine = graine_defaut
+) {
   stopifnot(proportion_entrainement > 0, proportion_validation > 0,
             proportion_entrainement + proportion_validation < 1)
   set.seed(graine)
@@ -465,8 +433,9 @@ appliquer_standardisation <- function(donnees, recette) {
 }
 
 # Données synthétiques de transactions. La réponse est déséquilibrée et les
-# probabilités servent seulement à générer l'exemple; le modèle ne les observe pas.
-set.seed(GRAINE + 3L)
+# probabilités servent seulement à générer l'exemple; le modèle ne les
+# observe pas.
+set.seed(graine_defaut + 3L)
 n_transactions <- 1500L
 transactions <- data.frame(
   montant = rlnorm(n_transactions, meanlog = log(80), sdlog = 1),
@@ -483,12 +452,13 @@ transactions$fraude <- factor(
   levels = c("non", "oui")
 )
 
-indices <- separation_stratifiee(transactions$fraude, graine = GRAINE + 4L)
+indices <- separation_stratifiee(
+  transactions$fraude, graine = graine_defaut + 4L
+)
 entrainement <- transactions[indices$entrainement, ]
 validation <- transactions[indices$validation, ]
 test <- transactions[indices$test, ]
 
-sous_section("Effectifs et proportion de fraudes dans chaque ensemble")
 print(data.frame(
   ensemble = c("Entraînement", "Validation", "Test"),
   n = c(nrow(entrainement), nrow(validation), nrow(test)),
@@ -551,7 +521,6 @@ meilleur_seuil <- resultats_validation$seuil[
   which.min(resultats_validation$cout)
 ]
 
-sous_section("Choix du seuil sur l'ensemble de validation")
 print(resultats_validation[which.min(resultats_validation$cout), ])
 
 # L'ensemble de test ne sert qu'après le choix du modèle et du seuil.
@@ -561,79 +530,24 @@ test_seuil_choisi <- evaluer_seuil(
   meilleur_seuil, test_std$fraude, probabilite_test
 )
 test_seuil_05 <- evaluer_seuil(0.50, test_std$fraude, probabilite_test)
-
-sous_section("Évaluation finale sur le test")
 print(rbind(seuil_valide = test_seuil_choisi, seuil_0_5 = test_seuil_05))
 
-if (AFFICHER_GRAPHIQUES) {
-  matplot(
-    resultats_validation$seuil,
-    resultats_validation[, c("sensibilite", "specificite", "precision")],
-    type = "l", lwd = 2, lty = 1,
-    col = c("#00897b", "#60747d", "#8e44ad"),
-    xlab = "Seuil de décision", ylab = "Mesure"
-  )
-  abline(v = meilleur_seuil, col = "#e67e22", lty = 2)
-  legend(
-    "right", legend = c("Sensibilité", "Spécificité", "Précision"),
-    col = c("#00897b", "#60747d", "#8e44ad"), lwd = 2, bty = "n"
-  )
-}
-
-
-# 7. SÉPARATIONS GROUPÉE ET TEMPORELLE --------------------------------------
-
-section("7. Adapter la séparation à la structure des observations")
-
-separation_par_groupe <- function(groupes, proportion_entrainement = 0.70,
-                                  graine = GRAINE) {
-  set.seed(graine)
-  groupes_uniques <- sample(unique(groupes))
-  n_entrainement <- floor(proportion_entrainement * length(groupes_uniques))
-  groupes_entrainement <- groupes_uniques[seq_len(n_entrainement)]
-  list(
-    entrainement = which(groupes %in% groupes_entrainement),
-    test = which(!groupes %in% groupes_entrainement)
-  )
-}
-
-patients <- rep(sprintf("P%02d", 1:10), each = 3)
-indices_groupes <- separation_par_groupe(patients, graine = GRAINE + 5L)
-groupes_communs <- intersect(
-  unique(patients[indices_groupes$entrainement]),
-  unique(patients[indices_groupes$test])
+matplot(
+  resultats_validation$seuil,
+  resultats_validation[, c("sensibilite", "specificite", "precision")],
+  type = "l", lwd = 2, lty = 1,
+  col = c("#00897b", "#60747d", "#8e44ad"),
+  xlab = "Seuil de décision", ylab = "Mesure"
 )
-cat("Patients présents à la fois dans l'entraînement et le test : ",
-    length(groupes_communs), "\n", sep = "")
-
-separation_temporelle <- function(dates, proportion_entrainement = 0.60,
-                                  proportion_validation = 0.20) {
-  ordre <- order(dates)
-  n <- length(dates)
-  fin_entrainement <- floor(proportion_entrainement * n)
-  fin_validation <- floor(
-    (proportion_entrainement + proportion_validation) * n
-  )
-  list(
-    entrainement = ordre[seq_len(fin_entrainement)],
-    validation = ordre[(fin_entrainement + 1L):fin_validation],
-    test = ordre[(fin_validation + 1L):n]
-  )
-}
-
-dates <- seq.Date(as.Date("2024-01-01"), by = "month", length.out = 24)
-indices_temporels <- separation_temporelle(dates)
-cat("Dernière date d'entraînement : ",
-    format(max(dates[indices_temporels$entrainement])), "\n", sep = "")
-cat("Première date de test : ",
-    format(min(dates[indices_temporels$test])), "\n", sep = "")
+abline(v = meilleur_seuil, col = "#e67e22", lty = 2)
+legend(
+  "right", legend = c("Sensibilité", "Spécificité", "Précision"),
+  col = c("#00897b", "#60747d", "#8e44ad"), lwd = 2, bty = "n"
+)
 
 
-# 8. VALIDATION CROISÉE À K PLIS --------------------------------------------
-
-section("8. Validation croisée et choix d'un hyper-paramètre")
-
-creer_plis <- function(n, k = 5L, graine = GRAINE) {
+# 7. VALIDATION CROISÉE À K PLIS --------------------------------------------
+creer_plis <- function(n, k = 5L, graine = graine_defaut) {
   stopifnot(k >= 2, k <= n)
   set.seed(graine)
   sample(rep(seq_len(k), length.out = n))
@@ -671,14 +585,14 @@ validation_croisee_polynome <- function(donnees, degres, plis) {
   do.call(rbind, resultats)
 }
 
-set.seed(GRAINE + 6L)
+set.seed(graine_defaut + 6L)
 donnees_cv <- data.frame(x = runif(120, -1, 1))
 donnees_cv$y <- fonction_reelle(donnees_cv$x) +
   rnorm(nrow(donnees_cv), sd = sigma)
 
 # Les mêmes plis servent à chaque degré. La comparaison dépend ainsi moins du
 # hasard du découpage qu'avec de nouveaux plis pour chaque modèle.
-plis <- creer_plis(nrow(donnees_cv), k = 5L, graine = GRAINE + 7L)
+plis <- creer_plis(nrow(donnees_cv), k = 5L, graine = graine_defaut + 7L)
 resultats_cv <- validation_croisee_polynome(donnees_cv, 1:10, plis)
 meilleur_degre <- resultats_cv$degre[which.min(resultats_cv$erreur_cv)]
 
@@ -687,37 +601,16 @@ cat("Degré choisi par validation croisée : ", meilleur_degre, "\n", sep = "")
 cat("La dispersion entre les plis complète la moyenne; elle ne constitue pas",
     " automatiquement un intervalle de confiance.\n", sep = "")
 
-if (AFFICHER_GRAPHIQUES) {
-  plot(
-    resultats_cv$degre, resultats_cv$erreur_cv,
-    type = "b", pch = 16, lwd = 2, col = "#00897b",
-    xlab = "Degré du polynôme", ylab = "MSE de validation croisée"
-  )
-  arrows(
-    resultats_cv$degre,
-    resultats_cv$erreur_cv - resultats_cv$ecart_type_plis,
-    resultats_cv$degre,
-    resultats_cv$erreur_cv + resultats_cv$ecart_type_plis,
-    angle = 90, code = 3, length = 0.04, col = "#60747d"
-  )
-  abline(v = meilleur_degre, col = "#e67e22", lty = 2)
-}
-
-
-# 9. PISTES DE DISCUSSION ----------------------------------------------------
-
-section("9. Questions pour conclure le cours")
-cat(
-  paste(
-    "1. Quelle est l'unité statistique et que représente une ligne?",
-    "2. Quelles transformations définissent l'espace d'observation?",
-    "3. Que signifie être proche dans le problème étudié?",
-    "4. La fonction d'erreur reflète-t-elle le coût réel des décisions?",
-    "5. La séparation reproduit-elle la situation d'utilisation future?",
-    "6. Toutes les transformations sont-elles apprises sans consulter le test?",
-    sep = "\n"
-  ),
-  "\n"
+plot(
+  resultats_cv$degre, resultats_cv$erreur_cv,
+  type = "b", pch = 16, lwd = 2, col = "#00897b",
+  xlab = "Degré du polynôme", ylab = "MSE de validation croisée"
 )
-
-cat("\nScript terminé avec R ", as.character(getRversion()), ".\n", sep = "")
+arrows(
+  resultats_cv$degre,
+  resultats_cv$erreur_cv - resultats_cv$ecart_type_plis,
+  resultats_cv$degre,
+  resultats_cv$erreur_cv + resultats_cv$ecart_type_plis,
+  angle = 90, code = 3, length = 0.04, col = "#60747d"
+)
+abline(v = meilleur_degre, col = "#e67e22", lty = 2)
