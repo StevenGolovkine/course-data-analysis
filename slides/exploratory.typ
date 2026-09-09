@@ -74,8 +74,8 @@
   ],
   fill: fill,
   stroke: stroke,
-  height: 1.48in,
-  body-size: 11.5pt,
+  height: 2.2in,
+  body-size: 17pt,
 )
 
 #show: metropolis-theme.with(
@@ -429,26 +429,43 @@
   Dans une observation « âge, revenu, achats », le revenu exprimé en dollars domine souvent la distance brute. Standardiser change les voisins jugés les plus proches.
 ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in)
 
-== Les présences rares changent la distance
+== Distance de Hamming
 
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 0.8em,
-  card([Hamming], [
-    #align(center)[$d_H (x,y)=sum_(j=1)^p 1(x_j != y_j)$]
+#card([Hamming], [
+  #align(center)[$d_H (x,y)=sum_(j=1)^p 1(x_j != y_j)$]
 
-    Compte tous les désaccords entre variables qualitatives.
-  ], height: 2in),
-  card([Jaccard], [
-    #align(center)[$J=M_11/(M_11+M_10+M_01)$]
+  Compte tous les désaccords entre variables qualitatives.
+], height: 1.65in)
 
-    Ignore les doubles absences lorsque seules les présences sont informatives.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2in),
-)
+#v(0.6em)
 
+#card([Exemple], [
+  #align(center)[
+    #set text(size: 14.5pt)
+    #set par(justify: false)
+    #table(
+      columns: (1.35fr, 0.7fr, 0.7fr, 0.7fr, 0.7fr, 0.7fr),
+      align: center + horizon,
+      inset: 5pt,
+      stroke: 0.6pt + rgb("#d8e0e3"),
+      fill: (x, y) => {
+        if y == 0 or x == 0 {
+          rgb("#eef3f1")
+        } else if y == 3 and (x == 3 or x == 4) {
+          pale-orange
+        }
+      },
+      [*$x_j$*], [1], [0], [1], [0], [0],
+      [*$y_j$*], [1], [0], [0], [1], [0],
+      [*$1(x_j != y_j)$*], [0], [0], [1], [1], [0],
+    )
 
+    #v(0.45em)
+    $d_H (x,y)=0+0+1+1+0=2$
+  ]
+], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2.35in, title-size: 18pt, body-size: 15pt)
 
-== Les quantités de l'indice de Jaccard
+== Indice de Jaccard
 
 #grid(
   columns: (1.1fr, 1fr),
@@ -503,7 +520,7 @@
 )
 
 
-== Choisir une distance, c'est choisir un sens
+== Choisir une distance, c'est choisir une manière de comparer
 
 #grid(
   columns: (1fr, 1fr, 1fr),
@@ -527,7 +544,7 @@
 
 = Mesurer l'erreur
 
-== Erreur, coût et perte désignent le même critère
+== Erreur, coût et perte désignent la même idée
 
 #formula([
   $Y = f(X) + epsilon$
@@ -559,12 +576,12 @@
     $ "MSE" = 1/n sum_(i=1)^n (y_i-hat(y)_i)^2 $
 
     Les grandes erreurs pèsent fortement.
-  ], height: 1.75in),
+  ], height: 2.5in),
   card([Erreur absolue moyenne], [
     $ "MAE" = 1/n sum_(i=1)^n |y_i-hat(y)_i| $
 
     L'erreur typique est plus robuste aux valeurs extrêmes.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.75in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.5in),
 )
 
 #v(0.75em)
@@ -573,19 +590,45 @@
   gutter: 0.75em,
   card([Choisir la MSE], [
     Quand les erreurs extrêmes ont des conséquences disproportionnées.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.02in),
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.8in),
   card([Choisir la MAE], [
     Quand l'écart absolu habituel correspond mieux à l'usage.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.02in),
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.8in),
 )
+
+== Taux d'erreur en classification
+
+#formula([
+  $ "ER" = 1/n sum_(i=1)^n 1(y_i != hat(y)_i) $
+], height: 1in)
+
+#v(0.7em)
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 0.8em,
+  card([Compter les erreurs], [
+    L'indicatrice vaut 1 lorsque la classe prédite diffère de la classe observée,
+    et 0 sinon. La somme compte les erreurs.
+  ], height: 2.15in),
+  card([Exemple], [
+    Avec 3 erreurs sur 20 observations,
+    #align(center)[$"ER" = 3/20 = 15%$.]
+    L'exactitude vaut alors $1 - "ER" = 85%$.
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.15in),
+)
+
+#v(0.7em)
+#takeaway([
+  Attention, le taux global ne distingue pas les faux positifs des faux négatifs et peut donc masquer la qualité d'une décision sur une classe rare.
+], fill: pale-orange)
 
 == La matrice de confusion compte quatre décisions
 
 #align(center)[
-  #set text(size: 13pt)
+  #set text(size: 15pt)
   #set par(justify: false)
   #table(
-    columns: (1.25fr, 1fr, 1fr),
+    columns: (1fr, 1fr, 1fr),
     align: center + horizon,
     inset: 11pt,
     stroke: 0.7pt + rgb("#cfd8dc"),
@@ -602,10 +645,10 @@
   gutter: 0.75em,
   card([Cas manqués], [
     Les faux négatifs sont positifs en réalité, mais non détectés.
-  ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.02in),
+  ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.5in),
   card([Fausses alertes], [
     Les faux positifs sont négatifs en réalité, mais signalés à tort.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.02in),
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in),
 )
 
 == Quatre mesures répondent à quatre questions
@@ -613,17 +656,12 @@
 #grid(
   columns: (1fr, 1fr),
   gutter: 0.62em,
-  metric([Sensibilité], [$"VP"/("VP"+"FN")$], [Parmi les positifs, combien sont détectés?]),
-  metric([Spécificité], [$"VN"/("VN"+"FP")$], [Parmi les négatifs, combien sont écartés?], fill: pale-blue, stroke: rgb("#c7d8e4")),
-  metric([Précision], [$"VP"/("VP"+"FP")$], [Parmi les alertes, combien sont réellement positives?], fill: pale-purple, stroke: rgb("#d9cbe4")),
-  metric([Rappel], [$"VP"/("VP"+"FN")$], [Autre nom de la sensibilité.], fill: pale-orange, stroke: rgb("#ead4ad")),
+  metric([Sensibilité], [$ "VP"/("VP"+"FN") $], [Parmi les positifs, combien sont détectés?]),
+  metric([Spécificité], [$ "VN"/("VN"+"FP") $], [Parmi les négatifs, combien sont écartés?], fill: pale-blue, stroke: rgb("#c7d8e4")),
+  metric([Précision ou rappel], [$ "VP"/("VP"+"FP") $], [Parmi les alertes, combien sont réellement positives?], fill: pale-purple, stroke: rgb("#d9cbe4")),
+  card([], [Abaisser le seuil augmente généralement la sensibilité mais réduit la spécificité. La précision dépend aussi de la fréquence de la classe positive.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 2.2in)
 )
 
-#v(0.55em)
-#text(size: 13.5pt, fill: muted)[
-  Abaisser le seuil augmente généralement la sensibilité, mais réduit la
-  spécificité. La précision dépend aussi de la fréquence de la classe positive.
-]
 
 == Une exactitude élevée peut masquer l'échec
 
@@ -663,20 +701,20 @@
   gutter: 0.62em,
   card([Dépistage], [
     Manquer une maladie peut coûter davantage qu'un examen complémentaire.
-  ], height: 1.55in, body-size: 11.5pt),
+  ], height: 1.55in, body-size: 16pt),
   card([Fraude], [
     Le coût dépend du montant, de la vérification et de la relation client.
-  ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.55in, body-size: 11.5pt),
+  ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.55in, body-size: 16pt),
   card([Stocks], [
     Rupture, stockage et gaspillage rendent les erreurs asymétriques.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.55in, body-size: 11.5pt),
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.55in, body-size: 16pt),
 )
 
 #v(0.8em)
 #card([Conséquence], [
   Le seuil de décision et la mesure de performance doivent refléter les
   conséquences pratiques, pas seulement le nombre d'erreurs.
-], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.02in)
+], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.4in)
 
 == Biais, variance et bruit décomposent l'erreur
 
@@ -692,18 +730,18 @@
   columns: (1fr, 1fr, 1fr),
   gutter: 0.62em,
   card([Biais²], [
-    Écart systématique entre la prédiction moyenne et la relation réelle.
-  ], height: 1.42in, body-size: 11.5pt),
+    Écart systématique entre la prédiction et la relation réelle.
+  ], height: 1.7in, body-size: 16pt),
   card([Variance], [
-    Sensibilité de la prédiction au choix de l'échantillon d'entraînement.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.42in, body-size: 11.5pt),
+    Sensibilité de la prédiction au choix du jeu d'entraînement.
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.7in, body-size: 16pt),
   card([Bruit $sigma^2$], [
     Variabilité irréductible avec les variables disponibles.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.42in, body-size: 11.5pt),
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.7in, body-size: 16pt),
 )
 
 #v(0.65em)
-#text(size: 13.5pt, fill: muted)[
+#text(size: 17pt, fill: muted)[
   Le biais statistique n'est ni un biais de collecte ni un biais social.
 ]
 
@@ -724,7 +762,7 @@
 
     Stabilité suffisante
   ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.52in),
-  text(size: 22pt, fill: accent)[→],
+  text(size: 22pt, fill: accent)[←],
   card([Sur-ajustement], [
     Biais faible
 
@@ -738,10 +776,10 @@
   gutter: 0.75em,
   card([Entraînement], [
     L'erreur diminue généralement avec la flexibilité.
-  ], height: 1.02in),
+  ], height: 1.8in),
   card([Nouvelles données], [
     L'erreur diminue, atteint un minimum, puis remonte souvent.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.02in),
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.8in),
 )
 
 = Valider pour généraliser
@@ -753,13 +791,13 @@
   gutter: 0.65em,
   card([Entraînement], [
     Estimer les paramètres et les transformations.
-  ], height: 1.55in),
+  ], height: 1.8in),
   card([Validation], [
     Comparer les méthodes, régler les hyperparamètres et le seuil.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.55in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.8in),
   card([Test], [
     Estimer une seule fois la performance finale.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.55in),
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.8in),
 )
 
 #v(0.75em)
@@ -774,36 +812,35 @@
   gutter: 0.68em,
   card([Aléatoire], [
     Observations indépendantes issues de la même population.
-  ], height: 1.2in),
+  ], height: 1.5in),
   card([Stratifiée], [
     Proportions des classes préservées dans chaque ensemble.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.2in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.5in),
   card([Par groupe], [
     Toutes les visites d'un patient restent ensemble.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.2in),
+  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.5in),
   card([Temporelle], [
-    Le passé entraîne; une période ultérieure valide et teste.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.2in),
+    Le passé entraîne et une période ultérieure valide et teste.
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in),
 )
 
 #v(0.62em)
-#text(size: 13.5pt, fill: muted)[
-  Les proportions 60–20–20 ou 70–15–15 sont des points de départ. Les effectifs
+#text(size: 17pt, fill: muted)[
+  Les proportions 60-20-20 ou 70-15-15 sont des points de départ. Les effectifs
   utiles, la rareté des classes et le nombre de groupes comptent davantage.
 ]
 
 == Une fuite rend l'évaluation trop optimiste
 
 #grid(
-  columns: (1fr, auto, 1fr),
+  columns: (1fr, 1fr),
   gutter: 0.55em,
   align: horizon,
   card([Procédure incorrecte], [
     Imputer, standardiser ou sélectionner sur toute la base.
   ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.5in),
-  text(size: 24pt, fill: rgb("#b91c1c"))[×],
   card([Procédure correcte], [
-    Ajuster la transformation sur l'entraînement, puis l'appliquer ailleurs.
+    Ajuster la transformation sur l'entraînement, puis l'appliquer sur les autres ensembles.
   ], fill: pale, stroke: rgb("#bedbd5"), height: 1.5in),
 )
 
@@ -811,15 +848,15 @@
 #card([Autres fuites], [
   Une date future, une observation du même individu ou une variable construite
   après l'événement à prédire peuvent transmettre de l'information interdite.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.12in)
+], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.5in)
 
 #v(0.65em)
 #takeaway([Toute transformation apprise fait partie du modèle.])
 
-== Chaque observation peut servir à valider
+== La validation croisée réduit la dépendance à un seul découpage
 
 #align(center)[
-  #set text(size: 11pt)
+  #set text(size: 15pt)
   #set par(justify: false)
   #table(
     columns: (0.75fr, 0.72fr, 0.72fr, 0.72fr, 0.72fr, 0.72fr),
@@ -842,14 +879,14 @@
   gutter: 0.75em,
   card([E · Entraînement], [
     Ajuster toute la procédure sur quatre plis.
-  ], height: 1.0in),
+  ], height: 1.3in),
   card([V · Validation], [
-    Prédire le pli tenu à l'écart, puis calculer son erreur.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.0in),
+    Prédire sur le pli restant, et calculer son erreur.
+  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.3in),
 )
 
 #v(0.55em)
-#text(size: 13.5pt, fill: muted)[
+#text(size: 17pt, fill: muted)[
   Les prédictions hors pli proviennent toujours d'un modèle qui n'a pas vu
   l'observation correspondante.
 ]
@@ -869,15 +906,15 @@
 #card([Exemple à cinq plis égaux], [
   Erreurs: 18 %, 22 %, 20 %, 16 % et 24 %.
 
-  Moyenne: $(18%+22%+20%+16%+24%)/5=20%$.
+  Moyenne: $frac((18%+22%+20%+16%+24%), 5, style: "horizontal")=20%$.
 
   L'étendue de 16 % à 24 % révèle aussi une sensibilité au découpage.
-], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.25in)
+], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 2in)
 
-== Le choix de $K$ est un compromis
+== Le choix du nombre de plis $K$ est un compromis
 
 #align(center)[
-  #set text(size: 11.5pt)
+  #set text(size: 15pt)
   #set par(justify: false)
   #table(
     columns: (0.65fr, 1.25fr, 1.8fr),
@@ -898,42 +935,12 @@
   gutter: 0.75em,
   card([Choix courant], [
     $K=5$ ou $K=10$ convient à de nombreux problèmes indépendants.
-  ], height: 1.02in),
+  ], height: 1.5in),
   card([Répéter], [
     Plusieurs partitions réduisent la dépendance à une seule graine aléatoire.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.02in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.5in),
 )
 
-== Le réglage reste à l'intérieur des plis
-
-#grid(
-  columns: (1fr, auto, 1fr, auto, 1fr),
-  gutter: 0.45em,
-  align: horizon,
-  card([Candidats], [
-    Degrés, profondeurs, pénalités…
-  ], height: 1.25in, body-size: 11.2pt),
-  text(size: 21pt, fill: accent)[→],
-  card([Boucle intérieure], [
-    Choisir les hyperparamètres.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.25in, body-size: 11.2pt),
-  text(size: 21pt, fill: accent)[→],
-  card([Boucle extérieure], [
-    Évaluer toute la sélection.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.25in, body-size: 11.2pt),
-)
-
-#v(0.75em)
-#card([Validation croisée imbriquée], [
-  La boucle intérieure règle le modèle; la boucle extérieure estime sa
-  performance. Avec un test indépendant, celui-ci reste réservé à l'évaluation finale.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.12in)
-
-#v(0.6em)
-#text(size: 13.5pt, fill: muted)[
-  Utiliser les mêmes scores pour choisir et annoncer la performance produit une
-  estimation optimiste.
-]
 
 == Une bonne moyenne ne suffit pas
 
@@ -945,13 +952,13 @@
     - dispersion entre les plis;
     - effectifs et classes;
     - règle de séparation.
-  ], height: 1.72in),
+  ], height: 2in),
   card([Vérifier], [
     - même contexte futur;
     - ordre temporel respecté;
     - groupes non séparés;
     - transformations sans fuite.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.72in),
+  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2in),
 )
 
 #v(0.7em)
@@ -959,7 +966,7 @@
   Les erreurs des plis ne sont pas indépendantes puisque leurs entraînements se
   chevauchent. Leur dispersion décrit une stabilité observée, pas automatiquement
   un intervalle de confiance valide.
-], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.18in)
+], fill: pale-red, stroke: rgb("#ecc1c1"), height: 2in)
 
 == Une analyse défendable relie tous les choix
 
@@ -967,28 +974,13 @@
   columns: (1fr, auto, 1fr, auto, 1fr, auto, 1fr),
   gutter: 0.32em,
   align: horizon,
-  card([Question], [Population et usage.], height: 0.92in, body-size: 10.8pt),
+  card([Question], [Population et usage.], height: 1.1in, body-size: 17pt),
   text(size: 19pt, fill: accent)[→],
-  card([Données], [Unité et qualité.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 0.92in, body-size: 10.8pt),
+  card([Données], [Unité et qualité.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.1in, body-size: 17pt),
   text(size: 19pt, fill: accent)[→],
-  card([Méthode], [Espace et distance.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.92in, body-size: 10.8pt),
+  card([Méthode], [Espace et distance.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.1in, body-size: 17pt),
   text(size: 19pt, fill: accent)[→],
-  card([Décision], [Erreur et validation.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.92in, body-size: 10.8pt),
-)
-
-#v(0.8em)
-#grid(
-  columns: (1fr, 1fr, 1fr),
-  gutter: 0.65em,
-  card([1], [
-    La représentation correspond-elle au phénomène?
-  ], height: 1.18in),
-  card([2], [
-    Le critère reflète-t-il le coût réel des erreurs?
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.18in),
-  card([3], [
-    La validation reproduit-elle l'usage futur?
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.18in),
+  card([Décision], [Erreur et validation.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.1in, body-size: 17pt),
 )
 
 #v(0.65em)
