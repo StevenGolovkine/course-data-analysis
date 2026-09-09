@@ -377,6 +377,8 @@
   La représentation choisie détermine les distances et les modèles possibles.
 ])
 
+= Pause code
+
 = Mesurer les ressemblances
 
 == Une distance formalise la notion de « proche »
@@ -541,6 +543,8 @@
   Deux observations proches doivent-elles partager des valeurs, des catégories,
   une trajectoire, des voisins ou une conséquence pratique?
 ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.25in)
+
+= Pause code
 
 = Mesurer l'erreur
 
@@ -716,6 +720,8 @@
   conséquences pratiques, pas seulement le nombre d'erreurs.
 ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.4in)
 
+= Pause code 
+
 == Biais, variance et bruit décomposent l'erreur
 
 #formula([
@@ -781,6 +787,8 @@
     L'erreur diminue, atteint un minimum, puis remonte souvent.
   ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.8in),
 )
+
+= Pause code
 
 = Valider pour généraliser
 
@@ -852,6 +860,8 @@
 
 #v(0.65em)
 #takeaway([Toute transformation apprise fait partie du modèle.])
+
+= Pause code 
 
 == La validation croisée réduit la dépendance à un seul découpage
 
@@ -967,6 +977,8 @@
   chevauchent. Leur dispersion décrit une stabilité observée, pas automatiquement
   un intervalle de confiance valide.
 ], fill: pale-red, stroke: rgb("#ecc1c1"), height: 2in)
+
+= Pause code 
 
 == Une analyse défendable relie tous les choix
 
