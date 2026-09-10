@@ -1,20 +1,14 @@
 #import "../styles/notes.typ": note, example
 
+#show figure.caption: set align(left)
+
 = Réduction de dimension
 
 == Introduction
 
-Un grand nombre de variables complique la visualisation, augmente le coût de
-calcul, favorise les corrélations redondantes et peut rendre les modèles
-instables. La réduction de dimension cherche à remplacer les variables initiales
-par un plus petit nombre de variables synthétiques qui conservent l'information
-utile.
+Un grand nombre de variables complique la visualisation, augmente le coût de calcul, favorise les corrélations redondantes et peut rendre les modèles instables. La réduction de dimension cherche à remplacer les variables initiales par un plus petit nombre de variables synthétiques qui conservent l'information utile.
 
-Réduire la dimension ne signifie pas seulement supprimer des colonnes. Une
-méthode plus riche consiste à construire de nouveaux axes, souvent comme des
-combinaisons des variables initiales, puis à travailler dans cet espace réduit.
-On passe alors d'une représentation où chaque variable a son propre rôle à une
-représentation où quelques dimensions résument les principales structures.
+Réduire la dimension ne signifie pas seulement supprimer des variables. Une méthode peut-étre plus intéressante consiste à construire de nouveaux axes de représentation, souvent comme des combinaisons des variables initiales, puis à travailler dans cet espace réduit. On passe alors d'une représentation où chaque variable a son propre axe, et donc son propre rôle, à une représentation où quelques dimensions (axes) résument les principales structures du jeu de données.
 
 #note[
   La réduction de dimension est une étape exploratoire. Elle aide à voir une
@@ -24,137 +18,553 @@ représentation où quelques dimensions résument les principales structures.
 
 === Deux idées différentes
 
-Il faut distinguer deux familles d'approches.
+Il faut distinguer deux familles d'approches. Toutes deux permettent de décrire
+les observations avec moins de variables, mais elles ne produisent pas le même
+type de représentation.
 
-- La sélection de variables garde certaines colonnes originales et en élimine
-  d'autres.
-- L'extraction de dimensions construit de nouvelles variables synthétiques,
-  appelées axes, composantes ou facteurs.
+- La *sélection de variables* garde certaines variables originales et en élimine
+  d'autres, par exemple parce qu'elles sont redondantes ou peu utiles pour
+  l'objectif de l'analyse. Les variables retenues conservent leur sens et leurs
+  unités, ce qui facilite l'interprétation. En revanche, l'information propre aux
+  variables supprimées n'est plus directement disponible.
+- La *réduction de dimension*, au sens de construction de nouvelles variables,
+  résume plusieurs variables originales par des variables synthétiques, appelées
+  axes, composantes, facteurs ou dimensions. Une même dimension peut combiner
+  l'information de plusieurs variables. On conserve ainsi certaines structures
+  communes, mais les nouvelles dimensions sont parfois plus difficiles à
+  interpréter que les mesures initiales.
 
-Les méthodes factorielles étudiées dans ce chapitre appartiennent surtout à la
-seconde famille. Elles ne disent pas seulement quelles variables sont utiles:
-elles proposent une géométrie des données.
+#example[
+  Supposons que trois évaluations d'un même cours donnent des notes fortement
+  corrélées. Une sélection pourrait ne garder que la note de l'examen final :
+  chaque étudiant serait alors décrit par une mesure déjà présente dans les
+  données. Une réduction de dimension pourrait plutôt construire un score
+  synthétique combinant les trois notes, par exemple une moyenne pondérée.
+  Ce score résumerait leur tendance commune, mais masquerait certaines
+  différences entre les profils : deux étudiants peuvent obtenir le même score
+  avec des notes différentes aux trois évaluations.
+]
+
+Au sens large, la sélection de variables est donc aussi une façon de réduire la
+dimension. La distinction porte ici sur le choix entre conserver des variables
+existantes et construire de nouvelles coordonnées.
+
+Les méthodes étudiées dans ce chapitre appartiennent surtout à la
+seconde famille. Elles ne disent pas seulement quelles variables sont utiles :
+elles proposent une nouvelle géométrie des données. Chaque observation y est
+décrite par ses coordonnées sur quelques dimensions, et la méthode choisie
+détermine quelles caractéristiques des données sont préservées au mieux, comme
+la variance ou les relations de voisinage.
 
 === Choisir une méthode
 
-Le choix dépend d'abord du type de variables.
+Le choix de la méthode de réduction de dimension dépend d'abord du type de variables.
 
-- L'ACP s'applique à un tableau de variables numériques.
-- L'AFC s'applique à un tableau de contingence croisant deux variables
-  qualitatives.
-- L'ACM s'applique à plusieurs variables qualitatives, souvent issues d'un
-  questionnaire.
-- t-SNE et UMAP s'utilisent surtout pour visualiser des voisinages dans des
-  données nombreuses ou complexes.
-- Les autoencodeurs apprennent une représentation latente par un modèle
-  prédictif, souvent non linéaire.
+- L'analyse en composantes principales (ACP) s'applique à un tableau de variables numériques et quantitatives.
+- L'analyse factorielle des correspondances (AFC) s'applique à un tableau de contingence croisant deux variables qualitatives.
+- L'analyse des correspondances multiples (ACM) s'applique à plusieurs variables qualitatives, souvent issues d'un questionnaire.
+- Les méthodes $t$-SNE et UMAP s'utilisent surtout pour visualiser des voisinages dans des données complexes, comme des images ou du texte.
+- Les autoencodeurs apprennent une représentation latente par un modèle prédictif, souvent non linéaire.
 
-Dans tous les cas, l'objectif est de construire une carte de faible dimension.
-Cette carte doit être lue avec prudence: une projection simplifie les données,
-donc elle conserve certaines oppositions et en efface d'autres.
+Dans tous les cas, l'objectif est de construire un espace de faible dimension.
+Cette espace doit être interprété avec prudence: une projection simplifie les données, donc elle conserve certaines structures et en efface d'autres.
 
-== L'ACP
+== L'analyse en composantes principales
 
 === Principe
 
-L'analyse en composantes principales, ou ACP, s'applique à des variables
-numériques. Elle cherche des directions orthogonales de variation maximale. La
-première composante explique le plus de variance possible, la seconde explique
-le plus de variance restante sous contrainte d'être orthogonale à la première,
-et ainsi de suite.
+L'analyse en composantes principales (ACP) s'applique à un tableau de $n$
+observations décrites par $p$ variables quantitatives. Chaque observation est
+un point dans un espace à $p$ dimensions. L'ACP cherche de nouveaux axes pour
+résumer ce nuage de points avec moins de dimensions, tout en conservant le plus
+possible de sa dispersion. Ces axes sont appelés *composantes principales*, *facteurs* ou *axes factoriels*.
 
-Soit $X$ un vecteur centré de $p$ variables et $Σ$ sa matrice de covariance.
-Une composante principale est une combinaison linéaire:
+Lorsque deux variables sont fortement corrélées, leur nuage de points est
+allongé dans une direction. On peut alors résumer une grande partie de leur
+variation par la position des observations le long de cette direction. L'ACP
+généralise cette idée à un nombre quelconque de variables.
 
-$ Y_k = alpha_k^T X $
+#figure(
+  image("../figures/acp_principe.svg", width: 100%,
+    alt: "Nuage de points allongé selon une diagonale. Le premier axe principal,"
+      + " CP1, suit cette direction et conserve 90 pour cent de la variance. "
+      + "CP2 lui est perpendiculaire. Les pointillés relient les observations "
+      + "à leurs projections orthogonales sur CP1."),
+  caption: [Exemple d'une ACP sur des données centrées simulées en deux dimensions. Les axes CP1 et CP2 sont perpendiculaires. CP1 conserve $90%$ de la variance. Ne garder que cet axe revient à projeter les observations sur la droite verte; les pointillés montrent les écarts perdus.],
+) <fig-acp-principe>
 
-La première direction $alpha_1$ maximise la variance de $Y_1$ sous la contrainte
-que $alpha_1$ soit de norme 1. La solution est donnée par l'équation aux valeurs
-propres:
 
-$ Σ alpha_1 = λ_1 alpha_1 $
+La première composante correspond à la direction sur laquelle les projections des observations ont la plus grande variance. La deuxième maximise cette variance parmi les directions perpendiculaires à la première, et ainsi de suite. Les axes sont donc orthogonaux, et les composantes obtenues sont non corrélées entre elles. Cela ne signifie cependant pas qu'elles sont indépendantes.
 
-La première composante principale est associée à la plus grande valeur propre.
-Les composantes suivantes correspondent aux valeurs propres suivantes, ordonnées
-de la plus grande à la plus petite.
+Si l'on conserve tous les axes, on effectue seulement un changement de coordonnées. La réduction de dimension intervient lorsqu'on ne garde que les $q$ premières composantes. Avec $q < p$, on abandonne alors les directions associées aux plus faibles variances.
+
+=== Préparer les données : centrer et réduire
+
+Le choix de l'échelle des variables détermine le nuage de points analysé. On commence par centrer chaque variable, i.e. soustraire sa moyenne. Le centre du nuage devient ainsi l'origine du repère. Si $x_(i j)$ est la valeur de la variable $j$ pour l'observation $i$, la valeur centrée est :
+
+$ z_(i j) = x_(i j) - overline(x)_j quad "où" quad overline(x)_j = frac(1, n) sum_(i=1)^n x_(i j). $
+
+Une *ACP centrée* travaille sur les valeurs centrées $z_(i j)$ et analyse la matrice de covariance des variables originales. Elle donne davantage de poids aux variables dont la variance est élevée. Ce choix est pertinent lorsque les échelles sont comparables et que les différences de dispersion ont un sens pour l'analyse.
+
+Une *ACP centrée réduite*, aussi appelée ACP normée, divise également chaque variable par son écart-type empirique $s_j$ :
+
+$ z_(i j) = (x_(i j) - overline(x)_j) / s_j quad "où" quad overline(x)_j = frac(1, n) sum_(i=1)^n x_(i j) quad "et" quad s_j = sqrt(frac(1, n - 1) sum_(i=1)^n (x_(i j) - overline(x)_j)^2). $
+
+Les variables transformées ont alors une moyenne nulle et une variance égale à 1. Leur matrice de covariance est la matrice de corrélation des variables originales. Cette approche est généralement adaptée lorsque les unités ou les ordres de grandeur diffèrent.
+
+#example[
+  Pour décrire des logements par leur superficie et leur prix, une ACP centrée peut être dominée par le prix, dont les valeurs sont plus dispersées. De plus, exprimer le prix en dollars plutôt qu'en euros ou exprimer la superficie en pieds carrés plutôt qu'en mètres carrés modifie le résultat. La standardisation supprime cet effet d'unité et donne à chaque variable la même variance initiale.
+]
+
+La standardisation reste un *choix* d'analyse : elle peut aussi donner beaucoup
+de poids à une variable peu informative. Avant le calcul, il faut examiner les
+valeurs extrêmes et traiter les données manquantes.
+
+#note[
+  Les variables constantes n'apportent aucune dispersion et doivent être retirées avant une division par leur écart-type, qui est nul.
+]
+
+=== Construction des composantes
+
+Notons $Z = (z_(i j)) in RR^(n times p)$ la matrice des données, avec $n >= 2$ observations en lignes et $p$ variables en colonnes. On suppose que chaque colonne est centrée, donc 
+$ sum_(i=1)^n z_(i j) = 0 quad "pour tout" quad j. $
+Les observations ont le même poids et l'on suppose qu'au moins une variable a une variance non nulle. La matrice de covariance empirique est donnée par 
+
+$ hat(Sigma) = 1 / (n - 1) Z^top Z in RR^(p times p). $
+
+#note[
+  Si les colonnes de $Z$ ont été réduites, $hat(Sigma)$ est la matrice de corrélation empirique des variables originales.
+]
+
+Ainsi, la matrice $hat(Sigma)$ est symétrique et semi-définie positive, car pour tout $alpha in RR^p, alpha != 0$, en utilisant la norme euclidienne, on trouve que 
+
+$ alpha^top hat(Sigma) alpha = 1 / (n - 1) norm(Z alpha)^2 >= 0. $
+
+*Variance d'une projection.* Une direction (axe) est représentée par un vecteur unitaire $alpha in RR^p$, c'est-à-dire $norm(alpha)^2 = alpha^top alpha = 1$. Si $z_i$ désigne le vecteur colonne correspondant à la ligne $i$ de $Z$, la coordonnée de cette observation sur la direction $alpha$ est donnée par $y_i = alpha^top z_i = chevron.l alpha, z_i chevron.r$. Le vecteur des coordonnées des $n$ observations dans la direction donnée par $alpha$ est donc $y = Z alpha in RR^n$. Il est centré car les colonnes de $Z$ le sont. Sa variance empirique vaut
+
+$ s^2(y) = 1 / (n - 1) sum_(i=1)^n y_i^2
+  = 1 / (n - 1) y^top y = alpha^top hat(Sigma) alpha $
+
+L'ACP cherche ainsi des directions unitaires qui maximisent cette forme quadratique. 
+
+#note[
+  La contrainte de norme fixe l'échelle des coefficients. En effet, multiplier $alpha$ par $c != 0$ multiplierait la variance par $c^2$, sans changer la direction géométrique.
+]
+
+*Première composante.* Le premier axe résout le problème :
+
+$ alpha_1 = op("arg max", limits: #true)_(alpha^top alpha = 1)
+  alpha^top hat(Sigma) alpha. $
+
+Pour obtenir les directions candidates, on introduit le lagrangien :
+
+$ cal(L)(alpha, lambda) = alpha^top hat(Sigma) alpha - lambda (alpha^top alpha - 1). $
+
+Comme $hat(Sigma)$ est symétrique, la condition de stationnarité par rapport à $alpha$
+donne :
+
+$ nabla_alpha cal(L) = 2 hat(Sigma) alpha - 2 lambda alpha = 0
+  quad arrow.r.double quad hat(Sigma) alpha = lambda alpha. $
+
+Une direction candidate est donc un vecteur propre unitaire de $hat(Sigma)$. En multipliant cette égalité à gauche par $alpha^top$, on obtient $alpha^top hat(Sigma) alpha = lambda$. La variance sur cette direction est la valeur propre associée au vecteur propre $alpha$. Cette condition ne suffit cependant pas à identifier le maximum, puisqu'elle est vérifiée par tous les vecteurs propres unitaires.
+
+Le théorème spectral permet de conclure. Il existe une base orthonormée $(u_1, dots, u_p)$ de vecteurs propres de $hat(Sigma)$, avec les valeurs propres ordonnées $lambda_1 >= lambda_2 >= dots >= lambda_p >= 0$. Tout vecteur unitaire $alpha$ s'écrit comme combinaison linéaire des vecteurs propres :
+
+$ alpha = sum_(j=1)^p c_j u_j, quad "où" quad sum_(j=1)^p c_j^2 = 1. $
+
+Par conséquent,
+
+$ alpha^top hat(Sigma) alpha = sum_(j=1)^p lambda_j c_j^2
+  <= lambda_1 sum_(j=1)^p c_j^2 = lambda_1. $
+
+La borne est atteinte pour $alpha_1 = u_1$. La première composante principale est donc $Y_1 = Z alpha_1$ et sa variance est $s^2(Y_1) = lambda_1$.
+
+*Composantes suivantes.* Pour $2 <= k <= p$, on maximise la même variance en imposant en plus l'orthogonalité aux directions déjà retenues. Si $cal(A)_k$ est l'ensemble des vecteurs $alpha$ tels que $alpha^top alpha = 1$ et $alpha^top alpha_j = 0$ pour tout $j < k$, alors :
+
+$ alpha_k = op("arg max", limits: #true)_(alpha in cal(A)_k)
+  alpha^top hat(Sigma) alpha. $
+
+En choisissant successivement $alpha_j = u_j$, ces contraintes imposent $c_1 = dots = c_(k-1) = 0$ dans la décomposition précédente. La variance ne peut donc pas dépasser $lambda_k$, et cette borne est atteinte pour $alpha_k = u_k$. On obtient ainsi des directions orthonormées vérifiant :
+
+$ hat(Sigma) alpha_k = lambda_k alpha_k, quad "et" quad Y_k = Z alpha_k. $
+
+Le coefficient $alpha_(j k)$ est le poids de la variable $j$ dans la composante $k$. Il est commun à toutes les observations. Le *score* de l'observation $i$ sur cette composante, i.e. la coordonnée de l'observation $i$ sur la direction $k$, est donnée par
+
+$ y_(i k) = alpha_k^top z_i = sum_(j=1)^p alpha_(j k) z_(i j). $
+
+*Variance et covariance des composantes.* Les vecteurs de scores étant centrés,
+leur covariance empirique s'écrit :
+
+$ s(Y_k, Y_l) = 1 / (n - 1) Y_k^top Y_l
+  = alpha_k^top hat(Sigma) alpha_l = lambda_l alpha_k^top alpha_l. $
+
+Pour $k = l$, on retrouve $s^2(Y_k) = lambda_k$. Pour $k != l$, l'orthogonalité
+des directions donne $s(Y_k, Y_l) = 0$. Les composantes de variance non nulle
+ont donc une corrélation empirique nulle deux à deux. Cette propriété ne
+démontre toujours pas une indépendance probabiliste.
+
+*Représentation réduite.* Pour conserver $q$ composantes, avec $1 <= q <= p$, on rassemble les composantes principales dans une matrice $A_q = (alpha_1, dots, alpha_q) in RR^(p times q)$. La matrice des données réduites $T_q = (Y_1, dots, Y_q)$ est donnée par
+
+$ T_q = Z A_q in RR^(n times q), quad "avec" quad A_q^top A_q = I_q. $
+
+La matrice de covariance de $T_q$ est donc
+$ 1 / (n - 1) T_q^top T_q = A_q^top hat(Sigma) A_q
+  = op("diag")(lambda_1, dots, lambda_q). $
+
+Ici, $I_q$ est la matrice identité de taille $q$ et $op("diag")$ désigne une
+matrice diagonale. Chaque ligne de $T_q$ contient les $q$ scores d'une observation.
+Le rang $r = op("rang")(Z)$ est au plus $min(n - 1, p)$, à cause du centrage.
+Il y a donc exactement $r$ composantes de variance strictement positive; les
+autres ont des scores tous nuls.
+
+#note[
+  Pour une valeur propre simple, le vecteur propre unitaire est défini au signe
+  près. Si une valeur propre est multiple, toute base orthonormée de son
+  sous-espace propre convient :
+  les axes individuels ne sont alors pas uniques. Pour $q < p$, une séparation
+  stricte $lambda_q > lambda_(q+1)$ garantit l'unicité du sous-espace engendré
+  par les $q$ premières directions, même si l'orientation de certains axes
+  dans ce sous-espace peut varier.
+]
+
+En pratique, on peut calculer les composantes avec une décomposition en valeurs singulières $Z = U D V^top$, où $U in RR^(n times q)$ et $V in RR^(p times q)$ sont des matrices dont les colonnes sont orthonormées, et $D = op("diag")(d_1, dots, d_q)$ avec $d_1 >= dots >= d_q > 0$. En notant $U_k$ et $V_k$ leurs $k$-ièmes colonnes, on obtient, pour $1 <= k <= q$ :
+
+$ alpha_k = V_k, quad lambda_k = d_k^2 / (n - 1), quad "et" quad Y_k = d_k U_k. $
+
+Cette formulation réalise la même ACP sans former explicitement $Z^top Z$,
+avec les mêmes possibilités de choix du signe et des bases des sous-espaces
+propres.
 
 === Inertie et variance expliquée
 
-Chaque valeur propre mesure la variance expliquée par une composante. La
-proportion de variance expliquée par la composante $k$ est:
+L'*inertie* mesure la dispersion globale d'un nuage de points autour de son centre de gravité, i.e. du point moyen. L'idée est de mesurer la distance de chaque observation à ce centre, de prendre son carré, puis d'additionner ces quantités. Un nuage compact a une faible inertie, à l'inverse un nuage très dispersé a une inertie élevée, à échelle et nombre d'observations comparables. Le carré des distances donne davantage de poids aux points éloignés. En effet, une distance au centre deux fois plus grande apporte une contribution quatre fois plus élevée à la somme.
 
-$ λ_k / sum_(j=1)^p λ_j $
+#figure(
+  image("../figures/acp_inertie.svg", width: 75%,
+    alt: "Nuage de points dont chaque observation est reliée au centre g. "
+      + "Un segment mis en évidence représente la distance d_i entre "
+      + "l'observation z_i et ce centre."),
+  caption: [Chaque observation est reliée au centre $g$ du nuage simulé.
+    La longueur $d_i$ mesure la distance de $z_i$ au centre. L'inertie cumule
+    les carrés de ces distances, avec la normalisation retenue.],
+) <fig-acp-inertie>
 
-Les premières composantes donnent donc une représentation de faible dimension
-qui conserve une grande part de la variance totale.
+Pour les observations $z_1, dots, z_n in RR^p$, le centre de gravité est $g = 1 / n sum_(i=1)^n z_i$. Dans le cadre de l'ACP, $g = 0$, puisque les variables ont été centrées. En utilisant la normalisation par $n - 1$ de la variance empirique, on définit l'inertie totale par
 
-On appelle souvent inertie totale la variance totale du nuage de points. Dans
-une ACP centrée, cette inertie est répartie entre les composantes principales.
-Un bon résumé en deux dimensions est possible lorsque les deux premières
-composantes concentrent une part importante de cette inertie.
+$ I_("total") = 1 / (n - 1) sum_(i=1)^n norm(z_i - g)^2
+  = 1 / (n - 1) sum_(i=1)^n norm(z_i)^2. $
+
+Le centrage ne change pas les distances au centre : il déplace simplement le centre de gravité à l'origine de l'espace. En revanche, réduire les variables change les distances et donc l'inertie analysée.
+
+#note[
+  L'inertie géométrique est souvent définie comme la moyenne des distances au
+  carré, avec le diviseur $n$. Elle vaut alors $(n - 1) / n I$. Le choix entre
+  ces deux normalisations ne change ni les axes de l'ACP ni les proportions
+  d'inertie expliquée, à condition de l'appliquer de manière cohérente.
+]
+
+*Lien avec la variance.* Le carré de la distance à l'origine est la somme des
+carrés des coordonnées. En échangeant les deux sommes, on obtient :
+
+$ I = sum_(j=1)^p (1 / (n - 1) sum_(i=1)^n z_(i j)^2)
+  = sum_(j=1)^p s^2(Z_j) = op("tr")(hat(Sigma)). $
+
+Ici, $Z_j$ est la $j$-ième colonne de $Z$ et la trace $op("tr")$ d'une matrice
+est la somme de ses éléments diagonaux. L'inertie totale est donc la somme des
+variances des variables préparées. Dans une ACP centrée réduite, elle vaut $p$,
+puisque chacune des $p$ variables a une variance égale à 1.
+
+*Répartition entre les axes.* Les axes de l'ACP forment un repère orthonormé. Le théorème de Pythagore donne, pour chaque observation :
+
+$ norm(z_i)^2 = sum_(k=1)^p y_(i k)^2. $
+
+Un changement de repère orthonormé conserve ainsi les distances au centre, et donc l'inertie totale. En sommant sur les observations et en utilisant $s^2(Y_k) = lambda_k$, on trouve 
+
+$ I = sum_(k=1)^p (1 / (n - 1) sum_(i=1)^n y_(i k)^2)
+  = sum_(k=1)^p lambda_k. $
+
+Chaque valeur propre $lambda_k$ mesure donc l'inertie portée par l'axe $k$. L'ACP répartit la dispersion du nuage entre des directions orthogonales, ordonnées de la plus dispersée à la moins dispersée.
+
+*Variance expliquée.* La proportion de variance expliquée par la composante $k$ et la proportion de variance expliquée cumulée sur les $q$ premières composantes sont respectivement :
+
+$ r_k = lambda_k / (sum_(j=1)^p lambda_j)
+  quad "et" quad R_q = (sum_(k=1)^q lambda_k) / (sum_(j=1)^p lambda_j). $
+
+La quantité $1 - R_q$ mesure donc la part de variance perdue dans la représentation réduite. Dans ce cas, « expliquée » signifie « conservée par la projection ». Il ne s'agit pas d'une explication causale des données.
 
 #example[
-  Si les deux premières composantes expliquent 82 pour cent de la variance d'un
-  jeu de données à dix variables, un graphique dans le plan principal donne une
-  image raisonnable de la structure globale. Il peut montrer des groupes, des
-  observations atypiques ou des variables fortement associées.
+  Si les deux premières composantes expliquent respectivement $60%$ et $22%$ de la variance, le premier plan factoriel en conserve $82%$. Les $18%$ restants correspondent à des différences entre observations qui ne sont pas visibles dans ce plan facotriel. Ce bon résumé global ne garantit pas que chaque observation ou chaque variable y soit bien représentée.
 ]
+
+L'ACP peut aussi être comprise comme une méthode de reconstruction. En effet, on peut approcher $z_i$ par
+
+$ hat(z)_i = sum_(k=1)^q y_(i k) alpha_k. $
+
+L'inertie perdue correspond exactement à l'erreur de reconstruction, avec la
+même normalisation :
+
+$ 1 / (n - 1) sum_(i=1)^n norm(z_i - hat(z)_i)^2
+  = sum_(k=q+1)^p lambda_k = I (1 - R_q). $
+
+Parmi les projections orthogonales sur des sous-espaces de dimension $q$,
+l'ACP minimise la somme des carrés des erreurs de reconstruction. Conserver
+le plus de variance et perdre le moins d'information au sens de cette erreur
+quadratique sont donc deux formulations du même problème. Pour retrouver les
+unités originales, on multiplie chaque valeur reconstruite par l'écart-type
+correspondant si les variables ont été réduites, puis on ajoute leur moyenne.
+
+=== Exemple à deux variables
+
+Imaginons une classe dans laquelle chaque étudiant a passé deux évaluations : un examen intermédiaire et un examen final, tous deux notés sur 20. Chaque étudiant est une observation, et les deux variables initiales sont ses notes aux deux examens. Pour comparer sa position dans la classe d'un examen à l'autre, on centre et réduit séparément chaque série de notes. On appelle $Z_1$ et $Z_2$ les deux variables ainsi obtenues.
+
+#example[
+  Supposons qu'à l'examen intermédiaire, la moyenne de la classe soit de 12 sur
+  20 et l'écart-type de 2 points. Un étudiant ayant obtenu 14 sur 20 a une note
+  standardisée de $(14 - 12) / 2 = 1$. Il dépasse la moyenne de 2 points, soit
+  exactement un écart-type. Une note de 10 sur 20 donne $(10 - 12) / 2 = -1$,
+  et une note de 12 sur 20 donne $0$. Pour l'examen final, on effectue le même
+  calcul avec la moyenne et l'écart-type propres à cet examen.
+]
+
+Une valeur standardisée indique donc un écart à la moyenne exprimé en unités
+d'écart-type. Un étudiant peut avoir la même valeur standardisée aux deux
+examens même si ses notes sur 20 diffèrent. On suppose ici que la corrélation
+empirique entre $Z_1$ et $Z_2$ est $0.8$ : les étudiants ayant une note élevée
+au premier examen tendent aussi à avoir une note élevée au second. Comme les
+deux variables standardisées ont chacune une variance égale à 1, leur matrice
+de corrélation est
+
+$ hat(Sigma) = mat(1, 0.8; 0.8, 1). $
+
+*Calcul des axes.* Les valeurs propres sont les solutions de :
+
+$ det(hat(Sigma) - lambda I_2) = (1 - lambda)^2 - 0.8^2 = 0. $
+
+On obtient $lambda_1 = 1.8$ et $lambda_2 = 0.2$. Des vecteurs propres unitaires (de norme 1) associés sont :
+
+$ alpha_1 = 1 / sqrt(2) (1, 1)^top, quad
+  alpha_2 = 1 / sqrt(2) (1, -1)^top. $
+
+Les composantes principales sont donc :
+
+$ Y_1 = (Z_1 + Z_2) / sqrt(2), quad
+  Y_2 = (Z_1 - Z_2) / sqrt(2). $
+
+Le premier axe suit la diagonale $z_1 = z_2$ : il représente le niveau commun
+aux deux notes. Le second suit la diagonale $z_1 = -z_2$ : il représente leur
+contraste. Avec le signe choisi, un score $y_2 > 0$ signifie que la première
+note standardisée est plus élevée que la seconde. Les deux axes sont
+perpendiculaires.
+
+*Passage au repère principal.* Les graphiques suivants utilisent les mêmes
+45 observations simulées, dont les variances empiriques valent exactement 1
+et la corrélation $0.8$. Les trois profils A, B et C mis en évidence font partie
+de ce nuage. Dans le nouveau repère, le nuage est allongé horizontalement,
+car la dispersion est plus forte sur $Y_1$ que sur $Y_2$. Les deux composantes
+étant conservées, ce changement de coordonnées ne perd aucune information.
+
+#figure(
+  image("../figures/acp_exemple_reperes.svg", width: 100%,
+    alt: "Deux graphiques des mêmes observations. À gauche, les deux notes "
+      + "standardisées ont une corrélation de 0,8; CP1 suit la diagonale "
+      + "croissante et CP2 la diagonale décroissante. À droite, les scores "
+      + "principaux forment un nuage surtout dispersé horizontalement. "
+      + "Les profils A, B et C sont repérés dans les deux graphiques."),
+  caption: [À gauche, le nuage dans le repère des notes standardisées et les
+    directions principales. À droite, les mêmes observations dans le repère
+    $(Y_1, Y_2)$. Les unités et les échelles sont identiques : le changement de
+    repère conserve les distances entre les points.],
+) <fig-acp-exemple-reperes>
+
+*Variance conservée.* On peut vérifier directement les variances des deux
+composantes à partir de celles des notes et de leur covariance :
+
+$ s^2(Y_1) = 1 / 2 (1 + 1 + 2 times 0.8) = 1.8, $
+$ s^2(Y_2) = 1 / 2 (1 + 1 - 2 times 0.8) = 0.2. $
+
+Leur covariance est nulle, car $s(Y_1, Y_2) = (s^2(Z_1) - s^2(Z_2)) / 2 = 0$. L'inertie totale vaut $1.8 + 0.2 = 2$, comme la somme des variances des deux notes centrées réduites. La première composante en conserve $1.8 / 2 = 90%$, et la seconde $0.2 / 2 = 10%$.
+
+*Lecture de trois profils.* Le calcul des scores donne :
+
+#table(
+  columns: (1fr, 1fr, 1fr, 1fr, 1fr),
+  align: center,
+  inset: 6pt,
+  stroke: 0.4pt + luma(210),
+  table.header([*Profil*], [$z_1$], [$z_2$], [$y_1$], [$y_2$]),
+  [A], [$1$], [$1$], [$sqrt(2)$], [$0$],
+  [B], [$1$], [$-1$], [$0$], [$sqrt(2)$],
+  [C], [$0$], [$0$], [$0$], [$0$],
+)
+
+Le profil A est au-dessus de la moyenne dans les deux évaluations : sa première
+composante est positive et son contraste est nul. Le profil B combine une note
+au-dessus de la moyenne et une note au-dessous : son niveau commun est nul,
+mais son contraste est élevé. Le profil C est à la moyenne dans les deux
+évaluations. B et C ont donc le même score sur $Y_1$, malgré des notes différentes.
+
+*Réduction à une seule composante.* Ne garder que $Y_1$ revient à projeter
+chaque observation sur la première direction. Dans les coordonnées des notes
+standardisées, la reconstruction est :
+
+$ hat(z)_i = y_(i 1) alpha_1
+  = ((z_(i 1) + z_(i 2)) / 2, (z_(i 1) + z_(i 2)) / 2)^top. $
+
+Les deux notes reconstruites sont ainsi égales à leur moyenne. Le profil A
+est reconstruit exactement, car il se trouve déjà sur la diagonale. Le profil B
+est reconstruit par $(0, 0)$ et devient confondu avec C : l'écart entre ses deux
+notes a disparu.
+
+#figure(
+  image("../figures/acp_exemple_projection.svg", width: 55%,
+    alt: "Projection du nuage sur la diagonale de la première composante. "
+      + "Les pointillés relient chaque observation à sa reconstruction. "
+      + "A reste à la position 1,1, tandis que B, initialement en 1,-1, "
+      + "est projeté au centre, où se trouve déjà C."),
+  caption: [Réduction à CP1 dans le repère des notes standardisées. Les cercles
+    vides sont les reconstructions et les pointillés représentent les écarts
+    perdus. Le segment orange souligne la projection de B sur C. A et C
+    sont déjà sur l'axe et restent à leur place.],
+) <fig-acp-exemple-projection>
+
+Pour chaque observation, le carré de l'erreur de reconstruction est :
+
+$ norm(z_i - hat(z)_i)^2 = y_(i 2)^2
+  = (z_(i 1) - z_(i 2))^2 / 2. $
+
+Cette erreur vaut $0$ pour A et C, mais $2$ pour B. Sur l'ensemble du nuage,
+la somme des erreurs au carré divisée par $n - 1$ vaut $lambda_2 = 0.2$,
+soit 10 pour cent de l'inertie totale. Conserver 90 pour cent de la variance
+donne donc un bon résumé global, sans garantir que chaque profil soit bien
+représenté. Ici, la composante de faible variance porte précisément la
+différence entre B et C.
+
+=== Choisir le nombre de composantes
+
+Le nombre de composantes dépend de l'usage prévu : deux ou trois axes pour une
+visualisation, éventuellement davantage pour compresser les données ou préparer
+un modèle. Plusieurs critères peuvent guider ce choix :
+
+- La *variance expliquée cumulée* : retenir assez de composantes pour atteindre
+  un seuil, par exemple 80 ou 90 pour cent. Ce seuil doit être adapté à
+  l'objectif; il n'existe pas de valeur universelle.
+- Le *graphique des valeurs propres*, ou éboulis : chercher un coude après lequel
+  les composantes supplémentaires apportent peu de variance. Le coude peut
+  toutefois être peu marqué ou absent.
+- La *règle de Kaiser*, pour une ACP centrée réduite : garder les valeurs propres
+  supérieures à 1. Chaque composante retenue explique alors plus de variance
+  qu'une variable standardisée prise seule. La règle de Jolliffe propose un
+  seuil plus permissif de $0.7$. Ces règles sont des repères heuristiques.
+- L'*interprétabilité* et l'objectif : examiner si les axes retenus décrivent
+  des oppositions utiles. Pour une tâche prédictive, choisir le nombre de
+  composantes par validation croisée de l'ensemble du modèle.
 
 === Lecture des cartes factorielles
 
-Une ACP produit généralement deux types de représentations.
+La *carte des individus* place les observations selon leurs scores sur deux
+composantes, généralement les deux premières. Chaque axe doit indiquer son
+pourcentage de variance expliquée. Des points éloignés dans ce plan ont des
+profils différents selon les dimensions affichées. En revanche, deux points
+proches peuvent différer sur les composantes omises : une projection raccourcit
+les distances et peut masquer des écarts.
 
-- La carte des individus place les observations dans le plan formé par deux
-  composantes principales.
-- Le cercle des corrélations représente les variables et aide à comprendre le
-  sens des axes.
+Un point proche de l'origine a des scores faibles sur les axes affichés, mais
+n'est pas nécessairement proche du profil moyen dans l'espace complet. Pour
+donner un sens aux positions des individus, il faut examiner les variables
+associées à chaque axe.
 
-Sur la carte des individus, deux observations proches ont des profils numériques
-semblables selon les variables qui contribuent aux axes affichés. Sur le cercle
-des corrélations, deux variables proches sont corrélées positivement, deux
-variables opposées sont corrélées négativement, et une variable proche de
-l'origine est mal représentée dans le plan choisi.
+Le *cercle des corrélations* représente chaque variable par ses corrélations
+avec les deux composantes. Ses coordonnées dans le premier plan sont donc
+$"corr"(Z_j, Y_1)$ et $"corr"(Z_j, Y_2)$. Une variable proche du cercle est
+bien représentée dans ce plan; une variable proche de l'origine l'est peu.
+Lorsque les deux variables sont bien représentées :
+
+- des flèches de même direction suggèrent une corrélation positive;
+- des flèches de directions opposées suggèrent une corrélation négative;
+- un angle proche de 90 degrés suggère une corrélation proche de zéro.
+
+Ces lectures d'angles deviennent peu fiables pour des variables mal représentées.
+Pour nommer un axe, on cherche les variables qui lui sont fortement corrélées et
+on décrit ce qu'elles ont en commun ou ce qu'elles opposent. Un axe associé
+positivement à plusieurs notes peut, par exemple, représenter un niveau de
+réussite commun.
 
 #note[
-  Le signe d'un axe d'ACP est arbitraire. Inverser un axe ne change pas
-  l'analyse: seules les directions, les oppositions et les contributions sont
-  importantes.
+  Le signe d'un axe d'ACP est arbitraire. Multiplier ses coefficients et ses
+  scores par $-1$ inverse l'orientation du graphique sans changer l'analyse.
+  Les termes « positif » et « négatif » décrivent une orientation, pas un jugement
+  sur les observations.
 ]
+
+=== Contribution et qualité de représentation
+
+Ces deux notions répondent à des questions différentes. La *contribution*
+indique dans quelle mesure une observation ou une variable participe à la
+construction d'un axe. La *qualité de représentation* indique dans quelle mesure
+un axe ou un plan restitue le profil d'une observation ou la variation d'une
+variable.
+
+Pour des observations de même poids, la contribution de l'individu $i$ à l'axe
+$k$, de variance non nulle, est :
+
+$ "ctr"_(i k) = y_(i k)^2 / ((n - 1) lambda_k) $
+
+Les contributions des $n$ individus à un axe totalisent 1. Une valeur supérieure
+à $1 / n$ indique une contribution supérieure à la moyenne, sans constituer à
+elle seule une preuve d'anomalie. Quelques observations très contributives
+peuvent fortement influencer l'orientation de l'axe.
+
+La qualité de représentation d'un individu sur cet axe est mesurée par le
+*cosinus carré* :
+
+$ cos^2_(i k) = y_(i k)^2 / (sum_(j=1)^p z_(i j)^2) $
+
+Le dénominateur est le carré de sa distance à l'origine dans l'espace préparé.
+Pour un plan, on additionne les cosinus carrés des deux axes. Une valeur proche
+de 1 signifie que le plan restitue presque toute cette distance. Ce rapport
+n'est pas défini pour une observation exactement au centre du nuage.
+
+Pour une variable, la qualité de représentation dans un plan est la somme de
+ses corrélations au carré avec les axes du plan. Dans une ACP centrée réduite,
+sa contribution à un axe est le carré du coefficient $alpha_(j k)$.
+Une variable peut être bien représentée sur un axe sans en être la principale
+contributrice. Il faut donc consulter les deux indicateurs avant d'interpréter
+les cartes.
 
 === Pratique de l'ACP
 
-En pratique, la matrice de covariance est inconnue et doit être estimée à partir
-des données. On centre les variables, on calcule la matrice de covariance ou de
-corrélation, puis on diagonalise cette matrice.
+Une analyse peut suivre les étapes suivantes :
 
-Il faut standardiser les variables lorsque leurs unités ou leurs ordres de
-grandeur diffèrent. Sinon, une variable très dispersée peut dominer les axes
-principaux même si elle n'est pas plus informative.
-
-Pour choisir le nombre de composantes, on peut utiliser:
-
-- la proportion de variance expliquée, par exemple atteindre 80 pour cent;
-- la règle de Kaiser, pour une ACP sur corrélations, qui garde les valeurs
-  propres supérieures à 1;
-- la règle de Joliffe, qui utilise parfois un seuil de 0.7;
-- le graphique des valeurs propres, aussi appelé règle du coude;
-- l'interprétabilité des axes et l'objectif de l'analyse.
-
-Il est aussi utile de regarder les contributions et les qualités de
-représentation. Une variable très contributive aide à définir un axe. Une
-observation bien représentée dans un plan peut être interprétée dans ce plan;
-une observation mal représentée demande de consulter d'autres axes.
+1. Définir les observations et les variables quantitatives pertinentes pour la
+   question étudiée; examiner les données manquantes et les valeurs extrêmes.
+2. Choisir une ACP centrée ou centrée réduite et préparer les données.
+3. Calculer les axes, les scores et les valeurs propres.
+4. Examiner la variance expliquée pour choisir le nombre de composantes.
+5. Interpréter les axes à partir des variables, de leurs contributions et de
+   leurs qualités de représentation, puis décrire les individus.
+6. Vérifier que les conclusions restent cohérentes en consultant d'autres plans
+   ou en examinant l'influence des observations les plus contributives.
 
 === Limites
 
-L'ACP est linéaire: elle cherche des axes qui sont des combinaisons linéaires
-des variables. Elle conserve la variance, pas nécessairement l'information utile
-pour une tâche supervisée. Elle est sensible aux variables mal standardisées, aux
-valeurs extrêmes et aux relations non linéaires.
+L'ACP est linéaire : un petit nombre d'axes peut mal résumer une structure
+courbe. Elle est sensible à l'échelle des variables et aux valeurs extrêmes,
+qui peuvent attirer les axes dans leur direction. La standardisation ne
+supprime pas cette sensibilité aux observations atypiques.
 
-Lorsque les composantes sont utilisées comme variables prédictives, il faut les
-calculer uniquement à partir des données d'entraînement puis appliquer la même
-transformation aux données de validation ou de test.
+L'ACP ne reçoit aucune variable réponse. Elle conserve la variance, qui n'est
+pas nécessairement l'information la plus utile pour prédire une cible. Une
+composante de faible variance peut être prédictive, tandis qu'une composante
+de forte variance peut surtout refléter du bruit ou un effet secondaire.
+De même, des groupes visibles sur une carte demandent une interprétation et
+une validation; l'ACP n'est pas en elle-même une méthode de classification.
+
+Lorsque les composantes servent de variables prédictives, le centrage, la
+réduction et les axes doivent être appris uniquement sur les données
+d'entraînement. On applique ensuite ces mêmes moyennes, écarts-types et
+coefficients aux nouvelles observations. En validation croisée, cette
+préparation doit être répétée dans chaque pli d'entraînement pour éviter une
+fuite d'information.
 
 == L'AFC
 

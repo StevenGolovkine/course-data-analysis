@@ -1,6 +1,7 @@
 #import "@preview/theorion:0.6.0": *
 #import cosmos.fancy: *
 
+
 #let before-location(a, b) = {
   let pa = a.position()
   let pb = b.position()
