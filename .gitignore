@@ -1,3 +1,5 @@
 # Typst build output
 *.pdf
 
+.Rhistory
+.DS_Store
