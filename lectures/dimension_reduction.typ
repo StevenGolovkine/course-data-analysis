@@ -432,32 +432,141 @@ Pour chaque observation, le carré de l'erreur de reconstruction est :
 $ norm(z_i - hat(z)_i)^2 = y_(i 2)^2
   = (z_(i 1) - z_(i 2))^2 / 2. $
 
-Cette erreur vaut $0$ pour A et C, mais $2$ pour B. Sur l'ensemble du nuage,
-la somme des erreurs au carré divisée par $n - 1$ vaut $lambda_2 = 0.2$,
-soit 10 pour cent de l'inertie totale. Conserver 90 pour cent de la variance
-donne donc un bon résumé global, sans garantir que chaque profil soit bien
-représenté. Ici, la composante de faible variance porte précisément la
-différence entre B et C.
+Cette erreur vaut $0$ pour A et C, mais $2$ pour B. Sur l'ensemble du nuage, la somme des erreurs au carré divisée par $n - 1$ vaut $lambda_2 = 0.2$, soit $10%$ de l'inertie totale. Conserver $90%$ de la variance donne donc un bon résumé global, sans garantir que chaque profil soit bien représenté. Ici, la composante de faible variance porte précisément la différence entre B et C.
 
 === Choisir le nombre de composantes
 
-Le nombre de composantes dépend de l'usage prévu : deux ou trois axes pour une
-visualisation, éventuellement davantage pour compresser les données ou préparer
-un modèle. Plusieurs critères peuvent guider ce choix :
+Choisir le nombre $q$ de composantes revient à chercher un compromis entre
+la simplicité de la représentation et la quantité d'information conservée.
+Ajouter un axe ne diminue jamais la variance expliquée sur les données qui ont
+servi à calculer l'ACP, mais cet axe peut apporter peu à l'interprétation ou à
+une tâche prédictive. Il n'existe donc pas de nombre de composantes qui
+convienne à tous les objectifs.
 
-- La *variance expliquée cumulée* : retenir assez de composantes pour atteindre
-  un seuil, par exemple 80 ou 90 pour cent. Ce seuil doit être adapté à
-  l'objectif; il n'existe pas de valeur universelle.
-- Le *graphique des valeurs propres*, ou éboulis : chercher un coude après lequel
-  les composantes supplémentaires apportent peu de variance. Le coude peut
-  toutefois être peu marqué ou absent.
-- La *règle de Kaiser*, pour une ACP centrée réduite : garder les valeurs propres
-  supérieures à 1. Chaque composante retenue explique alors plus de variance
-  qu'une variable standardisée prise seule. La règle de Jolliffe propose un
-  seuil plus permissif de $0.7$. Ces règles sont des repères heuristiques.
-- L'*interprétabilité* et l'objectif : examiner si les axes retenus décrivent
-  des oppositions utiles. Pour une tâche prédictive, choisir le nombre de
-  composantes par validation croisée de l'ensemble du modèle.
+Ici, $k$ désigne le rang d'une composante, $lambda_k$ sa valeur propre et $q$ désigne le nombre de composantes retenues. On conserve les composantes de rang $k = 1, dots, q$. La dernière composante retenue a donc le rang $k = q$. Enfin, $R_q$ désigne la variance expliquée cumulée par ces $q$ premières composantes.
+
+Il faut aussi distinguer le nombre de composantes retenues pour l'analyse du nombre d'axes affichés sur un graphique. On peut retenir quatre composantes et les examiner à l'aide de plusieurs plans factoriels à deux dimensions.
+
+*Variance expliquée cumulée.* On fixe un seuil $tau$, par exemple $0.80$,
+$0.90$ ou $0.95$, puis on retient le plus petit entier $q$ tel que $R_q >= tau$.
+
+Le choix du seuil exprime la perte de variance que l'on accepte : retenir
+au moins $90%$ de la variance revient à en perdre au plus $10%$. Ce seuil
+ne garantit cependant pas la qualité de représentation de chaque observation
+ou de chaque variable.
+
+Considérons une ACP centrée réduite portant sur six variables dont les valeurs
+propres sont présentées dans le @table-acp-variance-cumulee. Leur somme est bien
+égale à $6$, qui correspond à l'inertie totale des variables standardisées. Dans
+la dernière colonne, on pose $q = k$ : ainsi, pour la ligne de rang $k = 3$,
+le cumul des trois premières composantes vaut $R_3$.
+
+#figure(
+  table(
+    columns: (1fr, 1fr, 1.5fr, 1.5fr),
+    align: center,
+    inset: 6pt,
+    stroke: 0.4pt + luma(210),
+    table.header([*Rang* $k$], [$lambda_k$], [*Variance expliquée*], [*Cumul* $R_q$ ($q = k$)]),
+    [1], [$3.0$], [$50%$], [$50%$],
+    [2], [$1.5$], [$25%$], [$75%$],
+    [3], [$0.9$], [$15%$], [$90%$],
+    [4], [$0.3$], [$5%$], [$95%$],
+    [5], [$0.2$], [$3.3%$], [$98.3%$],
+    [6], [$0.1$], [$1.7%$], [$100%$],
+  )
+) <table-acp-variance-cumulee>
+
+Avec $q = 2$, on conserve $R_2 = 75%$ de la variance, cela ne suffit pas pour atteindre un seuil de $80%$. On choisit $q = 3$ pour atteindre $80%$ ou $90%$, et $q = 4$ pour atteindre $95%$. Le choix du seuil change donc directement la dimension retenue. Un plan factoriel limité aux deux premiers axes reste possible, mais elle masque notamment les $15%$ portés par le troisième axe.
+
+*Graphique des valeurs propres et règle du coude.* L'éboulis représente les
+valeurs propres $lambda_k$ en fonction du rang $k$ de la composante. On cherche
+une rupture de pente : avant le coude, les axes apportent une part importante
+de la variance; après, les gains deviennent plus faibles. Cette lecture sert
+à repérer un compromis, sans imposer au préalable un pourcentage.
+
+Dans l'exemple, la courbe s'aplatit à partir de la quatrième valeur propre,
+$lambda_4 = 0.3$ : les suivantes, $0.2$ et $0.1$, ne diminuent plus que de
+$0.1$ à chaque étape. On situe donc ici le coude au rang $k = 4$ et l'on
+retient $q = 4$ composantes, qui conservent $95%$ de la variance. La position du
+coude reste toutefois une appréciation visuelle; plusieurs ruptures peuvent
+être plausibles.
+
+#example[
+  Supposons au contraire que six variables standardisées soient non corrélées,
+  avec six valeurs propres toutes égales à $1$. L'éboulis est horizontal : il
+  n'existe pas de coude ni de direction de variance privilégiée. Deux axes
+  ne conservent que $2 / 6$, soit environ $33.3%$ de la variance. Il en faut
+  cinq pour dépasser $80%$, et les six pour atteindre $90%$. Une forte réduction
+  de dimension résumerait donc mal la dispersion de ces données.
+]
+
+*Règles de Kaiser et de Jolliffe.* Dans une ACP centrée réduite, la valeur propre
+moyenne vaut $1$, puisque la somme des $p$ valeurs propres vaut $p$. La règle
+de Kaiser conserve celles qui sont strictement supérieures à $1$ : chaque axe
+retenu porte alors plus de variance qu'une variable standardisée prise seule.
+La règle de Jolliffe abaisse ce seuil à $0.7$ et retient donc davantage d'axes,
+ou le même nombre.
+
+Dans notre exemple à six variables, Kaiser conserve les composantes de rangs
+$k = 1$ et $k = 2$ ($3.0$ et $1.5$) : le choix est donc $q = 2$, avec
+$R_2 = 75%$. Jolliffe conserve les trois premiers rangs ($3.0$, $1.5$ et $0.9$) :
+le choix est $q = 3$, avec $R_3 = 90%$. Ces règles peuvent donc conduire à des
+choix différents. Leurs seuils sont des repères heuristiques : ils ne
+s'appliquent pas tels quels à une ACP sur des variables non réduites, dont
+les variances dépendent des unités de mesure. Dans le cas de six valeurs
+propres égales à $1$, la règle stricte de Kaiser ne retient même aucun axe,
+ce qui illustre la nécessité de l'interpréter plutôt que de l'appliquer seule.
+
+#figure(
+  image("../figures/acp_nombre_composantes.svg", width: 100%,
+    alt: "À gauche, décroissance des six valeurs propres : 3, 1,5, 0,9, 0,3, "
+      + "0,2 et 0,1. Les seuils de Kaiser et Jolliffe conduisent respectivement "
+      + "à deux et trois composantes. Le coude est repéré au rang quatre, "
+      + "ce qui conduit à retenir quatre composantes. À droite, la variance cumulée atteint 90 pour cent "
+      + "à trois composantes et 95 pour cent à quatre composantes. Les seuils "
+      + "de 80 et 90 pour cent retiennent donc trois composantes, celui de "
+      + "95 pour cent en retient quatre."),
+  caption: [À gauche, $lambda_k$ est tracée en fonction du rang $k$; le repère
+    vertical en $k = q$ marque la dernière composante retenue. À droite,
+    $R_q$ est tracée en fonction du nombre $q$ de composantes, et l'on choisit
+    le plus petit $q$ qui atteint le seuil. Les lignes horizontales indiquent
+    les seuils. Le coude illustratif au rang $k = 4$ conduit ici au choix
+    $q = 4$; sa position reste une appréciation visuelle.],
+) <fig-acp-nombre-composantes>
+
+*Interprétabilité et objectif de l'analyse.* Une composante de faible variance
+peut représenter une opposition intéressante. Dans l'exemple des deux examens,
+le premier axe conserve $90%$ de la variance, mais le second distingue les
+étudiants ayant des résultats contrastés entre les deux évaluations. Si cette
+différence est au centre de la question étudiée, il est utile de conserver
+les deux composantes.
+
+Pour une utilisation prédictive, on compare plusieurs valeurs de $q$ par
+validation croisée de l'ensemble du modèle. Le critère devient alors la qualité
+des prédictions sur des observations qui n'ont pas servi à ajuster le modèle,
+et non le seul pourcentage de variance des variables explicatives.
+
+#example[
+  Supposons que l'on utilise les composantes pour prédire une note future.
+  Pour $q = 2, 3, 4, 6$, la validation croisée donne respectivement des racines
+  de l'erreur quadratique moyenne de $5.1$, $4.0$, $3.6$ et $3.9$ points.
+  Parmi ces choix, quatre composantes donnent la plus faible erreur moyenne.
+  Garder les six conserve toute la variance des variables explicatives, mais
+  n'améliore pas ici la prédiction. Ces résultats sont illustratifs : dans une
+  analyse réelle, on examine aussi la variabilité des erreurs entre les plis.
+]
+
+Le centrage, la réduction, l'ACP et le modèle prédictif doivent être ajustés
+dans chaque pli d'entraînement. Un éventuel jeu de test final reste réservé
+à l'évaluation après le choix de $q$.
+
+En pratique, on examine ensemble l'éboulis, la variance cumulée et le contenu
+des axes proches du seuil retenu. On peut ensuite justifier le choix de façon
+concrète : « Nous retenons trois composantes, qui conservent $90%$ de la
+variance; les axes suivants apportent chacun au plus $5%$ et ne modifient pas
+l'interprétation recherchée. » Cette dernière appréciation doit être vérifiée
+à partir des variables et des observations représentées sur ces axes.
 
 === Lecture des cartes factorielles
 
