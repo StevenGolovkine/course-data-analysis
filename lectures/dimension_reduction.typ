@@ -479,44 +479,18 @@ le cumul des trois premières composantes vaut $R_3$.
 
 Avec $q = 2$, on conserve $R_2 = 75%$ de la variance, cela ne suffit pas pour atteindre un seuil de $80%$. On choisit $q = 3$ pour atteindre $80%$ ou $90%$, et $q = 4$ pour atteindre $95%$. Le choix du seuil change donc directement la dimension retenue. Un plan factoriel limité aux deux premiers axes reste possible, mais elle masque notamment les $15%$ portés par le troisième axe.
 
-*Graphique des valeurs propres et règle du coude.* L'éboulis représente les
-valeurs propres $lambda_k$ en fonction du rang $k$ de la composante. On cherche
-une rupture de pente : avant le coude, les axes apportent une part importante
-de la variance; après, les gains deviennent plus faibles. Cette lecture sert
-à repérer un compromis, sans imposer au préalable un pourcentage.
+*Graphique des valeurs propres et règle du coude.* L'éboulis représente les valeurs propres $lambda_k$ en fonction du rang $k$ de la composante (cf. @fig-acp-nombre-composantes). On cherche une rupture de pente : avant le coude, les axes apportent une part importante de la variance; et après le coude, les gains deviennent plus faibles. Cette lecture sert à repérer un compromis, sans imposer au préalable un pourcentage.
 
-Dans l'exemple, la courbe s'aplatit à partir de la quatrième valeur propre,
-$lambda_4 = 0.3$ : les suivantes, $0.2$ et $0.1$, ne diminuent plus que de
-$0.1$ à chaque étape. On situe donc ici le coude au rang $k = 4$ et l'on
-retient $q = 4$ composantes, qui conservent $95%$ de la variance. La position du
-coude reste toutefois une appréciation visuelle; plusieurs ruptures peuvent
-être plausibles.
+Dans l'exemple, la courbe s'aplatit à partir de la quatrième valeur propre, $lambda_4 = 0.3$ : les suivantes, $0.2$ et $0.1$, ne diminuent plus que de $0.1$ à chaque étape. On situe donc ici le coude au rang $k = 4$ et l'on retient $q = 4$ composantes, qui conservent $95%$ de la variance. La position du coude reste toutefois une appréciation visuelle et plusieurs ruptures peuvent être plausibles. L'important est de justifier le choix retenu, et non de l'imposer.
 
 #example[
-  Supposons au contraire que six variables standardisées soient non corrélées,
-  avec six valeurs propres toutes égales à $1$. L'éboulis est horizontal : il
-  n'existe pas de coude ni de direction de variance privilégiée. Deux axes
-  ne conservent que $2 / 6$, soit environ $33.3%$ de la variance. Il en faut
-  cinq pour dépasser $80%$, et les six pour atteindre $90%$. Une forte réduction
-  de dimension résumerait donc mal la dispersion de ces données.
+  Supposons au contraire que six variables standardisées soient non corrélées, avec six valeurs propres toutes égales à $1$. L'éboulis est horizontal. Il n'existe pas de coude ni de direction de variance privilégiée. Deux axes ne conservent que $33.3%$ de la variance. Il en faut cinq pour dépasser $80%$, et les six pour atteindre $90%$. Une forte réduction de dimension résumerait donc mal la dispersion de ces données.
 ]
 
-*Règles de Kaiser et de Jolliffe.* Dans une ACP centrée réduite, la valeur propre
-moyenne vaut $1$, puisque la somme des $p$ valeurs propres vaut $p$. La règle
-de Kaiser conserve celles qui sont strictement supérieures à $1$ : chaque axe
-retenu porte alors plus de variance qu'une variable standardisée prise seule.
-La règle de Jolliffe abaisse ce seuil à $0.7$ et retient donc davantage d'axes,
-ou le même nombre.
+*Règles de Kaiser et de Jolliffe.* Dans une ACP centrée réduite, la valeur propre moyenne vaut $1$, puisque la somme des $p$ valeurs propres vaut $p$. La règle de Kaiser conserve celles qui sont strictement supérieures à $1$ : chaque axe retenu porte alors plus de variance qu'une variable standardisée prise seule. La règle de Jolliffe abaisse ce seuil à $0.7$ et retient donc davantage d'axes ou le même nombre.
 
-Dans notre exemple à six variables, Kaiser conserve les composantes de rangs
-$k = 1$ et $k = 2$ ($3.0$ et $1.5$) : le choix est donc $q = 2$, avec
-$R_2 = 75%$. Jolliffe conserve les trois premiers rangs ($3.0$, $1.5$ et $0.9$) :
-le choix est $q = 3$, avec $R_3 = 90%$. Ces règles peuvent donc conduire à des
-choix différents. Leurs seuils sont des repères heuristiques : ils ne
-s'appliquent pas tels quels à une ACP sur des variables non réduites, dont
-les variances dépendent des unités de mesure. Dans le cas de six valeurs
-propres égales à $1$, la règle stricte de Kaiser ne retient même aucun axe,
-ce qui illustre la nécessité de l'interpréter plutôt que de l'appliquer seule.
+Dans notre exemple à six variables, la règle de Kaiser conserve les composantes de rangs $k = 1$ et $k = 2$ ($3.0$ et $1.5$) : le choix est donc $q = 2$, avec $R_2 = 75%$. La règle de Jolliffe conserve les trois premières composantes ($3.0$, $1.5$ et $0.9$) : le choix est $q = 3$, avec $R_3 = 90%$. Ces règles peuvent donc conduire à des choix différents. Leurs seuils sont des repères heuristiques. Ils ne s'appliquent pas tels quels à une ACP sur des variables non réduites, dont les variances dépendent des unités de mesure. Dans le cas de six valeurs propres égales à $1$, la règle stricte de Kaiser ne retient même aucun axe, ce qui illustre la nécessité de l'interpréter plutôt que de l'appliquer seule.
+
 
 #figure(
   image("../figures/acp_nombre_composantes.svg", width: 100%,
@@ -535,68 +509,123 @@ ce qui illustre la nécessité de l'interpréter plutôt que de l'appliquer seul
     $q = 4$; sa position reste une appréciation visuelle.],
 ) <fig-acp-nombre-composantes>
 
-*Interprétabilité et objectif de l'analyse.* Une composante de faible variance
-peut représenter une opposition intéressante. Dans l'exemple des deux examens,
-le premier axe conserve $90%$ de la variance, mais le second distingue les
-étudiants ayant des résultats contrastés entre les deux évaluations. Si cette
-différence est au centre de la question étudiée, il est utile de conserver
-les deux composantes.
+*Interprétabilité et objectif de l'analyse.* Une composante de faible variance peut représenter une opposition intéressante. Dans l'exemple des deux examens, le premier axe conserve $90%$ de la variance, alors que le second distingue les étudiants ayant des résultats contrastés entre les deux évaluations. Si cette différence est au centre de la question étudiée, il est utile de conserver les deux composantes.
 
-Pour une utilisation prédictive, on compare plusieurs valeurs de $q$ par
-validation croisée de l'ensemble du modèle. Le critère devient alors la qualité
-des prédictions sur des observations qui n'ont pas servi à ajuster le modèle,
-et non le seul pourcentage de variance des variables explicatives.
+Pour une utilisation prédictive, on peut comparer plusieurs valeurs de $q$ par validation croisée de l'ensemble du modèle. Le critère devient alors la qualité des prédictions sur des observations qui n'ont pas servi à ajuster le modèle, et non le seul pourcentage de variance des variables explicatives. Le centrage, la réduction, l'ACP et le modèle prédictif doivent être ajustés dans chaque pli d'entraînement. Un éventuel jeu de test final reste réservé à l'évaluation après le choix de $q$.
+
+En pratique, on examine l'éboulis, la variance cumulée et le contenu des axes proches du seuil retenu ensemble. On peut ensuite justifier le choix de façon concrète : « Nous retenons trois composantes, qui conservent $90%$ de la variance. Les axes suivants apportent chacun au plus $5%$ de la variance expliquée et ne modifient pas l'interprétation recherchée. » Cette dernière appréciation doit être vérifiée à partir des variables et des observations représentées sur ces axes.
+
+=== Lecture des plans factoriels
+
+Un plan factoriel est un plan défini par deux composantes principales, par
+exemple $(Y_1, Y_2)$ ou $(Y_1, Y_3)$. Sa lecture combine deux représentations :
+la carte des individus, qui montre les profils des observations, et le cercle
+des corrélations, qui aide à comprendre le sens des axes à partir des variables.
+
+*Identifier le plan et la variance représentée.* Chaque axe doit indiquer son
+rang et son pourcentage de variance expliquée. La part de variance conservée
+par un plan est la somme des pourcentages de ses deux axes.
 
 #example[
-  Supposons que l'on utilise les composantes pour prédire une note future.
-  Pour $q = 2, 3, 4, 6$, la validation croisée donne respectivement des racines
-  de l'erreur quadratique moyenne de $5.1$, $4.0$, $3.6$ et $3.9$ points.
-  Parmi ces choix, quatre composantes donnent la plus faible erreur moyenne.
-  Garder les six conserve toute la variance des variables explicatives, mais
-  n'améliore pas ici la prédiction. Ces résultats sont illustratifs : dans une
-  analyse réelle, on examine aussi la variabilité des erreurs entre les plis.
+  Dans l'exemple à six variables de la sous-section précédente, les trois
+  premières composantes expliquent respectivement $50%$, $25%$ et $15%$ de la
+  variance. Le plan $(Y_1, Y_2)$ en représente donc $75%$, tandis que le plan
+  $(Y_1, Y_3)$ en représente $65%$. Ce dernier peut être utile pour examiner
+  une opposition portée par le troisième axe. Le cumul $R_3 = 90%$ concerne
+  les trois composantes ensemble. Il ne décrit pas à lui seul la qualité d'un
+  graphique à deux dimensions.
 ]
 
-Le centrage, la réduction, l'ACP et le modèle prédictif doivent être ajustés
-dans chaque pli d'entraînement. Un éventuel jeu de test final reste réservé
-à l'évaluation après le choix de $q$.
+*Lire la carte des individus.* Dans le premier plan, l'observation $i$ est placée au point $(y_(i 1), y_(i 2))$. Deux individus à droite ont des scores positifs sur le premier axe, mais leur position verticale peut les distinguer sur le second. Ces positions ne prennent un sens concret qu'après avoir interprété les axes à l'aide des variables.
 
-En pratique, on examine ensemble l'éboulis, la variance cumulée et le contenu
-des axes proches du seuil retenu. On peut ensuite justifier le choix de façon
-concrète : « Nous retenons trois composantes, qui conservent $90%$ de la
-variance; les axes suivants apportent chacun au plus $5%$ et ne modifient pas
-l'interprétation recherchée. » Cette dernière appréciation doit être vérifiée
-à partir des variables et des observations représentées sur ces axes.
+Les distances doivent être lues dans la géométrie des données utilisées pour l'ACP. Des points éloignés dans le plan ont des profils différents dans cette géométrie. En revanche, deux points proches peuvent différer sur les composantes omises. La projection raccourcit les distances et peut masquer des écarts. Pour comparer visuellement les distances, il faut utiliser la même échelle sur les deux axes du graphique.
 
-=== Lecture des cartes factorielles
+#example[
+  Reprenons les profils A, B et C de la @fig-acp-exemple-reperes. Le premier axe décrit le niveau commun aux deux notes, et le second leur contraste. Le point A, de score $(sqrt(2), 0)$, se trouve à droite : ses deux notes sont supérieures à leurs moyennes respectives. Le point B, de scores $(0, sqrt(2))$, se trouve en haut : sa première note standardisée dépasse la seconde. Le point C, de scores $(0, 0)$, est au centre : il correspond exactement aux deux notes moyennes. Les positions de A et B expriment donc deux caractéristiques différentes : un niveau commun élevé et un fort contraste.
+]
 
-La *carte des individus* place les observations selon leurs scores sur deux
-composantes, généralement les deux premières. Chaque axe doit indiquer son
-pourcentage de variance expliquée. Des points éloignés dans ce plan ont des
-profils différents selon les dimensions affichées. En revanche, deux points
-proches peuvent différer sur les composantes omises : une projection raccourcit
-les distances et peut masquer des écarts.
+Dans une ACP comportant davantage de composantes, être proche de l'origine
+du plan signifie seulement avoir des scores faibles sur les deux axes affichés.
+Cela ne suffit pas pour conclure que le profil est moyen dans l'espace complet.
 
-Un point proche de l'origine a des scores faibles sur les axes affichés, mais
-n'est pas nécessairement proche du profil moyen dans l'espace complet. Pour
-donner un sens aux positions des individus, il faut examiner les variables
-associées à chaque axe.
+#example[
+  Considérons deux individus D et E dont les scores sur trois composantes sont
+  $(0.1, 0.1, 3)$ et $(0.1, 0.1, -3)$. Dans le plan $(Y_1, Y_2)$, ils se
+  superposent près de l'origine. Pourtant, leur distance dans l'espace des
+  trois composantes vaut $6$, entièrement selon $Y_3$. Le plan $(Y_1, Y_3)$
+  révèle immédiatement cette différence. Leur proximité dans le premier plan
+  ne traduit donc pas une ressemblance de leurs profils complets.
+]
 
-Le *cercle des corrélations* représente chaque variable par ses corrélations
-avec les deux composantes. Ses coordonnées dans le premier plan sont donc
-$"corr"(Z_j, Y_1)$ et $"corr"(Z_j, Y_2)$. Une variable proche du cercle est
-bien représentée dans ce plan; une variable proche de l'origine l'est peu.
-Lorsque les deux variables sont bien représentées :
+*Lire le cercle des corrélations.* Chaque variable $Z_j$ peut être représentée par une flèche partant de l'origine. Dans le premier plan factoriel, son extrémité a pour coordonnées $(rho_(j 1), rho_(j 2))$, où $rho_(j k) = "corr"(Z_j, Y_k)$. Pour une ACP centrée réduite et un axe de variance non nulle, ces coordonnées se calculent à partir des coefficients de l'axe :
 
-- des flèches de même direction suggèrent une corrélation positive;
-- des flèches de directions opposées suggèrent une corrélation négative;
-- un angle proche de 90 degrés suggère une corrélation proche de zéro.
+$ rho_(j k) = sqrt(lambda_k) alpha_(j k). $
 
-Ces lectures d'angles deviennent peu fiables pour des variables mal représentées.
-Pour nommer un axe, on cherche les variables qui lui sont fortement corrélées et
-on décrit ce qu'elles ont en commun ou ce qu'elles opposent. Un axe associé
-positivement à plusieurs notes peut, par exemple, représenter un niveau de
-réussite commun.
+Ces corrélations ne doivent pas être confondues avec les coefficients
+$alpha_(j k)$ ni avec les scores des individus. Une corrélation proche de
+$1$ signifie que la variable augmente généralement avec le score sur l'axe;
+une corrélation proche de $-1$ signifie qu'elle évolue en sens inverse. Une
+corrélation proche de $0$ traduit une association linéaire faible, voire
+inexistante, entre la variable et la composante.
+
+L'extrémité de chaque flèche appartient au disque unité, car
+$rho_(j 1)^2 + rho_(j 2)^2 <= 1$. Cette somme mesure la qualité de représentation
+de la variable dans le plan. Une flèche qui atteint presque le cercle indique
+que les deux axes résument bien sa variation. Une flèche courte indique que
+sa variation est surtout portée par d'autres axes.
+
+#example[
+  Pour les deux examens, les coordonnées des variables sont
+  $Z_1 : (sqrt(0.9), sqrt(0.1))$ et
+  $Z_2 : (sqrt(0.9), -sqrt(0.1))$, soit environ $(0.949, 0.316)$ et
+  $(0.949, -0.316)$. Les deux notes sont fortement corrélées positivement à
+  $Y_1$, ce qui justifie l'interprétation de cet axe comme un niveau commun.
+  Leurs corrélations avec $Y_2$ ont des signes opposés : cet axe compare la
+  réussite relative aux deux examens. Les deux flèches atteignent le cercle,
+  puisque le plan contient ici toutes les composantes (cf. @fig-acp-cercle-correlations)
+]
+
+#figure(
+  image("../figures/acp_cercle_correlations.svg", width: 78%,
+    alt: "Cercle des corrélations des deux examens. La variable Z1 pointe "
+      + "vers les coordonnées 0,949 et 0,316; Z2 pointe vers 0,949 et moins "
+      + "0,316. Les deux flèches atteignent le cercle unité et forment un "
+      + "angle d'environ 37 degrés. Elles sont orientées vers les valeurs "
+      + "positives du premier axe et de part et d'autre du second."),
+  caption: [Cercle des corrélations de l'exemple des deux examens. Les variables
+    sont bien représentées et forment un angle d'environ $37 degree$.
+    Le cosinus de cet angle vaut $0.8$, leur corrélation. Leurs directions
+    communes sur $Y_1$ et opposées sur $Y_2$ expliquent le sens des deux axes.],
+) <fig-acp-cercle-correlations>
+
+*Interpréter les angles et nommer les axes.* Lorsque les deux variables sont
+bien représentées dans le plan, l'angle entre leurs flèches renseigne sur leur
+corrélation :
+
+- un petit angle suggère une forte corrélation positive;
+- un angle proche de $180 degree$ suggère une forte corrélation négative;
+- un angle proche de $90 degree$ suggère une corrélation proche de zéro.
+
+Cette lecture est exacte lorsque le plan représente entièrement les deux
+variables; elle devient une approximation lorsque certaines de leurs
+composantes sont omises. Elle est peu fiable pour des flèches courtes. Par
+ailleurs, une corrélation nulle ne démontre pas une indépendance.
+
+#example[
+  Dans une autre ACP portant sur davantage de variables, une variable de coordonnées $(0.1, 0.2)$ dans le cercle des corrélations n'a que $5%$ de sa variance représentée dans ce plan ($0.1^2 + 0.2^2 = 0.05$). Sa flèche courte ne signifie pas que la variable est constante ou inutile. Il faut examiner d'autres axes avant d'interpréter ses relations avec les autres variables.
+]
+
+Pour nommer un axe, on examine les variables qui lui sont fortement corrélées,
+les signes de ces corrélations et les contributions. On décrit ensuite les
+individus à partir de ce sens donné à l'axe. La proximité entre deux individus
+se lit sur leur plan, et les relations entre variables sur le cercle des
+corrélations : les scores et les corrélations ont des échelles différentes.
+
+Une lecture complète consiste ainsi à identifier la variance du plan, donner
+un sens aux axes à partir des variables, puis examiner les profils des
+individus. Les contributions et les qualités de représentation, détaillées
+ci-dessous, permettent de vérifier les interprétations et de choisir les
+autres plans à consulter.
 
 #note[
   Le signe d'un axe d'ACP est arbitraire. Multiplier ses coefficients et ses
@@ -607,52 +636,391 @@ réussite commun.
 
 === Contribution et qualité de représentation
 
-Ces deux notions répondent à des questions différentes. La *contribution*
-indique dans quelle mesure une observation ou une variable participe à la
-construction d'un axe. La *qualité de représentation* indique dans quelle mesure
-un axe ou un plan restitue le profil d'une observation ou la variation d'une
-variable.
+Ces deux notions répondent à des questions différentes. La contribution mesure la part d'un individu ou d'une variable dans l'inertie d'un axe : elle aide à identifier les éléments qui définissent cet axe. La qualité de représentation mesure la part du profil d'un individu, ou de la variation d'une variable, restituée par un axe ou un plan.
 
-Pour des observations de même poids, la contribution de l'individu $i$ à l'axe
-$k$, de variance non nulle, est :
+La différence vient du dénominateur. La contribution rapporte une quantité
+à l'inertie de l'axe, tandis que la qualité la rapporte à l'inertie de
+l'élément représenté. On considère les observations ayant servi à calculer
+l'ACP, de même poids. Les contributions aux axes sont définies pour
+$lambda_k > 0$.
 
-$ "ctr"_(i k) = y_(i k)^2 / ((n - 1) lambda_k) $
+*Contribution d'un individu.* Puisque les scores sont centrés,
+$sum_(l=1)^n y_(l k)^2 = (n - 1) lambda_k$. La contribution de l'individu $i$
+à l'axe $k$ est donc la fraction de cette somme des carrés qui lui revient :
 
-Les contributions des $n$ individus à un axe totalisent 1. Une valeur supérieure
-à $1 / n$ indique une contribution supérieure à la moyenne, sans constituer à
-elle seule une preuve d'anomalie. Quelques observations très contributives
+$ "ctr"_(i k) = y_(i k)^2 / (sum_(l=1)^n y_(l k)^2)
+  = y_(i k)^2 / ((n - 1) lambda_k). $
+
+Pour un axe fixé, les contributions des $n$ individus totalisent $1$, soit
+$100%$. Leur moyenne vaut donc $1 / n$. Un individu dont la contribution
+dépasse $1 /n$ porte une part de l'inertie de l'axe supérieure à la moyenne.
+Il mérite une attention particulière pour interpréter l'axe, sans être
+nécessairement une observation aberrante. Quelques individus très contributifs
 peuvent fortement influencer l'orientation de l'axe.
 
-La qualité de représentation d'un individu sur cet axe est mesurée par le
-*cosinus carré* :
+#example[
+  Dans le nuage des deux examens, $n = 45$, $lambda_1 = 1.8$ et
+  $lambda_2 = 0.2$. Le profil A a pour scores $(sqrt(2), 0)$ et le profil B
+  $(0, sqrt(2))$. Leurs contributions non nulles sont :
 
-$ cos^2_(i k) = y_(i k)^2 / (sum_(j=1)^p z_(i j)^2) $
+  $ "ctr"_(A 1) = 2 / (44 times 1.8) approx 2.53%, quad
+    "ctr"_(B 2) = 2 / (44 times 0.2) approx 22.73%. $
 
-Le dénominateur est le carré de sa distance à l'origine dans l'espace préparé.
-Pour un plan, on additionne les cosinus carrés des deux axes. Une valeur proche
-de 1 signifie que le plan restitue presque toute cette distance. Ce rapport
-n'est pas défini pour une observation exactement au centre du nuage.
+  Le repère moyen vaut $1 / 45 approx 2.22%$. A contribue légèrement plus que
+  la moyenne au premier axe, tandis que B porte près du quart de l'inertie
+  du second. Pourtant, A et B sont à la même distance du centre : leur
+  distance au carré vaut $2$. La différence vient de l'inertie totale des
+  axes, beaucoup plus faible sur $Y_2$. Les contributions de A à $Y_2$ et de
+  B à $Y_1$ sont nulles.
+]
 
-Pour une variable, la qualité de représentation dans un plan est la somme de
-ses corrélations au carré avec les axes du plan. Dans une ACP centrée réduite,
-sa contribution à un axe est le carré du coefficient $alpha_(j k)$.
-Une variable peut être bien représentée sur un axe sans en être la principale
-contributrice. Il faut donc consulter les deux indicateurs avant d'interpréter
-les cartes.
+*Qualité de représentation d'un individu.* Notons $d_i^2 = norm(z_i)^2$ le carré de la distance de l'individu au centre, dans les données utilisées pour l'ACP. L'orthonormalité du repère principal donne $d_i^2 = sum_(k=1)^p y_(i k)^2$. Si $d_i > 0$, la qualité sur l'axe $k$ est :
+
+$ cos^2_(i k) = y_(i k)^2 / d_i^2
+  = y_(i k)^2 / (sum_(k=1)^p y_(i k)^2). $
+
+Ce rapport est le cosinus carré de l'angle entre le vecteur $z_i$ et l'axe
+$k$ : sa projection sur cet axe a pour longueur $abs(y_(i k))$. Il est compris
+entre $0$ et $1$. Une valeur proche de $1$ signifie que l'axe restitue presque
+tout l'écart de cet individu au centre; une valeur proche de $0$ signifie que
+cet écart se situe surtout dans d'autres directions.
+
+Pour un individu fixé, les cosinus carrés sur les $p$ axes totalisent $1$.
+Pour un plan, on additionne ceux des deux axes affichés. Plus généralement,
+la qualité de représentation sur les $q$ premières composantes est :
+
+$ Q_i (q) = sum_(k=1)^q cos^2_(i k)
+  = (sum_(k=1)^q y_(i k)^2) / (sum_(k=1)^p y_(i k)^2). $
+
+La part $1 - Q_i (q)$ est la fraction de sa distance au carré perdue par la
+projection. L'erreur de reconstruction vérifie
+$norm(z_i - hat(z)_i)^2 = d_i^2 (1 - Q_i (q))$.
+Pour un individu exactement au centre, $d_i = 0$. Ces rapports ne sont pas
+définis, même si sa reconstruction est exacte.
+
+#example[
+  Pour A et B, $d_A^2 = d_B^2 = 2$. Leurs qualités de représentation se lisent
+  directement à partir des scores :
+
+  #table(
+    columns: (1fr, 1fr, 1fr, 1.5fr),
+    align: center,
+    inset: 6pt,
+    stroke: 0.4pt + luma(210),
+    table.header([*Profil*], [*Sur $Y_1$*], [*Sur $Y_2$*], [*Plan $(Y_1, Y_2)$*]),
+    [A], [$100%$], [$0%$], [$100%$],
+    [B], [$0%$], [$100%$], [$100%$],
+    [C], [Non défini], [Non défini], [Non défini],
+  )
+
+  Le premier axe représente parfaitement A, mais perd tout l'écart de B au
+  centre. Ainsi, les $90%$ de variance globale conservés par $Y_1$ ne donnent
+  pas la qualité de représentation de chaque étudiant. Dans le plan complet,
+  A et B sont tous deux parfaitement représentés. Pour C, qui est au centre,
+  le cosinus carré n'est pas défini : le rapport serait $0 / 0$.
+]
+
+*Pourquoi les deux indicateurs peuvent différer ?* Pour un individu non situé
+au centre, les deux formules sont reliées par :
+
+$ "ctr"_(i k) = d_i^2 / ((n - 1) lambda_k) cos^2_(i k). $
+
+À qualité égale sur un même axe, un individu plus éloigné du centre contribue
+donc davantage. Un point proche du centre peut être très bien représenté
+tout en apportant peu d'inertie à l'axe. Inversement, un point éloigné peut
+contribuer fortement à un axe tout en conservant une grande partie de son
+profil dans d'autres directions.
+
+#example[
+  Dans une autre ACP à trois variables, supposons que la somme des scores
+  au carré sur le premier axe vaille $100$. Un individu de scores $(1, 0, 0)$
+  contribue à hauteur de $1 / 100 = 1%$ à cet axe, tout en y étant représenté
+  à $100%$.
+
+  Un second individu de scores $(3, 4, 0)$ contribue à hauteur de
+  $9 / 100 = 9%$, mais sa qualité sur cet axe vaut seulement
+  $9 / (9 + 16) = 36%$. Il contribue neuf fois plus que le premier, tout en
+  étant moins bien représenté. Le plan $(Y_1, Y_2)$ restitue en revanche
+  entièrement les deux profils.
+]
+
+*Contribution et qualité de représentation d'une variable.* Dans une ACP
+centrée réduite, chaque variable $Z_j$ a une variance égale à $1$. En notant
+$rho_(j k) = "corr"(Z_j, Y_k)$, sa qualité de représentation sur l'axe $k$
+est $rho_(j k)^2$. Sur le plan $(Y_1, Y_2)$, elle vaut
+$rho_(j 1)^2 + rho_(j 2)^2$, le carré de la longueur de sa flèche dans le cercle
+des corrélations.
+
+La relation $rho_(j k) = sqrt(lambda_k) alpha_(j k)$ donne
+$sum_(j=1)^p rho_(j k)^2 = lambda_k$, puisque le vecteur $alpha_k$ est unitaire.
+La contribution de la variable $j$ à cet axe, notée ici
+$"ctr"^("var")_(j k)$ pour la distinguer de celle d'un individu, est donc :
+
+$ "ctr"^("var")_(j k) = rho_(j k)^2 / lambda_k = alpha_(j k)^2. $
+
+Sur un axe fixé, les contributions des $p$ variables totalisent $1$ et donc le repère
+moyen est $1 / p$. La qualité indique quelle part de la variation de la
+variable est conservée, tandis que la contribution compare son rôle à celui
+des autres variables dans cet axe.
+
+#example[
+  Pour chacun des deux examens, les coefficients au carré valent $1 / 2$
+  sur les deux axes. En revanche, les corrélations au carré valent $0.9$
+  sur $Y_1$ et $0.1$ sur $Y_2$. Pour chacune des variables $Z_1$ et $Z_2$ :
+
+  #table(
+    columns: (2fr, 1fr, 1fr),
+    align: (left, center, center),
+    inset: 6pt,
+    stroke: 0.4pt + luma(210),
+    table.header([*Indicateur*], [*Axe $Y_1$*], [*Axe $Y_2$*]),
+    [Contribution], [$50%$], [$50%$],
+    [Qualité de représentation], [$90%$], [$10%$],
+  )
+
+  Les deux notes participent à parts égales à la construction de chaque axe.
+  Cela ne signifie pas que chaque axe restitue la moitié de leur variation :
+  le second n'en conserve que $10%$. Une contribution de $50%$ à un axe de
+  faible variance peut donc coexister avec une faible qualité sur cet axe.
+  Dans le plan complet, la qualité de chaque variable vaut $90% + 10% = 100%$.
+]
+
+*Utilisation pour l'interprétation.* On repère d'abord les individus et les variables qui contribuent le plus à un axe, puis on vérifie leur qualité de représentation sur les axes que l'on souhaite commenter. Les repères $1 / n$ et $1 / p$ servent à comparer les contributions à la contribution moyenne. Ce ne sont cependant pas des seuils de qualité de représentation. Les contributions se lisent axe par axe, tandis que les cosinus carrés s'additionnent sur les axes d'un plan pour évaluer sa qualité.
+
+Enfin, ces deux indicateurs utilisent des carrés : ils ne donnent pas le sens
+des oppositions. Il faut revenir aux signes des scores et des corrélations
+pour décrire les profils et nommer les axes.
 
 === Pratique de l'ACP
 
-Une analyse peut suivre les étapes suivantes :
+Une ACP demande de préciser la question étudiée, de justifier la préparation des données et de relier les résultats numériques au sens des variables. Une démarche pratique peut suivre les étapes suivantes :
 
-1. Définir les observations et les variables quantitatives pertinentes pour la
-   question étudiée; examiner les données manquantes et les valeurs extrêmes.
-2. Choisir une ACP centrée ou centrée réduite et préparer les données.
-3. Calculer les axes, les scores et les valeurs propres.
-4. Examiner la variance expliquée pour choisir le nombre de composantes.
-5. Interpréter les axes à partir des variables, de leurs contributions et de
-   leurs qualités de représentation, puis décrire les individus.
-6. Vérifier que les conclusions restent cohérentes en consultant d'autres plans
-   ou en examinant l'influence des observations les plus contributives.
+1. *Définir l'analyse.* Préciser ce que représente une ligne et sélectionner les variables quantitatives qui décrivent le phénomène étudié. Un identifiant numérique n'est pas une mesure à inclure. Une catégorie connue peut servir à colorer les points après le calcul, sans participer à la construction des axes. Elle est alors une information supplémentaire.
+2. *Examiner et préparer les données.* Vérifier les unités, les distributions, les valeurs manquantes, les variables constantes et les observations extrêmes. L'ACP usuelle exige une matrice numérique complète. Ainsi, une exclusion ou une imputation doit être justifiée et documentée. Une valeur extrême peut être une erreur de saisie ou une observation réelle intéressante. Elle ne doit donc pas être supprimée automatiquement.
+3. *Choisir la géométrie.* Centrer les variables et décider si elles doivent être réduites. La réduction donne à chacune une variance initiale égale à $1$; sans réduction, les variables les plus dispersées pèsent davantage. Des unités identiques ne suffisent donc pas à rendre les deux choix équivalents. Conserver les moyennes et les écarts-types utilisés.
+4. *Calculer et retenir les composantes.* Obtenir les valeurs propres, les
+   directions et les scores, puis choisir le nombre $q$ de composantes en
+   combinant variance cumulée, éboulis et interprétabilité. Distinguer le
+   nombre de composantes conservées des deux axes affichés sur chaque figure.
+5. *Interpréter les résultats.* Examiner d'abord les corrélations et les
+   contributions des variables pour donner un sens aux axes. Décrire ensuite
+   les individus à partir de leurs scores, en vérifiant leurs cosinus carrés.
+   Un pourcentage élevé de variance globale ne dispense pas de cette
+   vérification individuelle.
+6. *Vérifier et restituer.* Consulter les axes omis et les observations très
+   contributives. Si plusieurs préparations sont raisonnables, comparer leurs
+   résultats. Le compte rendu doit indiquer les données utilisées, la
+   préparation, le choix de $q$, la variance conservée et les principales
+   interprétations, avec leurs limites.
+
+*Exemple réel : Palmer Penguins.* Le jeu `penguins` du projet
+#link("https://allisonhorst.github.io/palmerpenguins/")[palmerpenguins]
+contient $344$ observations de manchots des espèces `Adelie`, `Chinstrap` et
+`Gentoo`, collectées dans l'archipel Palmer, en Antarctique, entre 2007 et 2009.
+Les données proviennent de Kristen Gorman et du programme Palmer Station LTER.
+
+On utilise les quatre mesures `bill_length_mm`, `bill_depth_mm`,
+`flipper_length_mm` et `body_mass_g`, en conservant leurs noms originaux.
+Les trois premières sont en millimètres et la dernière en grammes.
+Le #link("https://allisonhorst.github.io/palmerpenguins/reference/penguins.html")[dictionnaire des variables]
+décrit aussi `species`, `island`, `sex` et `year`.
+Une copie du fichier officiel est conservée dans `assets/penguins.csv`;
+sa provenance est précisée dans `assets/penguins_README.md`.
+
+#example[
+  La question est : *peut-on résumer les différences morphologiques entre
+  manchots par quelques composantes, et comment les espèces se répartissent-elles
+  dans les plans obtenus ?* Seules les quatre mesures entrent dans l'ACP.
+  `species` sert à colorer les points après le calcul. `island`, `sex` et
+  `year` restent également hors de la construction des axes : même si `year`
+  est numérique, ce n'est pas une mesure morphologique.
+]
+
+*Préparation des mesures.* Deux observations sont incomplètes sur les quatre
+mesures retenues : les lignes $4$ et $272$, en numérotant les lignes de données
+du fichier à partir de $1$, sans compter l'en-tête. Pour cet exemple, on les
+exclut sans imputation et on conserve $n = 342$ observations : $151$ `Adelie`,
+$68$ `Chinstrap` et $123$ `Gentoo`.
+
+Le filtrage porte uniquement sur les variables utilisées dans l'ACP.
+Neuf des observations conservées ont une valeur manquante pour `sex` : cela
+n'empêche pas de calculer leurs scores. Une suppression des lignes incomplètes
+sur toutes les colonnes réduirait inutilement l'échantillon à $333$ individus
+pour la question étudiée ici.
+
+On choisit une ACP centrée réduite, car les unités et les dispersions diffèrent
+fortement. Sur les $342$ observations, les écarts-types de `bill_length_mm`,
+`bill_depth_mm`, `flipper_length_mm` et `body_mass_g` valent respectivement
+environ $5.46$, $1.97$, $14.06$ et $801.95$, dans leurs unités propres.
+Les moyennes et les écarts-types sont calculés sur l'ensemble des observations
+conservées, avec le diviseur $n - 1$. On ne centre pas séparément chaque espèce,
+afin de conserver leurs écarts de moyennes. Les variables standardisées
+$Z_1, Z_2, Z_3, Z_4$ suivent l'ordre des quatre noms indiqué ci-dessus.
+
+*Choix du nombre de composantes.* Les calculs sur ces données donnent les
+résultats suivants, arrondis pour la lecture :
+
+#table(
+  columns: (1fr, 1.2fr, 1.4fr, 1.4fr),
+  align: center,
+  inset: 6pt,
+  stroke: 0.4pt + luma(210),
+  table.header([*Rang $k$*], [*$lambda_k$*], [*Variance $r_k$*], [*Cumul $R_k$*]),
+  [$1$], [$2.7538$], [$68.84%$], [$68.84%$],
+  [$2$], [$0.7725$], [$19.31%$], [$88.16%$],
+  [$3$], [$0.3652$], [$9.13%$], [$97.29%$],
+  [$4$], [$0.1085$], [$2.71%$], [$100%$],
+)
+
+Les valeurs propres totalisent $4$, l'inertie des quatre variables réduites.
+Un seuil de variance cumulée de $95%$ conduit à retenir $q = 3$, avec
+$R_3 approx 97.29%$. Le plan $(Y_1, Y_2)$ reste utile pour visualiser les
+individus, mais il ne conserve que $88.16%$ de la variance. Les $9.13%$ portés
+par le troisième axe ne sont pas visibles dans ce plan.
+
+La règle stricte de Kaiser conduirait à $q = 1$ et celle de Jolliffe à
+$q = 2$. Le deuxième axe apporte pourtant $19.31%$ de variance et le troisième
+$9.13%$. Le choix dépend donc de l'objectif : deux axes pour un premier
+graphique, trois composantes pour dépasser le seuil de $95%$ retenu ici.
+
+*Interprétation des axes et des individus.* On oriente le premier axe vers
+les valeurs élevées de `flipper_length_mm` et le second vers les valeurs
+élevées de `bill_depth_mm`. Les corrélations des variables avec ces axes et
+leur qualité de représentation dans le plan $(Y_1, Y_2)$ sont :
+
+#table(
+  columns: (2.3fr, 1fr, 1fr, 1.25fr),
+  align: (left, center, center, center),
+  inset: 6pt,
+  stroke: 0.4pt + luma(210),
+  table.header([*Variable*], [*$rho_(j 1)$*], [*$rho_(j 2)$*], [*Qualité du plan*]),
+  [`bill_length_mm`], [$0.755$], [$0.525$], [$84.61%$],
+  [`bill_depth_mm`], [$-0.664$], [$0.701$], [$93.30%$],
+  [`flipper_length_mm`], [$0.956$], [$0.002$], [$91.37%$],
+  [`body_mass_g`], [$0.910$], [$0.074$], [$83.35%$],
+)
+
+Le premier axe associe des valeurs élevées de `flipper_length_mm`,
+`body_mass_g` et `bill_length_mm` à des valeurs plus faibles de `bill_depth_mm`.
+Les variables `flipper_length_mm` et `body_mass_g` contribuent ensemble à
+environ $63.25%$ de cet axe. Il faut donc commenter cette combinaison de
+mesures, plutôt que supposer que toutes augmentent dans le même sens.
+
+Le second axe est principalement construit par `bill_depth_mm` et
+`bill_length_mm`, dont les contributions valent respectivement $63.64%$ et
+$35.64%$. Pour `bill_depth_mm`, la qualité sur cet axe seul vaut environ
+$49.17%$. La contribution de $63.64%$ décrit son rôle dans l'axe, tandis que
+les $49.17%$ décrivent la part de sa propre variation conservée par cet axe.
+
+#figure(
+  image("../figures/acp_palmerpenguins.svg", width: 100%,
+    alt: "ACP centrée réduite de 342 observations Palmer Penguins. À gauche, "
+      + "les scores sur Y1 et Y2, qui expliquent 68,84 et 19,31 pour cent "
+      + "de la variance, colorés selon species. Gentoo se situe surtout à "
+      + "droite; Adelie et Chinstrap se recouvrent en partie. L'individu 327 "
+      + "est entouré près du centre. À droite, le cercle des corrélations "
+      + "affiche bill_length_mm, bill_depth_mm, flipper_length_mm et body_mass_g."),
+  caption: [ACP de Palmer Penguins sur les quatre mesures complètes. Les
+    couleurs et les formes indiquent `species`, ajoutée après le calcul.
+    Le premier plan conserve $88.16%$ de la variance; les trois composantes
+    retenues en conservent $97.29%$. L'individu 327 illustre une faible
+    qualité de représentation dans le premier plan.],
+) <fig-acp-palmerpenguins>
+
+Les `Gentoo` se situent surtout du côté positif de $Y_1$, associé notamment
+à de grandes valeurs de `flipper_length_mm` et de `body_mass_g`. Les
+`Chinstrap` ont en moyenne des scores plus élevés sur $Y_2$ que les `Adelie`,
+mais leurs nuages se recouvrent en partie. Cette structure apparaît sans
+avoir fourni `species` à l'ACP. Elle décrit l'échantillon et ne mesure pas
+la précision d'un classificateur sur de nouveaux individus.
+
+*Vérification de la représentation.* Les qualités des variables dans le
+premier plan vont de $83.35%$ à $93.30%$. Leurs directions donnent donc une
+lecture utile de leurs relations, avec une part de variation encore omise.
+Les qualités individuelles peuvent être beaucoup plus faibles.
+
+#example[
+  L'individu de la ligne $327$ du fichier original est un `Chinstrap`, de
+  mesures $(48.1, 16.4, 199, 3325)$ dans l'ordre des quatre variables et
+  dans leurs unités respectives. Ses scores sont environ
+  $(-0.177, 0.061, 1.336, 0.352)$.
+
+  À partir des valeurs non arrondies, on obtient $Q_327 (2) approx 1.81%$.
+  Son point est proche du centre dans le premier plan, alors que son écart
+  au centre se situe surtout sur $Y_3$. Le plan $(Y_1, Y_3)$ permet donc de
+  mieux décrire ce profil. Cette faible qualité relative ne signifie pas
+  que l'observation est aberrante.
+]
+
+Le choix de la réduction a ici un effet particulièrement marqué. Sans
+réduction, `body_mass_g` représente environ $99.96%$ de l'inertie initiale
+avec les unités du fichier. Le premier axe d'une ACP seulement centrée
+conserve alors environ $99.99%$ de la variance. Ce pourcentage très élevé
+reflète surtout le poids numérique de la masse exprimée en grammes; il ne
+signifie pas que les quatre mesures sont toutes bien résumées. La réduction
+permet d'accorder la même variance initiale à chaque variable.
+
+*Reproduire les calculs en Python.* Le code ci-dessous utilise NumPy et
+pandas et s'exécute depuis la racine du projet, avec le fichier local
+`assets/penguins.csv`. Il filtre les valeurs manquantes uniquement sur les
+quatre mesures, puis utilise `ddof=1` pour rester cohérent avec le diviseur
+$n - 1$ du cours. Le signe de chaque axe est fixé pour retrouver l'orientation
+des graphiques.
+
+#block(breakable: false)[
+  #set text(size: 9pt)
+  ```python
+  import numpy as np
+  import pandas as pd
+
+  variables = ["bill_length_mm", "bill_depth_mm",
+               "flipper_length_mm", "body_mass_g"]
+  penguins = pd.read_csv("assets/penguins.csv")
+  data = penguins.dropna(subset=variables)
+  X = data[variables].to_numpy()
+  n, p = X.shape
+  Z = (X - X.mean(axis=0)) / X.std(axis=0, ddof=1)
+
+  _, d, Vt = np.linalg.svd(Z, full_matrices=False)
+  A = Vt.T.copy()
+  for k in range(p):
+      A[:, k] *= np.sign(A[np.argmax(np.abs(A[:, k])), k])
+  T = Z @ A
+  valeurs = d**2 / (n - 1)
+  r = valeurs / valeurs.sum()
+  R = np.cumsum(r)
+  q = int(np.searchsorted(R, 0.95) + 1)
+
+  rho = A * np.sqrt(valeurs)
+  ctr_ind = T**2 / ((n - 1) * valeurs)
+  cos2_ind = T**2 / np.sum(Z**2, axis=1, keepdims=True)
+  ctr_var = A**2
+  qual_var_plan = np.sum(rho[:, :2]**2, axis=1)
+  i = data.index.get_loc(326)  # Ligne 327 du fichier original.
+
+  print(n, valeurs.round(4))
+  print(q, (100 * R).round(2))
+  print((100 * qual_var_plan).round(2))
+  print(round(100 * cos2_ind[i, :2].sum(), 2))
+  ```
+]
+
+Les colonnes de `A` sont les directions $alpha_k$ et celles de `T` sont les
+scores $Y_k$. `q` vaut $3$, tandis que les expressions `:2` calculent les
+qualités dans le premier plan à deux axes. Les contributions et les qualités
+sont des proportions, multipliées par $100$ pour l'affichage en pourcentage.
+Le script `figures/acp_palmerpenguins.py` produit la figure avec Matplotlib.
+
+#example[
+  Un compte rendu possible est : « Nous réalisons une ACP centrée réduite de
+  `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g` sur
+  les $342$ observations complètes de Palmer Penguins. Trois composantes
+  conservent $97.29%$ de la variance. Le premier plan en représente $88.16%$
+  et distingue notamment les `Gentoo` selon $Y_1$. Le deuxième axe décrit
+  surtout la variation conjointe de `bill_depth_mm` et de `bill_length_mm`.
+  Certains individus, comme celui de la ligne 327, nécessitent l'examen
+  du troisième axe. »
+]
 
 === Limites
 
