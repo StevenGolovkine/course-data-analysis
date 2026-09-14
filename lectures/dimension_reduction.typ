@@ -1060,9 +1060,9 @@ axe ne constitue pas une instabilité géométrique : elle conserve sa direction
 et les distances.
 
 *Des contraintes sur les données analysées.* L'ACP usuelle travaille sur des
-variables quantitatives et une matrice complète. Attribuer les codes $1$, $2$
+variables quantitatives et une matrice pleine. Attribuer les codes $1$, $2$
 et $3$ aux modalités de `species` créerait des distances arbitraires entre
-elles; ces codes ne deviennent pas des mesures quantitatives pertinentes.
+elles. Ainsi, ces codes ne deviennent pas des mesures quantitatives pertinentes.
 
 Les valeurs manquantes demandent également un traitement explicite. Supprimer
 des lignes peut modifier la population représentée si les observations
@@ -1071,14 +1071,7 @@ manquantes par la moyenne réduit artificiellement la dispersion de la variable
 et peut fausser les corrélations. Le résultat doit donc être interprété en tenant
 compte de la méthode retenue et de l'ampleur des données manquantes.
 
-*Une interprétation descriptive, à valider pour d'autres usages.* Les axes
-sont des combinaisons mathématiques de variables. Un nom comme « taille » ou
-« niveau général » est une interprétation à étayer par leurs coefficients
-et leurs corrélations; il ne démontre pas l'existence d'un mécanisme causal.
-De même, des groupes visibles dans un plan ne constituent pas, à eux seuls,
-une classification validée. La non-corrélation des composantes n'implique pas
-leur indépendance. Le calcul d'une ACP descriptive n'exige d'ailleurs pas
-que les données suivent une loi normale.
+*Une interprétation descriptive, à valider pour d'autres usages.* Les axes sont des combinaisons mathématiques de variables. Un nom comme « taille » ou « niveau général » est une interprétation à étayer par leurs coefficients et leurs corrélations. Cela ne démontre pas l'existence d'un mécanisme causal. De même, des groupes visibles dans un plan ne constituent pas, à eux seuls, une classification validée. La non-corrélation des composantes n'implique pas leur indépendance. L'ACP n'exige d'ailleurs pas que les données suivent une loi normale.
 
 Lorsque les composantes servent de variables prédictives, le centrage, la
 réduction, une éventuelle imputation et les axes doivent être ajustés
@@ -1095,7 +1088,7 @@ conditions de collecte ou de la population peut rendre les axes appris
 moins représentatifs. Une bonne reconstruction sur l'échantillon initial
 ne garantit donc pas la même qualité sur de nouvelles données.
 
-== L'AFC
+== L'analyse factorielle des correspondances
 
 === Tableau de contingence et profils
 
