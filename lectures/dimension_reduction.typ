@@ -795,70 +795,33 @@ pour décrire les profils et nommer les axes.
 
 Une ACP demande de préciser la question étudiée, de justifier la préparation des données et de relier les résultats numériques au sens des variables. Une démarche pratique peut suivre les étapes suivantes :
 
-1. *Définir l'analyse.* Préciser ce que représente une ligne et sélectionner les variables quantitatives qui décrivent le phénomène étudié. Un identifiant numérique n'est pas une mesure à inclure. Une catégorie connue peut servir à colorer les points après le calcul, sans participer à la construction des axes. Elle est alors une information supplémentaire.
+1. *Définir l'analyse.* Préciser ce que représente une ligne et sélectionner les variables quantitatives qui décrivent le phénomène étudié. Un identifiant numérique n'est pas une mesure à inclure. Une catégorie connue peut servir à grouper les points après le calcul, sans participer à la construction des axes. Elle est alors une information supplémentaire.
 2. *Examiner et préparer les données.* Vérifier les unités, les distributions, les valeurs manquantes, les variables constantes et les observations extrêmes. L'ACP usuelle exige une matrice numérique complète. Ainsi, une exclusion ou une imputation doit être justifiée et documentée. Une valeur extrême peut être une erreur de saisie ou une observation réelle intéressante. Elle ne doit donc pas être supprimée automatiquement.
-3. *Choisir la géométrie.* Centrer les variables et décider si elles doivent être réduites. La réduction donne à chacune une variance initiale égale à $1$; sans réduction, les variables les plus dispersées pèsent davantage. Des unités identiques ne suffisent donc pas à rendre les deux choix équivalents. Conserver les moyennes et les écarts-types utilisés.
-4. *Calculer et retenir les composantes.* Obtenir les valeurs propres, les
-   directions et les scores, puis choisir le nombre $q$ de composantes en
-   combinant variance cumulée, éboulis et interprétabilité. Distinguer le
-   nombre de composantes conservées des deux axes affichés sur chaque figure.
-5. *Interpréter les résultats.* Examiner d'abord les corrélations et les
-   contributions des variables pour donner un sens aux axes. Décrire ensuite
-   les individus à partir de leurs scores, en vérifiant leurs cosinus carrés.
-   Un pourcentage élevé de variance globale ne dispense pas de cette
-   vérification individuelle.
+3. *Choisir la géométrie.* Centrer les variables et décider si elles doivent être réduites. La réduction donne à chacune une variance initiale égale à $1$. Sans réduction, les variables les plus dispersées pèsent davantage. Des unités identiques ne suffisent donc pas à rendre les deux choix équivalents. Conserver les moyennes et les écarts-types utilisés.
+4. *Calculer et retenir les composantes.* Obtenir les valeurs propres, les directions et les scores, puis choisir le nombre $q$ de composantes en combinant variance cumulée, éboulis et interprétabilité. Distinguer le nombre de composantes conservées des deux axes affichés sur chaque figure.
+5. *Interpréter les résultats.* Examiner d'abord les corrélations et les contributions des variables pour donner un sens aux axes. Décrire ensuite les individus à partir de leurs scores, en vérifiant leurs cosinus carrés. Un pourcentage élevé de variance globale ne dispense pas de cette vérification individuelle.
 6. *Vérifier et restituer.* Consulter les axes omis et les observations très
    contributives. Si plusieurs préparations sont raisonnables, comparer leurs
    résultats. Le compte rendu doit indiquer les données utilisées, la
    préparation, le choix de $q$, la variance conservée et les principales
    interprétations, avec leurs limites.
 
-*Exemple réel : Palmer Penguins.* Le jeu `penguins` du projet
-#link("https://allisonhorst.github.io/palmerpenguins/")[palmerpenguins]
-contient $344$ observations de manchots des espèces `Adelie`, `Chinstrap` et
-`Gentoo`, collectées dans l'archipel Palmer, en Antarctique, entre 2007 et 2009.
-Les données proviennent de Kristen Gorman et du programme Palmer Station LTER.
+*Exemple réel : Palmer Penguins.* Le jeu `penguins` du projet `palmerpenguins` #footnote("https://allisonhorst.github.io/palmerpenguins/") contient $344$ observations de manchots des espèces `Adelie`, `Chinstrap` et `Gentoo`, collectées dans l'archipel Palmer, en Antarctique, entre 2007 et 2009. Les données proviennent de Kristen Gorman et du programme Palmer Station LTER.
 
-On utilise les quatre mesures `bill_length_mm`, `bill_depth_mm`,
-`flipper_length_mm` et `body_mass_g`, en conservant leurs noms originaux.
-Les trois premières sont en millimètres et la dernière en grammes.
-Le #link("https://allisonhorst.github.io/palmerpenguins/reference/penguins.html")[dictionnaire des variables]
-décrit aussi `species`, `island`, `sex` et `year`.
-Une copie du fichier officiel est conservée dans `assets/penguins.csv`;
-sa provenance est précisée dans `assets/penguins_README.md`.
+On utilise les quatre mesures `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g`, en conservant leurs noms originaux. Les trois premières sont en millimètres et la dernière en grammes. Le dictionnaire des variables #footnote("https://allisonhorst.github.io/palmerpenguins/reference/penguins.html") décrit aussi `species`, `island`, `sex` et `year`.
 
 #example[
-  La question est : *peut-on résumer les différences morphologiques entre
-  manchots par quelques composantes, et comment les espèces se répartissent-elles
-  dans les plans obtenus ?* Seules les quatre mesures entrent dans l'ACP.
-  `species` sert à colorer les points après le calcul. `island`, `sex` et
-  `year` restent également hors de la construction des axes : même si `year`
-  est numérique, ce n'est pas une mesure morphologique.
+  Une question possible est : peut-on résumer les différences morphologiques entre manchots par quelques composantes, et comment les espèces se répartissent-elles dans les plans obtenus ? Seules les quatre variables quantitatives entrent dans l'ACP. La variable `species` sert à colorer les points après le calcul. Les variables `island`, `sex` et `year` restent également hors de la construction des axes : même si `year` est numérique, ce n'est pas une mesure morphologique.
 ]
 
-*Préparation des mesures.* Deux observations sont incomplètes sur les quatre
-mesures retenues : les lignes $4$ et $272$, en numérotant les lignes de données
-du fichier à partir de $1$, sans compter l'en-tête. Pour cet exemple, on les
-exclut sans imputation et on conserve $n = 342$ observations : $151$ `Adelie`,
-$68$ `Chinstrap` et $123$ `Gentoo`.
+*Préparation des mesures.* Deux observations sont incomplètes sur les quatre mesures retenues : les lignes $4$ et $272$, en numérotant les lignes de données du fichier à partir de $1$. Pour cet exemple, on les exclut sans imputation et on conserve $n = 342$ observations : $151$ `Adelie`, $68$ `Chinstrap` et $123$ `Gentoo`.
 
-Le filtrage porte uniquement sur les variables utilisées dans l'ACP.
-Neuf des observations conservées ont une valeur manquante pour `sex` : cela
-n'empêche pas de calculer leurs scores. Une suppression des lignes incomplètes
-sur toutes les colonnes réduirait inutilement l'échantillon à $333$ individus
-pour la question étudiée ici.
+Le filtrage porte uniquement sur les variables utilisées dans l'ACP. Neuf des observations conservées ont une valeur manquante pour `sex`, mais cela n'empêche pas de calculer leurs scores. Une suppression des lignes incomplètes sur toutes les colonnes réduirait inutilement l'échantillon à $333$ individus pour la question étudiée ici.
 
-On choisit une ACP centrée réduite, car les unités et les dispersions diffèrent
-fortement. Sur les $342$ observations, les écarts-types de `bill_length_mm`,
-`bill_depth_mm`, `flipper_length_mm` et `body_mass_g` valent respectivement
-environ $5.46$, $1.97$, $14.06$ et $801.95$, dans leurs unités propres.
-Les moyennes et les écarts-types sont calculés sur l'ensemble des observations
-conservées, avec le diviseur $n - 1$. On ne centre pas séparément chaque espèce,
-afin de conserver leurs écarts de moyennes. Les variables standardisées
-$Z_1, Z_2, Z_3, Z_4$ suivent l'ordre des quatre noms indiqué ci-dessus.
+On choisit une ACP centrée réduite, car les unités et les dispersions diffèrent fortement. Sur les $342$ observations, les écarts-types de `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g` valent respectivement environ $5.46$, $1.97$, $14.06$ et $801.95$, dans leurs unités propres. Les moyennes et les écarts-types sont calculés sur l'ensemble des observations conservées. On ne centre pas séparément chaque espèce, afin de conserver leurs écarts de moyennes. Les variables standardisées $Z_1, Z_2, Z_3, Z_4$ suivent l'ordre des quatre noms indiqué ci-dessus.
 
 *Choix du nombre de composantes.* Les calculs sur ces données donnent les
-résultats suivants, arrondis pour la lecture :
+résultats suivants :
 
 #table(
   columns: (1fr, 1.2fr, 1.4fr, 1.4fr),
@@ -945,29 +908,16 @@ Les qualités individuelles peuvent être beaucoup plus faibles.
   dans leurs unités respectives. Ses scores sont environ
   $(-0.177, 0.061, 1.336, 0.352)$.
 
-  À partir des valeurs non arrondies, on obtient $Q_327 (2) approx 1.81%$.
-  Son point est proche du centre dans le premier plan, alors que son écart
-  au centre se situe surtout sur $Y_3$. Le plan $(Y_1, Y_3)$ permet donc de
-  mieux décrire ce profil. Cette faible qualité relative ne signifie pas
-  que l'observation est aberrante.
+  On obtient $Q_327 (2) approx 1.81%$. Son point est proche du centre dans le premier plan, alors que son écart au centre se situe surtout sur $Y_3$. Le plan $(Y_1, Y_3)$ permet donc de mieux décrire ce profil. Cette faible qualité relative ne signifie pas que l'observation est aberrante.
 ]
 
-Le choix de la réduction a ici un effet particulièrement marqué. Sans
-réduction, `body_mass_g` représente environ $99.96%$ de l'inertie initiale
-avec les unités du fichier. Le premier axe d'une ACP seulement centrée
-conserve alors environ $99.99%$ de la variance. Ce pourcentage très élevé
-reflète surtout le poids numérique de la masse exprimée en grammes; il ne
-signifie pas que les quatre mesures sont toutes bien résumées. La réduction
-permet d'accorder la même variance initiale à chaque variable.
+Le choix de la réduction des données a ici un effet particulièrement marqué. Sans réduction, `body_mass_g` représente environ $99.96%$ de l'inertie initiale avec les unités du fichier. Le premier axe d'une ACP seulement centrée conserve alors environ $99.99%$ de la variance. Ce pourcentage très élevé reflète surtout le poids numérique de la masse exprimée en grammes. Il ne signifie pas que les quatre mesures sont toutes bien résumées. La réduction permet d'accorder la même variance initiale à chaque variable.
 
 *Reproduire les calculs en Python.* Le code ci-dessous utilise NumPy et
-pandas et s'exécute depuis la racine du projet, avec le fichier local
-`assets/penguins.csv`. Il filtre les valeurs manquantes uniquement sur les
-quatre mesures, puis utilise `ddof=1` pour rester cohérent avec le diviseur
-$n - 1$ du cours. Le signe de chaque axe est fixé pour retrouver l'orientation
-des graphiques.
+pandas. Il filtre les valeurs manquantes uniquement sur les quatre mesures, puis utilise `ddof=1` pour rester cohérent avec le diviseur $n - 1$ du cours. Le signe de chaque axe est fixé pour retrouver l'orientation des graphiques.
 
-#block(breakable: false)[
+#align(center)[
+#block(breakable: true)[
   #set text(size: 9pt)
   ```python
   import numpy as np
@@ -1004,44 +954,146 @@ des graphiques.
   print(round(100 * cos2_ind[i, :2].sum(), 2))
   ```
 ]
+]
 
-Les colonnes de `A` sont les directions $alpha_k$ et celles de `T` sont les
-scores $Y_k$. `q` vaut $3$, tandis que les expressions `:2` calculent les
-qualités dans le premier plan à deux axes. Les contributions et les qualités
-sont des proportions, multipliées par $100$ pour l'affichage en pourcentage.
-Le script `figures/acp_palmerpenguins.py` produit la figure avec Matplotlib.
+Les colonnes de `A` sont les directions $alpha_k$ et celles de `T` sont les scores $Y_k$. La variable `q` vaut $3$, tandis que les expressions `:2` calculent les qualités dans le premier plan à deux axes. Les contributions et les qualités sont des proportions.
 
 #example[
-  Un compte rendu possible est : « Nous réalisons une ACP centrée réduite de
-  `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g` sur
-  les $342$ observations complètes de Palmer Penguins. Trois composantes
-  conservent $97.29%$ de la variance. Le premier plan en représente $88.16%$
-  et distingue notamment les `Gentoo` selon $Y_1$. Le deuxième axe décrit
-  surtout la variation conjointe de `bill_depth_mm` et de `bill_length_mm`.
-  Certains individus, comme celui de la ligne 327, nécessitent l'examen
-  du troisième axe. »
+  Un compte rendu possible est : « Nous réalisons une ACP centrée réduite de `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g` sur les $342$ observations complètes du jeu de données Palmer Penguins. Trois composantes conservent $97.29%$ de la variance. Le premier plan en représente $88.16%$ et distingue notamment les `Gentoo` selon $Y_1$. Le deuxième axe décrit surtout la variation conjointe de `bill_depth_mm` et de `bill_length_mm`. Certains individus, comme celui de la ligne 327, nécessitent l'examen du troisième axe. »
 ]
 
 === Limites
 
-L'ACP est linéaire : un petit nombre d'axes peut mal résumer une structure
-courbe. Elle est sensible à l'échelle des variables et aux valeurs extrêmes,
-qui peuvent attirer les axes dans leur direction. La standardisation ne
-supprime pas cette sensibilité aux observations atypiques.
+L'ACP fournit une représentation optimale pour un critère précis : parmi les projections orthogonales de dimension $q$, elle minimise l'erreur quadratique de reconstruction des données. Cette propriété ne garantit ni que la structure étudiée soit linéaire, ni que la variance conservée corresponde à l'information recherchée. Ses limites concernent donc le choix du critère, la préparation des données et l'interprétation des résultats.
 
-L'ACP ne reçoit aucune variable réponse. Elle conserve la variance, qui n'est
-pas nécessairement l'information la plus utile pour prédire une cible. Une
-composante de faible variance peut être prédictive, tandis qu'une composante
-de forte variance peut surtout refléter du bruit ou un effet secondaire.
-De même, des groupes visibles sur une carte demandent une interprétation et
-une validation; l'ACP n'est pas en elle-même une méthode de classification.
+*Une réduction linéaire.* Les composantes sont des combinaisons linéaires des
+variables. Elles décrivent un sous-espace affine dans l'espace original,
+après réintroduction de la moyenne. Si le nuage suit une courbe ou une surface
+courbe, il peut être nécessaire de conserver plusieurs axes, même lorsque
+la position des observations dépend de peu de paramètres.
+
+#example[
+  Considérons une distribution uniforme sur le cercle unité. Une observation
+  a pour coordonnées $(cos(theta), sin(theta))$. Sa position peut être décrite par
+  un seul angle $theta$, mais toute projection sur une droite confond des
+  positions distinctes du cercle. Les deux valeurs propres sont égales :
+  une seule composante conserve $50%$ de la variance, et il faut les deux
+  pour reconstruire exactement les points. Une dimension intrinsèque faible
+  ne garantit donc pas qu'une réduction linéaire de même dimension soit
+  satisfaisante.
+]
+
+Il faut examiner la forme du nuage et les erreurs de reconstruction pour
+repérer cette situation. Une transformation des variables peut rendre une
+relation plus linéaire, mais elle change aussi la géométrie et le sens de
+l'analyse.
+
+*La variance n'est pas une mesure universelle d'information.* L'ACP ne reçoit
+aucune variable réponse. Une direction de forte variance peut traduire un
+effet secondaire, une différence de protocole de mesure ou du bruit. À
+l'inverse, une composante de faible variance peut porter une opposition
+importante ou être utile pour prédire une cible. La proportion $R_q$ mesure la
+variance conservée des variables analysées, mais il ne mesure pas une performance
+prédictive.
+
+#example[
+  Dans un modèle théorique, supposons que deux composantes centrées et
+  indépendantes $Y_1$ et $Y_2$ aient des variances respectives de $9$ et $1$.
+  La cible à prédire est $W = Y_2$. Conserver seulement $Y_1$ préserve $90%$
+  de la variance, mais n'apporte aucune information sur les variations de
+  $W$, puisque les deux composantes sont indépendantes. La composante
+  supprimée aurait au contraire permis de prédire exactement la cible.
+]
+
+Pour un objectif prédictif, le nombre de composantes doit donc être évalué
+avec le modèle qui les utilise. Pour une analyse descriptive, il faut examiner
+le contenu des axes de faible variance avant de les écarter.
+
+*Un bon résumé global peut masquer certains profils.* L'erreur minimisée est
+une somme sur tous les individus. L'ACP ne garantit pas une même qualité de
+représentation pour chacun, et elle ne cherche pas à préserver chaque distance
+ou chaque voisinage. Des observations proches dans un plan peuvent différer
+fortement sur les axes omis.
+
+
+*Une dépendance au choix des variables et à leur échelle.* Sans réduction, les variables les plus dispersées dominent l'inertie. Dans l'exemple `palmerpenguins`, la masse `body_mass_g` exprimée en grammes détermine presque toute l'inertie de l'ACP seulement centrée. La réduction corrige cet effet d'unité, mais donner la même variance initiale à toutes les variables reste un choix. Une mesure peu fiable peut alors peser autant qu'une mesure précise.
+
+La standardisation ne corrige pas non plus le déséquilibre entre des groupes
+de variables. Inclure plusieurs mesures presque identiques d'un même aspect
+lui donne davantage de poids dans les distances, même si chaque colonne est
+réduite. Il faut donc justifier la sélection des variables, leur éventuelle
+pondération et les transformations appliquées. Les axes décrivent le tableau
+ainsi construit, et non une structure indépendante de ces choix.
+
+*Une sensibilité aux observations extrêmes.* La covariance et l'inertie
+utilisent des écarts au carré : à centre et axe fixés, un score dix fois plus
+grand apporte un terme cent fois plus grand à la somme des carrés. Quelques
+observations éloignées peuvent ainsi modifier fortement les directions
+principales. Le centrage et la réduction usuels restent sensibles à ces
+observations, car leurs moyennes et leurs écarts-types le sont eux-mêmes.
+
+Il faut examiner les individus très contributifs et revenir aux mesures
+initiales. Une analyse de sensibilité peut comparer les axes avec et sans
+une observation suspecte, en explicitant cette comparaison. Une contribution
+élevée ne suffit cependant pas à justifier sa suppression. En effet, l'observation
+peut décrire une partie réelle du phénomène étudié.
+
+*Des axes estimés sur un échantillon.* Les directions dépendent de la matrice
+de covariance empirique. Elles peuvent varier d'un échantillon à l'autre,
+notamment lorsque l'effectif est faible par rapport au nombre de variables
+ou lorsque plusieurs valeurs propres sont proches. Si $p >= n$, le rang des
+données centrées est au plus $n - 1$ : les valeurs propres nulles qui en
+résultent ne prouvent pas que la population possède la même faible dimension.
+
+#example[
+  Si $lambda_1$ et $lambda_2$ sont presque égales, une petite modification
+  des données peut faire tourner les deux premiers axes et changer leurs
+  coefficients. Si ces deux valeurs propres sont bien séparées de
+  $lambda_3$, le plan qu'ils engendrent peut pourtant rester stable. Il est
+  alors plus solide d'interpréter le plan commun que d'attribuer un sens
+  très précis à chacun de ses axes.
+]
+
+On peut examiner cette stabilité en répétant l'ACP sur des rééchantillonnages
+et en comparant les sous-espaces obtenus. Une simple inversion du signe d'un
+axe ne constitue pas une instabilité géométrique : elle conserve sa direction
+et les distances.
+
+*Des contraintes sur les données analysées.* L'ACP usuelle travaille sur des
+variables quantitatives et une matrice complète. Attribuer les codes $1$, $2$
+et $3$ aux modalités de `species` créerait des distances arbitraires entre
+elles; ces codes ne deviennent pas des mesures quantitatives pertinentes.
+
+Les valeurs manquantes demandent également un traitement explicite. Supprimer
+des lignes peut modifier la population représentée si les observations
+incomplètes ont des caractéristiques particulières. Remplacer les valeurs
+manquantes par la moyenne réduit artificiellement la dispersion de la variable
+et peut fausser les corrélations. Le résultat doit donc être interprété en tenant
+compte de la méthode retenue et de l'ampleur des données manquantes.
+
+*Une interprétation descriptive, à valider pour d'autres usages.* Les axes
+sont des combinaisons mathématiques de variables. Un nom comme « taille » ou
+« niveau général » est une interprétation à étayer par leurs coefficients
+et leurs corrélations; il ne démontre pas l'existence d'un mécanisme causal.
+De même, des groupes visibles dans un plan ne constituent pas, à eux seuls,
+une classification validée. La non-corrélation des composantes n'implique pas
+leur indépendance. Le calcul d'une ACP descriptive n'exige d'ailleurs pas
+que les données suivent une loi normale.
 
 Lorsque les composantes servent de variables prédictives, le centrage, la
-réduction et les axes doivent être appris uniquement sur les données
-d'entraînement. On applique ensuite ces mêmes moyennes, écarts-types et
-coefficients aux nouvelles observations. En validation croisée, cette
-préparation doit être répétée dans chaque pli d'entraînement pour éviter une
-fuite d'information.
+réduction, une éventuelle imputation et les axes doivent être ajustés
+uniquement sur les données d'entraînement. Les mêmes paramètres sont ensuite
+appliqués aux observations de validation ou de test. En validation croisée,
+il faut répéter cette préparation dans chaque pli d'entraînement, y compris
+pour comparer plusieurs valeurs de $q$. Calculer d'abord l'ACP sur tout le
+jeu transmettrait de l'information sur les données de validation aux axes,
+même sans utiliser la variable réponse.
+
+Enfin, projeter de nouvelles observations suppose que les mêmes variables
+soient mesurées de façon comparable. Une modification des instruments, des
+conditions de collecte ou de la population peut rendre les axes appris
+moins représentatifs. Une bonne reconstruction sur l'échantillon initial
+ne garantit donc pas la même qualité sur de nouvelles données.
 
 == L'AFC
 
