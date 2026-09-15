@@ -1092,64 +1092,468 @@ ne garantit donc pas la même qualité sur de nouvelles données.
 
 === Tableau de contingence et profils
 
-L'analyse factorielle des correspondances, ou AFC, s'applique à un tableau de
-contingence croisant deux variables qualitatives. Elle représente simultanément
-les modalités de ligne et de colonne dans un espace de faible dimension.
+L'analyse factorielle des correspondances (AFC) s'applique à un tableau de
+contingence croisant deux variables qualitatives. Elle cherche à résumer les
+associations entre leurs modalités et représente les modalités de ligne et de
+colonne sur des axes communs. Les points d'une carte d'AFC sont donc des
+catégories, et non les individus qui ont servi à construire le tableau.
 
-L'AFC part des fréquences relatives du tableau. Elle compare les profils-lignes
-et les profils-colonnes plutôt que les effectifs bruts. Un profil-ligne décrit,
-pour une modalité de la première variable, la distribution conditionnelle des
-modalités de la seconde variable. Un profil-colonne décrit l'information
-symétrique.
+Considérons un tableau $N = (n_(i j))$ comportant $I$ lignes et $J$ colonnes.
+La cellule $n_(i j)$ compte les individus qui possèdent simultanément la modalité
+$i$ de la première variable et la modalité $j$ de la seconde. On note les
+effectifs marginaux et l'effectif total
 
-#example[
-  Si l'on croise le programme d'étude et le type d'admission des étudiants, une
-  ligne du tableau décrit la répartition des types d'admission pour un programme
-  donné. Deux programmes proches dans la représentation AFC ont des profils
-  d'admission semblables.
+$
+  n_(i +) = sum_(j=1)^J n_(i j), quad
+  n_(+ j) = sum_(i=1)^I n_(i j), quad
+  n = sum_(i=1)^I sum_(j=1)^J n_(i j).
+$
+
+*Un exemple suivi.* Le tableau fictif suivant décrit $200$ étudiants selon leur
+programme et leur type d'admission. Chaque étudiant appartient à un seul
+programme et à une seule catégorie d'admission.
+
+#table(
+  columns: (1.3fr, 1fr, 1.1fr, 1.5fr, 0.8fr),
+  align: center, inset: 6pt, stroke: 0.4pt + luma(210),
+  table.header([*Programme*], [*Directe*], [*Passerelle*],
+    [*Reprise d'études*], [*Total*]),
+  [Sciences], [60], [25], [15], [100],
+  [Lettres], [10], [35], [15], [60],
+  [Gestion], [10], [10], [20], [40],
+  [*Total*], [*80*], [*70*], [*50*], [*200*],
+)
+
+Une comparaison des seuls effectifs serait dominée par les programmes les plus
+nombreux. L'AFC compare plutôt les *profils*, c'est-à-dire les distributions
+conditionnelles. Le profil-ligne du programme $i$ est le vecteur dont les
+coordonnées sont
+
+$ a_(i j) = n_(i j) / n_(i +), quad sum_(j=1)^J a_(i j) = 1. $
+
+Ainsi, le profil de Sciences est $(0.60, 0.25, 0.15)$ : parmi les étudiants de
+Sciences, 60~% ont une admission directe, 25~% passent par une passerelle et
+15~% sont en reprise d'études. Deux programmes ayant ces mêmes proportions ont
+le même profil, même si l'un accueille deux fois plus d'étudiants que l'autre.
+
+Symétriquement, le profil-colonne de l'admission $j$ a pour coordonnées
+$b_(i j) = n_(i j) / n_(+ j)$, avec $sum_(i=1)^I b_(i j) = 1$.
+Parmi les $80$ admissions directes, $60$ concernent Sciences : le profil de
+cette colonne est $(0.75, 0.125, 0.125)$. Le dénominateur change donc selon la
+question : répartition des admissions *dans un programme*, ou répartition des
+programmes *pour une admission donnée*.
+
+On introduit les fréquences relatives et les *masses* des modalités :
+
+$
+  p_(i j) = n_(i j) / n, quad
+  r_i = n_(i +) / n, quad c_j = n_(+ j) / n.
+$
+
+Les masses des programmes sont $r = (0.50, 0.30, 0.20)^top$ et celles des
+admissions sont $c = (0.40, 0.35, 0.25)^top$. Elles pondèrent les points dans
+l'analyse : comparer les profils ne revient pas à donner le même poids à
+toutes les catégories. On suppose les masses strictement positives ; une ligne
+ou une colonne entièrement nulle doit être retirée.
+
+Le profil moyen des lignes est $c$, car $sum_(i=1)^I r_i a_(i j) = c_j$.
+De même, le profil moyen des colonnes est $r$. Ces moyennes sont pondérées par
+les masses, et non calculées en donnant le même poids à chaque profil.
+
+#figure(
+  image("../figures/afc_profils.svg", width: 100%,
+    alt: "Profils d'admission de trois programmes fictifs. Sciences compte "
+      + "60 pour cent d'admissions directes, Lettres 58,3 pour cent de "
+      + "passerelles et Gestion 50 pour cent de reprises d'études. Le profil "
+      + "d'ensemble est de 40, 35 et 25 pour cent respectivement."),
+  caption: [Profils-lignes et profil moyen pondéré. Chaque barre représente
+    100~% des étudiants du groupe concerné. L'AFC étudie les différences de
+    composition entre ces barres.],
+)
+
+=== Indépendance, distance du chi-deux et inertie
+
+*La situation de référence.* Si les deux variables étaient indépendantes,
+connaître le programme ne modifierait pas la distribution des admissions.
+Tous les profils-lignes seraient égaux à $c$, et tous les profils-colonnes à
+$r$. Le tableau de fréquences correspondant est $r c^top$. À marges fixées,
+l'effectif attendu dans la cellule $(i,j)$ est donc
+
+$ e_(i j) = n r_i c_j = (n_(i +) n_(+ j)) / n. $
+
+Pour Sciences et l'admission directe, on attendrait $100 times 80 / 200 = 40$
+étudiants, contre $60$ observés. Cette combinaison est surreprésentée : son
+effectif vaut $1.5$ fois l'effectif attendu. À l'inverse, Sciences et la reprise
+d'études comptent $15$ étudiants, contre $25$ attendus. Une association se juge
+ainsi par rapport aux marges du tableau, et non à la seule taille d'un effectif.
+
+*La distance entre profils.* L'AFC utilise la distance du chi-deux. Pour deux
+profils-lignes $i$ et $ell$, elle est définie par
+
+$ d_(chi^2)^2(i, ell) = sum_(j=1)^J (a_(i j) - a_(ell j))^2 / c_j. $
+
+Pour deux profils-colonnes $j$ et $h$, la définition symétrique est
+
+$ d_(chi^2)^2(j, h) = sum_(i=1)^I (b_(i j) - b_(i h))^2 / r_i. $
+
+La pondération tient compte de la fréquence de chaque modalité. Un même écart
+de proportion pèse davantage dans une colonne rare que dans une colonne très
+fréquente. Par exemple, un écart de $0.10$ contribue pour $0.10^2 / 0.25 = 0.04$
+dans la colonne Reprise d'études, contre $0.10^2 / 0.40 = 0.025$ dans la colonne
+Directe. Ce choix de distance donne un sens relatif aux écarts, mais peut aussi
+amplifier les fluctuations de catégories rares.
+
+*L'inertie mesure l'écart à l'indépendance.* Comme en ACP, l'inertie est une
+dispersion autour du centre. Ici, les points sont les profils, la distance est
+celle du chi-deux et les poids sont les masses. En notant
+
+$
+  d_i^2 = sum_(j=1)^J (a_(i j) - c_j)^2 / c_j, quad
+  delta_j^2 = sum_(i=1)^I (b_(i j) - r_i)^2 / r_i,
+$
+
+l'inertie totale s'écrit
+
+$
+  cal(I) = sum_(i=1)^I r_i d_i^2
+         = sum_(j=1)^J c_j delta_j^2
+         = sum_(i=1)^I sum_(j=1)^J
+           (p_(i j) - r_i c_j)^2 / (r_i c_j).
+$
+
+Les nuages de lignes et de colonnes ont la *même inertie* : il s'agit de deux
+descriptions de la même association, et non de deux inerties à additionner.
+On retrouve la statistique de Pearson du test d'indépendance :
+
+$
+  chi^2 = sum_(i=1)^I sum_(j=1)^J (n_(i j) - e_(i j))^2 / e_(i j),
+  quad cal(I) = chi^2 / n.
+$
+
+Dans l'exemple, $chi^2 = 47.75$ et $cal(I) = 47.75 / 200 = 0.23875$.
+Une inertie nulle correspond à une indépendance exacte dans le tableau observé :
+tous les profils de chaque nuage coïncident avec leur centre. Plus l'inertie
+est grande, plus les profils s'en écartent, pour cette géométrie.
+
+#note[
+  L'AFC décrit la structure du tableau ; elle ne constitue pas à elle seule un
+  test d'indépendance. Multiplier tous les effectifs par deux ne change ni les
+  profils, ni l'inertie, ni la carte, mais double $chi^2$. L'interprétation d'une
+  valeur $p$ dépend en outre du plan d'échantillonnage et des conditions du test.
 ]
 
-=== Indépendance et distance du chi-deux
+=== Construction des axes factoriels
 
-Si les deux variables qualitatives sont indépendantes, les fréquences conjointes
-sont proches du produit des fréquences marginales. L'AFC étudie les écarts à
-cette situation d'indépendance.
+L'AFC peut se comprendre comme une analyse en composantes principales des
+profils, avec leurs masses et la distance du chi-deux. Sa construction repose
+sur la décomposition en valeurs singulières des écarts à l'indépendance.
+On pose $P = N/n$, $D_r = op("diag")(r_1, dots, r_I)$ et
+$D_c = op("diag")(c_1, dots, c_J)$, puis
 
-La distance utilisée est la distance du chi-deux. Elle pondère les écarts par
-les fréquences marginales, ce qui évite qu'une modalité très fréquente impose à
-elle seule la structure géométrique. L'inertie totale est liée à la statistique
-du test du chi-deux d'indépendance.
+$
+  S = D_r^(-1/2) (P - r c^top) D_c^(-1/2), quad
+  S_(i j) = (p_(i j) - r_i c_j) / sqrt(r_i c_j).
+$
 
-Autrement dit, l'AFC met en évidence les associations qui s'écartent le plus de
-ce que l'on observerait si les deux variables étaient indépendantes.
+La soustraction de $r c^top$ retire la situation d'indépendance. Les facteurs
+diagonaux appliquent les pondérations liées aux marges. La somme des carrés des
+éléments de $S$ est précisément l'inertie $cal(I)$.
+
+Pour un tableau qui n'est pas exactement indépendant, la décomposition réduite
+de $S$ est
+
+$
+  S = U D V^top, quad D = op("diag")(sigma_1, dots, sigma_K),
+  quad sigma_1 >= dots >= sigma_K > 0,
+$
+
+où $U^top U = V^top V = I_K$ et $I_K$ est la matrice identité d'ordre $K$.
+Le nombre d'axes non triviaux vérifie $K = op("rang")(S) <= min(I-1, J-1)$.
+Les contraintes sur les marges expliquent la perte d'une dimension de chaque
+côté. Un tableau à deux lignes ne peut donc fournir qu'un seul axe non trivial,
+même s'il possède beaucoup de colonnes.
+
+Les *coordonnées principales* des lignes et des colonnes sont respectivement
+les lignes des matrices#footnote[
+  Pour les conventions de coordonnées et leur calcul, voir
+  #link("https://doi.org/10.18637/jss.v020.i03")[Nenadić et Greenacre (2007),
+  _Correspondence Analysis in R, with Two- and Three-dimensional Graphics:
+  The ca Package_].
+] :
+
+$ F = D_r^(-1/2) U D, quad G = D_c^(-1/2) V D. $
+
+Ainsi, $F_(i k)$ est la coordonnée du programme $i$ sur l'axe $k$, et
+$G_(j k)$ celle de l'admission $j$. Dans l'espace complet des $K$ axes, les
+distances euclidiennes entre lignes de $F$ reproduisent exactement les distances
+du chi-deux entre profils-lignes. Il en va de même pour $G$ et les
+profils-colonnes. En ne conservant que $q$ axes, on projette les points : les
+distances peuvent diminuer, ce qui impose de contrôler la qualité de
+représentation avant d'interpréter une proximité.
+
+L'inertie de l'axe $k$ est la valeur propre $lambda_k = sigma_k^2$. Elle vérifie
+
+$
+  sum_(i=1)^I r_i F_(i k)^2
+  = sum_(j=1)^J c_j G_(j k)^2
+  = lambda_k, quad
+  sum_(k=1)^K lambda_k = cal(I).
+$
+
+Le premier axe conserve le plus d'inertie possible ; les suivants résument
+successivement l'inertie restante dans des directions orthogonales. Pour $q$
+axes retenus, la proportion cumulée est
+
+$ R_q = (sum_(k=1)^q lambda_k) / cal(I), quad 1 <= q <= K. $
+
+Le choix de $q$ repose sur la décroissance des valeurs propres, l'inertie cumulée
+et l'interprétation des axes. La règle de Kaiser de l'ACP normée ne se transpose
+pas telle quelle : le seuil $lambda_k > 1$ n'est pas une référence adaptée à
+l'AFC.
+
+#example[
+  Notre tableau $3 times 3$ possède deux axes non triviaux :
+
+  #table(
+    columns: (1fr, 1.5fr, 1.5fr, 1.5fr), align: center,
+    inset: 6pt, stroke: 0.4pt + luma(210),
+    table.header([*Axe $k$*], [*Valeur propre*], [*Inertie expliquée*],
+      [*Inertie cumulée*]),
+    [1], [0,17021], [71,29~%], [71,29~%],
+    [2], [0,06854], [28,71~%], [100~%],
+  )
+
+  Un seul axe résume la principale opposition, mais laisse de côté 28,71~% de
+  l'inertie. Un seuil cumulé de 80~% conduit ici à retenir $q = 2$. Le plan
+  conserve alors toute l'inertie parce qu'il contient tous les axes non
+  triviaux. Cela ne signifie pas que l'association est parfaite : les
+  pourcentages décrivent la part de l'inertie représentée, pas la force absolue
+  de la liaison.
+]
 
 === Représentation barycentrique
 
-Une propriété utile de l'AFC est la double représentation barycentrique. Les
-modalités de ligne peuvent être vues comme des barycentres pondérés des
-modalités de colonne, et inversement. Cela rend les cartes factorielles
-interprétables: une proximité entre modalités suggère une association dans le
-tableau, à condition de vérifier la qualité de représentation.
+Les deux nuages sont liés par des *relations de transition*. Pour les exprimer
+comme des barycentres, il faut distinguer les coordonnées principales $F, G$
+des *coordonnées standard*
 
-#note[
-  Sur une carte d'AFC, il faut interpréter les directions, les oppositions et
-  les contributions. Deux points proches du centre peuvent être mal représentés
-  ou peu contributifs; leur proximité brute n'est pas toujours informative.
+$ Phi = D_r^(-1/2) U = F D^(-1), quad
+  Gamma = D_c^(-1/2) V = G D^(-1). $
+
+Dans les coordonnées standard, l'inertie pondérée de chaque axe vaut $1$ ; dans
+les coordonnées principales, elle vaut $lambda_k$. On obtient les relations
+
+$ F = D_r^(-1) P Gamma, quad G = D_c^(-1) P^top Phi, $
+
+soit, coordonnée par coordonnée,
+
+$ F_(i k) = sum_(j=1)^J a_(i j) Gamma_(j k), quad
+  G_(j k) = sum_(i=1)^I b_(i j) Phi_(i k). $
+
+Comme les coefficients d'un profil sont positifs ou nuls et de somme $1$, une
+ligne en coordonnées principales est le barycentre des colonnes en coordonnées
+standard, pondéré par son profil-ligne. La relation inverse utilise les profils
+colonnes, avec les colonnes en coordonnées principales et les lignes en
+coordonnées standard.
+
+#example[
+  Sur le premier axe de l'exemple, les coordonnées standard des admissions sont
+  environ $1.2243$ pour Directe, $-0.7883$ pour Passerelle et $-0.8553$ pour
+  Reprise d'études. Le profil de Sciences donne donc
+
+  $ F_("Sciences", 1)
+    approx 0.60 times 1.2243 + 0.25 times (-0.7883) + 0.15 times (-0.8553)
+    approx 0.4092. $
+
+  La forte proportion d'admissions directes tire ce programme du côté positif
+  de l'axe. Un programme ayant exactement le profil moyen $c$ serait placé à
+  l'origine sur tous les axes.
 ]
 
-=== Lecture pratique
+Une carte dite *symétrique*, comme celle ci-dessous, affiche les deux ensembles
+en coordonnées principales $F$ et $G$. Dans cette convention, la relation devient
 
-Pour interpréter une AFC, on regarde:
+$ F_(i k) = 1 / sigma_k sum_(j=1)^J a_(i j) G_(j k). $
 
-- les modalités qui contribuent fortement aux axes;
-- les oppositions entre modalités de ligne;
-- les oppositions entre modalités de colonne;
-- les modalités éloignées de l'origine, souvent plus spécifiques;
-- la qualité de représentation des points dans le plan affiché.
+Le facteur $1/sigma_k$ est essentiel : une ligne n'est généralement pas le
+barycentre direct des colonnes telles qu'elles sont dessinées sur cette carte.
+Une carte asymétrique représentant $F$ et $Gamma$ permet la lecture barycentrique
+directe pour les lignes, mais les distances entre colonnes n'y sont plus les
+distances du chi-deux. Il faut donc connaître la convention du graphique fourni
+par le logiciel avant d'en interpréter les distances.
 
-Une carte d'AFC n'est pas seulement un graphique décoratif. Elle doit être reliée
-au tableau de contingence: les associations visibles doivent correspondre à des
-écarts concrets entre profils.
+=== Lecture du plan factoriel
+
+*Lire les oppositions.* Le premier axe oppose Sciences aux deux autres
+programmes et l'admission directe aux deux autres types d'admission. Cela
+correspond aux profils : les admissions directes représentent 60~% des
+étudiants de Sciences, contre 16,7~% en Lettres et 25~% en Gestion. Le second
+axe distingue surtout Gestion et la reprise d'études, en haut, de Lettres et
+la passerelle, en bas. La reprise d'études représente 50~% des admissions en
+Gestion, contre 25~% dans l'ensemble du tableau ; la passerelle représente
+58,3~% des admissions en Lettres, contre 35~% dans l'ensemble.
+
+Le signe d'un axe est arbitraire : inverser simultanément les signes des
+coordonnées des lignes et des colonnes ne change ni les distances ni les
+associations. Les noms donnés aux axes doivent décrire leurs oppositions,
+plutôt que donner un sens intrinsèque aux côtés positif et négatif.
+
+#figure(
+  image("../figures/afc_plan.svg", width: 95%,
+    alt: "Carte symétrique de l'AFC du tableau fictif. Sciences et Directe sont "
+      + "du côté positif du premier axe. Le deuxième axe oppose Gestion et "
+      + "Reprise d'études, en haut, à Lettres et Passerelle, en bas. Les deux "
+      + "axes expliquent respectivement 71,29 et 28,71 pour cent de l'inertie."),
+  caption: [Carte symétrique : programmes et admissions en coordonnées
+    principales. Les deux axes représentent toute l'inertie de ce tableau.
+    Les distances s'interprètent à l'intérieur de chaque ensemble de points.],
+)
+
+*Distinguer les distances.* Deux programmes proches ont des profils d'admission
+semblables si les axes affichés les représentent bien. Deux admissions proches
+ont des répartitions semblables entre programmes, sous la même réserve. En
+revanche, la distance entre un programme et une admission n'est pas une
+distance du chi-deux entre profils : ces points appartiennent à deux espaces
+initiaux différents. La proximité d'un cercle et d'un triangle ne mesure donc
+pas directement leur association, même dans un plan qui conserve toute l'inertie.
+
+Pour relier les deux ensembles, on examine leurs positions sur les axes et on
+revient aux écarts à l'indépendance. Avec tous les axes, l'identité suivante
+exprime ce lien de façon précise :
+
+$ p_(i j) / (r_i c_j) - 1
+  = sum_(k=1)^K (F_(i k) G_(j k)) / sigma_k. $
+
+Des coordonnées de même signe contribuent à une surreprésentation sur un axe ;
+des signes opposés contribuent à une sous-représentation. C'est la somme sur
+les axes qui reconstitue l'association. Pour Gestion et Reprise d'études, le
+rapport observé/attendu vaut $20/10 = 2$, ce qui confirme leur association
+positive dans le tableau.
+
+*Situer l'origine.* Un programme dont le profil est moyen se trouve à
+l'origine. Un point éloigné de l'origine dans l'espace complet possède un
+profil spécifique. Sur un plan partiel, un point proche du centre peut au
+contraire s'écarter du profil moyen sur un axe non affiché. La distance au
+centre du graphique ne suffit donc pas à décider qu'une modalité est banale.
+
+=== Contributions et qualité de représentation
+
+Comme en ACP, ces deux diagnostics répondent à des questions différentes.
+La *contribution* indique quelles modalités construisent un axe. Pour les
+lignes et les colonnes, elle vaut respectivement
+
+$
+  op("ctr")_(i k)^r = (r_i F_(i k)^2) / lambda_k, quad
+  op("ctr")_(j k)^c = (c_j G_(j k)^2) / lambda_k.
+$
+
+Sur chaque axe, les contributions des lignes somment à $1$, et celles des
+colonnes somment aussi à $1$. On analyse ces deux ensembles séparément : on
+n'additionne pas la contribution d'un programme à celle d'une admission.
+Les valeurs $1/I$ et $1/J$ donnent des repères de contribution moyenne, sans
+constituer des seuils de significativité.
+
+La *qualité de représentation* mesure la part de la distance d'une modalité
+à son profil moyen qui est visible sur l'axe. Elle est donnée par les cosinus
+carrés
+
+$
+  op("cos")^2_(i k) = F_(i k)^2 / d_i^2, quad
+  op("cos")^2_(j k) = G_(j k)^2 / delta_j^2.
+$
+
+Pour un plan ou un espace de $q$ axes, on somme ces cosinus carrés sur les axes
+retenus. La qualité est comprise entre $0$ et $1$ ; elle vaut $1$ dans l'espace
+complet des $K$ axes. Pour un profil exactement moyen, la distance au centre est
+nulle et ce rapport n'est pas défini.
+
+#example[
+  Pour Sciences, $r_i = 0.50$, $F_(i 1) approx 0.40923$ et
+  $d_i^2 approx 0.16857$. On obtient
+
+  $ op("ctr")_(i 1)^r
+    approx (0.50 times 0.40923^2) / 0.17021 approx 0.492, quad
+    op("cos")^2_(i 1) approx 0.40923^2 / 0.16857 approx 0.993. $
+
+  Sciences apporte ainsi 49,2~% de l'inertie du premier axe, tandis que cet
+  axe représente 99,3~% de l'écart de Sciences au profil moyen. Le premier
+  pourcentage décrit le rôle du programme dans l'axe ; le second décrit ce
+  que l'axe montre du programme.
+]
+
+Les résultats pour les trois programmes précisent la lecture du plan :
+
+#table(
+  columns: (1.2fr, 1fr, 1fr, 1fr, 1fr), align: center,
+  inset: 6pt, stroke: 0.4pt + luma(210),
+  table.header([*Programme*], [*Contribution axe 1*], [*Contribution axe 2*],
+    [*Qualité axe 1*], [*Qualité axe 2*]),
+  [Sciences], [49,2~%], [0,8~%], [99,3~%], [0,7~%],
+  [Lettres], [38,9~%], [31,1~%], [75,6~%], [24,4~%],
+  [Gestion], [11,9~%], [68,1~%], [30,3~%], [69,7~%],
+)
+
+Le premier axe dépend surtout de Sciences et de Lettres ; le second dépend
+surtout de Gestion. Bien que l'axe 1 explique 71,29~% de l'inertie totale,
+il ne représente que 30,3~% de l'écart du profil de Gestion au profil moyen.
+L'inertie expliquée globalement ne garantit donc pas une bonne représentation
+de chaque modalité. Du côté des admissions, Directe contribue pour 60,0~% au
+premier axe ; Reprise d'études et Passerelle contribuent respectivement pour
+56,7~% et 43,2~% au second.
+
+=== Pratique et limites de l'AFC
+
+Une analyse suit la progression suivante :
+
+1. *Construire et vérifier le tableau.* Préciser la population, les catégories
+   et le traitement des valeurs manquantes. Examiner les marges et les
+   cellules peu remplies. L'AFC s'applique directement aux effectifs : il ne
+   faut pas centrer et réduire les colonnes du tableau comme pour une ACP.
+2. *Examiner les profils et les écarts à l'indépendance.* Repérer les
+   différences de composition et les combinaisons surreprésentées ou
+   sous-représentées avant de chercher à nommer des axes.
+3. *Choisir le nombre $q$ d'axes.* Examiner les valeurs propres et l'inertie
+   cumulée, puis vérifier quelles modalités sont bien représentées. Un plan
+   lisible peut laisser de côté une opposition substantielle.
+4. *Interpréter conjointement la carte et les diagnostics.* Nommer les axes à
+   partir des contributions, vérifier les cosinus carrés et confronter les
+   associations proposées aux effectifs attendus et aux profils.
+
+*Projeter un profil supplémentaire.* On peut situer un nouveau programme sans
+modifier les axes déjà construits. Si son profil d'admission est
+$(a_(ast 1), dots, a_(ast J))$, avec des proportions de somme $1$ sur les mêmes
+catégories, sa coordonnée projetée est
+
+$ F_(ast k) = sum_(j=1)^J a_(ast j) Gamma_(j k). $
+
+Le programme est alors supplémentaire : il ne contribue ni aux axes ni à
+l'inertie du tableau actif. Par exemple, un programme dont le profil est
+$(0.40, 0.35, 0.25)$ est projeté à l'origine. Si l'on souhaite au contraire
+qu'il participe à la construction des axes, il faut refaire l'analyse du
+tableau augmenté.
+
+*Des modalités rares parfois instables.* La distance du chi-deux donne un poids
+élevé à certains écarts impliquant de petites masses. Quelques observations
+peuvent alors déplacer fortement une modalité rare, voire orienter un axe.
+Une grande distance à l'origine ne signifie toutefois pas automatiquement une
+forte contribution, puisque celle-ci dépend aussi de la masse. Il faut examiner
+les effectifs et la stabilité de l'interprétation ; un regroupement de
+catégories doit avoir un sens dans le domaine étudié.
+
+*Des zéros à interpréter.* Une cellule nulle n'empêche pas le calcul si ses deux
+marges sont positives. Il faut distinguer une combinaison simplement absente
+de l'échantillon d'une combinaison impossible par construction. Ces zéros
+structurels peuvent organiser la carte et rendre le modèle d'indépendance
+usuel peu pertinent. À l'inverse, une ligne ou une colonne entièrement nulle
+n'a ni profil ni distance définis.
+
+*Une analyse dépendante du tableau choisi.* Modifier les catégories, filtrer
+une partie de la population ou changer le traitement des valeurs manquantes
+modifie les marges et donc la géométrie. La carte décrit les associations dans
+le tableau analysé ; elle n'établit pas une relation causale et ne permet pas
+de déduire le parcours d'un étudiant particulier. Enfin, les propriétés du
+cercle des corrélations de l'ACP ne s'appliquent pas aux angles entre modalités
+sur une carte d'AFC.
 
 == L'ACM
 
