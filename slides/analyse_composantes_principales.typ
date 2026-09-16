@@ -52,7 +52,7 @@
   footer: self => [STT-2200 · Analyse en composantes principales],
   config-info(
     title: [Analyse en composantes principales],
-    subtitle: [Réduction de dimension · STT-2200],
+    subtitle: [STT-2200],
     author: [Steven Golovkine],
     date: [Automne 2026],
     institution: [Université Laval],
@@ -67,40 +67,22 @@
 
 #title-slide()
 
-== Objectifs du cours
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.65em,
-  card([1 · Construire], [
-    Choisir la préparation des données et obtenir les axes principaux.
-  ]),
-  card([2 · Réduire], [
-    Relier variance conservée, nombre de composantes et reconstruction.
-  ], fill: pale-blue),
-  card([3 · Interpréter], [
-    Lire les individus, les variables, les contributions et les cosinus carrés.
-  ], fill: pale-purple),
-  card([4 · Appliquer], [
-    Analyser les données Palmer Penguins et discuter les limites de l'ACP.
-  ], fill: pale-orange),
-)
-
 = Représenter les données
 
 == Sélection de variables et nouvelles coordonnées
 
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
-  card([Sélection], [
+  card([Sélection de variables], [
     Garder certaines variables originales.
 
     *Exemple :* conserver uniquement la note de l'examen final.
-  ], height: 2.6in),
+  ], height: 2in),
   card([Construction de composantes], [
-    Combiner les variables en quelques scores synthétiques.
+    Combiner les variables en quelques scores.
 
     *Exemple :* résumer plusieurs évaluations par un niveau commun.
-  ], fill: pale-blue, height: 2.6in),
+  ], fill: pale-blue, height: 2in),
 )
 
 #v(0.7em)
@@ -117,7 +99,7 @@
 
     *CP2* lui est perpendiculaire et résume la variation restante.
 
-    Dans ce nuage simulé, CP1 conserve *90 %* de la variance.
+    Dans ces données simulées, CP1 conserve *90 %* de la variance.
   ],
 )
 
@@ -163,9 +145,6 @@
   ], fill: pale-blue, height: 2.75in),
 )
 
-#v(0.6em)
-#small([$s_j^2 = 1/(n-1) sum_i (x_(i j)-overline(x)_j)^2$.
-  Retirer les variables constantes et traiter les valeurs manquantes.])
 
 == La standardisation est un choix d'analyse
 
@@ -200,7 +179,9 @@
 )
 
 #v(0.65em)
-#small([Les $n$ observations ont le même poids. Les variances utilisent le diviseur $n-1$.])
+#text(size: 17pt, fill: muted)[
+  Les $n$ observations ont le même poids. Les variances utilisent le diviseur $n-1$.
+]
 
 == Variance d'une projection
 
@@ -684,181 +665,6 @@ Pour une ACP centrée réduite et $lambda_k > 0$ :
 #small([Sur un axe, les contributions des variables totalisent 1.
   Le repère $1/p$ est une contribution moyenne, pas un seuil de qualité.])
 
-= Application : Palmer Penguins
-
-== Une question morphologique
-
-Peut-on résumer les différences morphologiques entre manchots par quelques
-composantes ? Comment les espèces se répartissent-elles dans ces plans ?
-
-#v(0.65em)
-#course-table(
-  columns: (2fr, 2fr, 1fr),
-  [*Variable active*], [*Mesure*], [*Unité*],
-  [`bill_length_mm`], [Longueur du bec], [mm],
-  [`bill_depth_mm`], [Profondeur du bec], [mm],
-  [`flipper_length_mm`], [Longueur de la nageoire], [mm],
-  [`body_mass_g`], [Masse corporelle], [g],
-)
-
-#v(0.55em)
-#small([Source : palmerpenguins, 344 observations, 2007–2009.
-  Collecte : Kristen Gorman et Palmer Station LTER.])
-
-== Préparation des données Palmer Penguins
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([342 observations complètes], [
-    Exclure les lignes 4 et 272, incomplètes sur les quatre mesures.
-
-    151 Adelie, 68 Chinstrap et 123 Gentoo.
-  ], height: 2.45in),
-  card([ACP centrée réduite], [
-    Calculer moyennes et écarts-types sur les 342 observations ensemble.
-
-    `species` sert seulement à colorer les points après le calcul.
-  ], fill: pale-blue, height: 2.45in),
-)
-
-#v(0.65em)
-#takeaway([Neuf valeurs de `sex` sont manquantes parmi ces observations.
-  Cela ne gêne pas l'ACP des quatre mesures retenues.])
-
-== Combien de composantes pour les manchots ?
-
-#course-table(
-  columns: (1fr, 1.2fr, 1.4fr, 1.4fr),
-  [*Axe*], [$lambda_k$], [*Variance*], [*Cumul*],
-  [1], [2,7538], [68,84 %], [68,84 %],
-  [2], [0,7725], [19,31 %], [88,16 %],
-  [3], [0,3652], [9,13 %], [97,29 %],
-  [4], [0,1085], [2,71 %], [100 %],
-)
-
-#v(0.75em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Objectif : au moins 95 %], [
-    Retenir *trois composantes* : $R_3 approx 97.29%$.
-  ], height: 1.3in),
-  card([Premier graphique], [
-    Afficher *deux axes* : le plan conserve *88,16 %*.
-  ], fill: pale-blue, height: 1.3in),
-)
-
-== Les individus et les variables dans le premier plan
-
-#align(center)[
-  #image("../figures/acp_palmerpenguins.svg", height: 4in)
-]
-
-#v(0.25em)
-#small([Les espèces servent d'information supplémentaire.
-  Leur séparation visuelle n'évalue pas un classificateur.])
-
-== Donner un sens aux axes de Palmer Penguins
-
-#course-table(
-  columns: (2.1fr, 1fr, 1fr, 1.25fr),
-  [*Variable*], [$rho_(j 1)$], [$rho_(j 2)$], [*Qualité du plan*],
-  [`bill_length_mm`], [0,755], [0,525], [84,61 %],
-  [`bill_depth_mm`], [−0,664], [0,701], [93,30 %],
-  [`flipper_length_mm`], [0,956], [0,002], [91,37 %],
-  [`body_mass_g`], [0,910], [0,074], [83,35 %],
-)
-
-#v(0.7em)
-*CP1* associe des nageoires plus longues, une masse plus élevée et un bec
-plus long à une profondeur du bec plus faible.
-
-*CP2* décrit surtout la variation conjointe des deux mesures du bec.
-
-== Un profil mal représenté dans un bon plan
-
-L'individu 327 du fichier original est un *Chinstrap*.
-Ses scores sont environ :
-
-#formula([$ (-0.177, 0.061, 1.336, 0.352). $])
-
-#v(0.6em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Qualité globale du plan], [
-    Le plan $(Y_1,Y_2)$ conserve *88,16 %* de la variance du nuage.
-  ], height: 1.65in),
-  card([Qualité de cet individu], [
-    $Q_327(2) approx 1.81%$.
-
-    Son écart au centre se situe surtout sur $Y_3$.
-  ], fill: pale-orange, height: 1.65in),
-)
-
-#v(0.5em)
-#small([Consulter le plan $(Y_1,Y_3)$. Un faible cosinus carré ne suffit pas
-  pour qualifier une observation d'aberrante.])
-
-== Reproduire l'ACP : préparation et SVD
-
-#small([Python, depuis la racine du dépôt. Les noms et l'ordre des variables
-  correspondent aux tableaux précédents.])
-
-#v(0.45em)
-```python
-import numpy as np
-import pandas as pd
-
-variables = ["bill_length_mm", "bill_depth_mm",
-             "flipper_length_mm", "body_mass_g"]
-data = pd.read_csv("assets/penguins.csv").dropna(subset=variables)
-X = data[variables].to_numpy()
-n, p = X.shape
-Z = (X - X.mean(axis=0)) / X.std(axis=0, ddof=1)
-_, d, Vt = np.linalg.svd(Z, full_matrices=False)
-A = Vt.T.copy()
-for k in range(p):
-    A[:, k] *= np.sign(A[np.argmax(np.abs(A[:, k])), k])
-T = Z @ A
-```
-
-== Reproduire l'ACP : variance et diagnostics
-
-```python
-valeurs = d**2 / (n - 1)
-R = np.cumsum(valeurs / valeurs.sum())
-q = int(np.searchsorted(R, 0.95) + 1)
-
-rho = A * np.sqrt(valeurs)
-ctr_ind = T**2 / ((n - 1) * valeurs)
-distance2 = np.sum(Z**2, axis=1, keepdims=True)
-cos2_ind = np.divide(T**2, distance2,
-                    out=np.full_like(T, np.nan), where=distance2 > 0)
-ctr_var = A**2
-qual_var_plan = np.sum(rho[:, :2]**2, axis=1)
-```
-
-#v(0.6em)
-#small([Ici, toutes les valeurs propres sont positives. Si un axe a une variance
-  nulle, ses contributions et ses corrélations ne sont pas définies.])
-
-== Projeter de nouvelles observations
-
-En ACP centrée réduite, réutiliser les moyennes, les écarts-types et les
-directions appris.
-
-#formula([
-  $ z_("nouveau",j) = (x_("nouveau",j)-overline(x)_j)/s_j $
-  $ t_("nouveau") = A_q^top z_("nouveau") $
-])
-
-#v(0.65em)
-Pour une utilisation prédictive, ajuster dans *chaque pli d'entraînement*
-la préparation, l'ACP et le modèle qui utilise ses scores.
-
-#v(0.6em)
-#takeaway([Choisir $q$ par validation de la procédure complète.
-  Le jeu de test final intervient après ce choix.])
-
 = Limites et restitution
 
 == Une réduction linéaire et un critère de variance
@@ -934,19 +740,3 @@ la préparation, l'ACP et le modèle qui utilise ses scores.
 #v(0.6em)
 #small([Le compte rendu relie les données, la préparation, la dimension
   retenue, l'interprétation et les limites de la représentation.])
-
-== Supports et ressources
-
-- *Notes du cours* : chapitre « Réduction de dimension », section
-  « L'analyse en composantes principales ».
-- *Données locales* : `assets/penguins.csv`.
-- *Provenance et licence CC0* : `assets/penguins_README.md`.
-- *Figures reproductibles* : scripts `figures/acp_*.py`.
-- *Documentation des données* :
-  #link("https://allisonhorst.github.io/palmerpenguins/")[projet palmerpenguins].
-
-#v(0.65em)
-#small([Données : Kristen Gorman et Palmer Station LTER.
-  Paquet : Horst, Hill et Gorman (2020),
-  #link("https://doi.org/10.5281/zenodo.3960218")[palmerpenguins].
-  Figures reprises des supports du cours.])
