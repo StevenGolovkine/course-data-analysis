@@ -193,12 +193,14 @@ La covariance empirique des données centrées est
 Pour une direction unitaire $alpha$, le vecteur des scores est $y = Z alpha$.
 
 #formula([
-  $ s^2(y) = 1/(n-1) y^top y = alpha^top hat(Sigma) alpha. $
+  $ op("Var")(y) = 1/(n-1) y^top y = alpha^top hat(Sigma) alpha. $
 ])
 
 #v(0.65em)
-#small([La contrainte $alpha^top alpha = 1$ fixe l'échelle : multiplier les
-  coefficients par $c$ multiplierait la variance par $c^2$.])
+#text(size: 17pt, fill: muted)[
+  La contrainte $alpha^top alpha = 1$ fixe l'échelle : multiplier les
+  coefficients par $c$ multiplierait la variance par $c^2$.
+]
 
 == Le premier axe : un problème d'optimisation
 
@@ -208,7 +210,7 @@ Pour une direction unitaire $alpha$, le vecteur des scores est $y = Z alpha$.
 ])
 
 #v(0.6em)
-Le lagrangien introduit la contrainte de norme :
+Le Lagrangien introduit la contrainte de norme :
 
 $ cal(L)(alpha, lambda) = alpha^top hat(Sigma) alpha
   - lambda (alpha^top alpha - 1). $
@@ -236,7 +238,7 @@ Pour tout vecteur unitaire, $alpha = sum_j c_j u_j$ avec $sum_j c_j^2 = 1$.
 
 #v(0.7em)
 La borne est atteinte avec $alpha_1 = u_1$.
-Ainsi, $Y_1 = Z alpha_1$ et $s^2(Y_1) = lambda_1$.
+Ainsi, $Y_1 = Z alpha_1$ et $op("Var")(Y_1) = lambda_1$.
 
 == Les axes suivants et la non-corrélation
 
@@ -247,19 +249,22 @@ L'axe $k$ maximise la variance sous deux contraintes :
 
 #formula([
   $ hat(Sigma) alpha_k = lambda_k alpha_k, quad Y_k = Z alpha_k $
-  $ s(Y_k, Y_l) = alpha_k^top hat(Sigma) alpha_l
+  $ op("Cov")(Y_k, Y_l) = alpha_k^top hat(Sigma) alpha_l
     = lambda_l alpha_k^top alpha_l $
 ])
 
 #v(0.65em)
-#takeaway([La variance de $Y_k$ vaut $lambda_k$. Les composantes sont non corrélées,
-  ce qui n'implique pas leur indépendance.])
+#takeaway([
+La variance de $Y_k$ vaut $lambda_k$.
+
+Les composantes sont non corrélées, ce qui n'implique pas leur indépendance.
+])
 
 == Représentation réduite et rang
 
 #formula([
-  $ A_q = (alpha_1, dots, alpha_q), quad T_q = Z A_q, quad A_q^top A_q = I_q $
-  $ 1/(n-1) T_q^top T_q = op("diag")(lambda_1, dots, lambda_q) $
+  $ A_q = (alpha_1 | dots | alpha_q), quad T_q = Z A_q, quad A_q^top A_q = I_q, $
+  $ 1/(n-1) T_q^top T_q = op("diag")(lambda_1, dots, lambda_q). $
 ])
 
 #v(0.7em)
@@ -267,32 +272,16 @@ L'axe $k$ maximise la variance sous deux contraintes :
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Chaque ligne de $T_q$], [
     Les $q$ scores d'une observation :
-    $y_(i k) = sum_j alpha_(j k) z_(i j)$.
-  ], height: 2in),
-  card([Nombre d'axes non nuls], [
-    $r = op("rang")(Z) <= min(n-1, p)$.
 
+    $ y_(i k) = sum_(j=1)^p alpha_(j k) z_(i j), k = 1, dots, q. $
+  ], height: 2.2in),
+  card([Nombre d'axes non nuls], [
     Exactement $r$ composantes ont une variance strictement positive.
-  ], fill: pale-blue, height: 2in),
+    
+    $ r = op("rang")(Z) <= min(n-1, p). $
+  ], fill: pale-blue, height: 2.2in),
 )
 
-== Calculer l'ACP par décomposition en valeurs singulières
-
-Pour $r = op("rang")(Z)$, la SVD compacte s'écrit
-
-#formula([
-  $ Z = U_r D_r V_r^top, quad D_r = op("diag")(d_1, dots, d_r) $
-  $ alpha_k = V_k, quad lambda_k = d_k^2/(n-1), quad Y_k = d_k U_k. $
-])
-
-#v(0.75em)
-- $U_r$ est de taille $n times r$ et $V_r$ de taille $p times r$.
-- Leurs colonnes sont orthonormées et $d_1 >= dots >= d_r > 0$.
-- Le calcul évite de former explicitement $Z^top Z$.
-
-#v(0.35em)
-#small([Inverser simultanément le signe d'une direction et de ses scores
-  donne la même ACP.])
 
 = Mesurer la variance conservée
 
@@ -311,13 +300,15 @@ Pour $r = op("rang")(Z)$, la SVD compacte s'écrit
 )
 
 #v(0.55em)
-#small([Avec une normalisation par $n$, l'inertie vaut $(n-1)I/n$.
-  Les proportions de variance conservée restent identiques.])
+#text(size: 17pt, fill: muted)[
+  Avec une normalisation par $n$, l'inertie vaut $(n-1) / n I$.
+  Les proportions de variance conservée restent identiques.
+]
 
 == L'inertie est la somme des valeurs propres
 
 #formula([
-  $ I = sum_(j=1)^p s^2(Z_j) = op("tr")(hat(Sigma))
+  $ I = sum_(j=1)^p op("Var")(Z_j) = op("tr")(hat(Sigma))
     = sum_(k=1)^p lambda_k $
 ])
 
@@ -325,22 +316,24 @@ Pour $r = op("rang")(Z)$, la SVD compacte s'écrit
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Changement de repère], [
-    $norm(z_i)^2 = sum_(k=1)^p y_(i k)^2$.
+    $ norm(z_i)^2 = sum_(k=1)^p y_(i k)^2. $
 
     L'orthonormalité conserve les distances et l'inertie totale.
-  ], height: 2in),
+  ], height: 2.4in),
   card([ACP centrée réduite], [
     Chaque variable a une variance égale à 1.
 
-    L'inertie totale vaut donc $I = p$.
-  ], fill: pale-blue, height: 2in),
+    L'inertie totale vaut donc 
+    
+    $ I = p. $
+  ], fill: pale-blue, height: 2.4in),
 )
 
 == Variance expliquée par un axe et par plusieurs axes
 
 #formula([
-  $ r_k = lambda_k / sum_(j=1)^p lambda_j, quad
-    R_q = (sum_(k=1)^q lambda_k) / sum_(j=1)^p lambda_j $
+  $ r_k = lambda_k / (sum_(j=1)^p lambda_j), quad
+    R_q = (sum_(k=1)^q lambda_k) / (sum_(j=1)^p lambda_j). $
 ])
 
 #v(0.75em)
@@ -349,7 +342,7 @@ Pour $r = op("rang")(Z)$, la SVD compacte s'écrit
   card([Exemple], [
     CP1 : 60 % ; CP2 : 22 %.
 
-    Le premier plan conserve *82 %* de la variance totale.
+    Le premier plan conserve 82% de la variance totale.
   ], height: 1.8in),
   card([Part omise], [
     Les 18 % restants correspondent à des différences invisibles dans ce plan.
@@ -357,18 +350,21 @@ Pour $r = op("rang")(Z)$, la SVD compacte s'écrit
 )
 
 #v(0.55em)
-#small([« Expliquée » signifie conservée par la projection, sans interprétation causale.])
+#text(size: 17pt, fill: muted)[
+  « Expliquée » signifie conservée par la projection, sans interprétation causale.
+]
+
 
 == Reconstruction et variance perdue
 
 #formula([
-  $ hat(Z)_q = T_q A_q^top, quad hat(z)_i = sum_(k=1)^q y_(i k) alpha_k $
+  $ hat(Z)_q = T_q A_q^top, quad hat(z)_i = sum_(k=1)^q y_(i k) alpha_k, $
   $ 1/(n-1) sum_(i=1)^n norm(z_i-hat(z)_i)^2
     = sum_(k=q+1)^p lambda_k = I(1-R_q) $
 ])
 
 #v(0.75em)
-Parmi les projections orthogonales de dimension $q$, l'ACP minimise
+Parmi les projections orthogonales de dimension $q$, l'ACP est celle qui minimise
 l'erreur quadratique de reconstruction.
 
 #v(0.65em)
@@ -384,22 +380,18 @@ On suppose une corrélation empirique de $0.8$.
 
 #formula([
   $ hat(Sigma) = mat(1, 0.8; 0.8, 1), quad
-    det(hat(Sigma)-lambda I_2) = (1-lambda)^2-0.8^2 $
+    det(hat(Sigma)-lambda I_2) = (1-lambda)^2-0.8^2. $
 ])
 
 #v(0.7em)
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Première direction], [
-    $lambda_1 = 1.8$
-
-    $alpha_1 = 1/sqrt(2) (1, 1)^top$
-  ], height: 1.65in),
+    $ lambda_1 = 1.8, quad alpha_1 = 1/sqrt(2) vec(1, 1) $
+  ], height: 1.8in),
   card([Seconde direction], [
-    $lambda_2 = 0.2$
-
-    $alpha_2 = 1/sqrt(2) (1, -1)^top$
-  ], fill: pale-blue, height: 1.65in),
+    $ lambda_2 = 0.2, quad alpha_2 = 1/sqrt(2) vec(1, -1) $
+  ], fill: pale-blue, height: 1.8in),
 )
 
 == Niveau commun et contraste
@@ -410,12 +402,12 @@ On suppose une corrélation empirique de $0.8$.
     $ Y_1 = (Z_1 + Z_2)/sqrt(2) $
 
     Les deux notes contribuent dans le même sens.
-  ], height: 1.9in),
+  ], height: 2.2in),
   card([Contraste : 10 %], [
     $ Y_2 = (Z_1 - Z_2)/sqrt(2) $
 
     Un score positif indique une première note standardisée plus élevée.
-  ], fill: pale-orange, height: 1.9in),
+  ], fill: pale-orange, height: 2.2in),
 )
 
 #v(0.65em)
@@ -423,7 +415,7 @@ On suppose une corrélation empirique de $0.8$.
   columns: (1fr, 1fr, 1fr, 1fr, 1fr),
   [*Profil*], [$z_1$], [$z_2$], [$y_1$], [$y_2$],
   [A], [1], [1], [$sqrt(2)$], [0],
-  [B], [1], [−1], [0], [$sqrt(2)$],
+  [B], [1], [-1], [0], [$sqrt(2)$],
   [C], [0], [0], [0], [0],
 )
 
@@ -435,7 +427,9 @@ On suppose une corrélation empirique de $0.8$.
 
 #v(0.3em)
 #takeaway([Les deux composantes conservent toutes les distances.
-  B et C se distinguent uniquement sur le second axe.])
+
+  B et C se distinguent uniquement sur le second axe.
+])
 
 == Réduire à une seule composante
 
