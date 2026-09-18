@@ -1095,7 +1095,7 @@ ne garantit donc pas la même qualité sur de nouvelles données.
 L'analyse factorielle des correspondances (AFC) s'applique à un tableau de
 contingence croisant deux variables qualitatives. Elle cherche à résumer les
 associations entre leurs modalités et représente les modalités de ligne et de
-colonne sur des axes communs. Les points d'une carte d'AFC sont donc des
+colonne sur des axes communs. Les points d'un plan d'AFC sont donc des
 catégories, et non les individus qui ont servi à construire le tableau.
 
 Considérons un tableau $N = (n_(i j))$ comportant $I$ lignes et $J$ colonnes.
@@ -1109,7 +1109,7 @@ $
   n = sum_(i=1)^I sum_(j=1)^J n_(i j).
 $
 
-*Un exemple suivi.* Le tableau fictif suivant décrit $200$ étudiants selon leur
+*Exemple.* Le tableau suivant décrit $200$ étudiants selon leur
 programme et leur type d'admission. Chaque étudiant appartient à un seul
 programme et à une seule catégorie d'admission.
 
@@ -1125,11 +1125,11 @@ programme et à une seule catégorie d'admission.
 )
 
 Une comparaison des seuls effectifs serait dominée par les programmes les plus
-nombreux. L'AFC compare plutôt les *profils*, c'est-à-dire les distributions
+nombreux. L'AFC compare plutôt les *profils*, i.e. les distributions
 conditionnelles. Le profil-ligne du programme $i$ est le vecteur dont les
 coordonnées sont
 
-$ a_(i j) = n_(i j) / n_(i +), quad sum_(j=1)^J a_(i j) = 1. $
+$ a_(i j) = n_(i j) / n_(i +), quad j = 1, ..., J, quad "et" quad sum_(j=1)^J a_(i j) = 1. $
 
 Ainsi, le profil de Sciences est $(0.60, 0.25, 0.15)$ : parmi les étudiants de
 Sciences, 60~% ont une admission directe, 25~% passent par une passerelle et
@@ -1137,17 +1137,16 @@ Sciences, 60~% ont une admission directe, 25~% passent par une passerelle et
 le même profil, même si l'un accueille deux fois plus d'étudiants que l'autre.
 
 Symétriquement, le profil-colonne de l'admission $j$ a pour coordonnées
-$b_(i j) = n_(i j) / n_(+ j)$, avec $sum_(i=1)^I b_(i j) = 1$.
-Parmi les $80$ admissions directes, $60$ concernent Sciences : le profil de
-cette colonne est $(0.75, 0.125, 0.125)$. Le dénominateur change donc selon la
-question : répartition des admissions *dans un programme*, ou répartition des
-programmes *pour une admission donnée*.
+$ b_(i j) = n_(i j) / n_(+ j),quad i = 1, ..., I, quad "et" quad sum_(i=1)^I b_(i j) = 1. $
+Parmi les $80$ admissions directes, $60$ concernent Sciences. Le profil de Admission directe est $(0.75, 0.125, 0.125)$. Le dénominateur change donc selon la
+question : répartition des admissions dans un programme, ou répartition des
+programmes pour un type d'admission donné.
 
-On introduit les fréquences relatives et les *masses* des modalités :
+On introduit maintenant les fréquences relatives et les masses des modalités :
 
 $
   p_(i j) = n_(i j) / n, quad
-  r_i = n_(i +) / n, quad c_j = n_(+ j) / n.
+  r_i = n_(i +) / n, quad c_j = n_(+ j) / n, quad i = 1, ..., I, quad j = 1, ..., J.
 $
 
 Les masses des programmes sont $r = (0.50, 0.30, 0.20)^top$ et celles des
@@ -1157,8 +1156,8 @@ toutes les catégories. On suppose les masses strictement positives ; une ligne
 ou une colonne entièrement nulle doit être retirée.
 
 Le profil moyen des lignes est $c$, car $sum_(i=1)^I r_i a_(i j) = c_j$.
-De même, le profil moyen des colonnes est $r$. Ces moyennes sont pondérées par
-les masses, et non calculées en donnant le même poids à chaque profil.
+De même, le profil moyen des colonnes est $r$, car $sum_(j=1)^J c_j b_(i j) = r_i$.
+Ces moyennes sont pondérées par les masses, et non calculées en donnant le même poids à chaque profil.
 
 #figure(
   image("../figures/afc_profils.svg", width: 100%,
@@ -1173,22 +1172,13 @@ les masses, et non calculées en donnant le même poids à chaque profil.
 
 === Indépendance, distance du chi-deux et inertie
 
-*La situation de référence.* Si les deux variables étaient indépendantes,
-connaître le programme ne modifierait pas la distribution des admissions.
-Tous les profils-lignes seraient égaux à $c$, et tous les profils-colonnes à
-$r$. Le tableau de fréquences correspondant est $r c^top$. À marges fixées,
-l'effectif attendu dans la cellule $(i,j)$ est donc
+*Situation de référence.* Si les deux variables considérées étaient indépendantes, connaître l'une ne modifierait pas la distribution de l'autre. Ainsi, dans l'exemple précédent, connaître le programme ne modifierait pas la distribution des types d'admissions. Tous les profils-lignes seraient égaux à $c$, et tous les profils-colonnes à $r$. Le tableau de fréquences correspondant est $r c^top$. L'effectif attendu dans la cellule $(i,j)$ est donc
 
 $ e_(i j) = n r_i c_j = (n_(i +) n_(+ j)) / n. $
 
-Pour Sciences et l'admission directe, on attendrait $100 times 80 / 200 = 40$
-étudiants, contre $60$ observés. Cette combinaison est surreprésentée : son
-effectif vaut $1.5$ fois l'effectif attendu. À l'inverse, Sciences et la reprise
-d'études comptent $15$ étudiants, contre $25$ attendus. Une association se juge
-ainsi par rapport aux marges du tableau, et non à la seule taille d'un effectif.
+Pour Sciences et l'admission directe, on attendrait $(100 times 80) / 200 = 40$ étudiants, contre $60$ observés. Cette combinaison semble surreprésentée. En effet, son effectif vaut $1.5$ fois l'effectif attendu. À l'inverse, Sciences et la reprise d'études comptent $15$ étudiants, contre $25$ attendus. Une association se juge ainsi par rapport aux marges du tableau, et non à la seule taille d'un effectif.
 
-*La distance entre profils.* L'AFC utilise la distance du chi-deux. Pour deux
-profils-lignes $i$ et $ell$, elle est définie par
+*La distance entre profils.* L'AFC utilise la distance du $chi^2$ pour comparer des profils. Pour deux profils-lignes $i$ et $ell$, elle est définie par
 
 $ d_(chi^2)^2(i, ell) = sum_(j=1)^J (a_(i j) - a_(ell j))^2 / c_j. $
 
