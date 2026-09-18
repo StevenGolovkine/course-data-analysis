@@ -210,7 +210,6 @@ mesures_binaires <- function(
     taux_erreur = mean(observe != predit),
     exactitude = mean(observe == predit),
     sensibilite = division_sure(vp, vp + fn),
-    rappel = division_sure(vp, vp + fn),
     specificite = division_sure(vn, vn + fp),
     precision = division_sure(vp, vp + fp)
   )
@@ -252,7 +251,7 @@ print(rbind(
 
 # Le coût permet de distinguer des erreurs dont les conséquences diffèrent.
 # Les montants ci-dessous sont pédagogiques, pas des estimations réelles.
-cout_fn <- 5000
+cout_fn <- 500
 cout_fp <- 50
 cout_classification <- function(evaluation) {
   evaluation$effectifs["FN"] * cout_fn +

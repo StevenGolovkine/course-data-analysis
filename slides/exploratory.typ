@@ -662,7 +662,7 @@
   gutter: 0.62em,
   metric([Sensibilité], [$ "VP"/("VP"+"FN") $], [Parmi les positifs, combien sont détectés?]),
   metric([Spécificité], [$ "VN"/("VN"+"FP") $], [Parmi les négatifs, combien sont écartés?], fill: pale-blue, stroke: rgb("#c7d8e4")),
-  metric([Précision ou rappel], [$ "VP"/("VP"+"FP") $], [Parmi les alertes, combien sont réellement positives?], fill: pale-purple, stroke: rgb("#d9cbe4")),
+  metric([Précision], [$ "VP"/("VP"+"FP") $], [Parmi les alertes, combien sont réellement positives?], fill: pale-purple, stroke: rgb("#d9cbe4")),
   card([], [Abaisser le seuil augmente généralement la sensibilité mais réduit la spécificité. La précision dépend aussi de la fréquence de la classe positive.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 2.2in)
 )
 
@@ -680,7 +680,7 @@
   ], height: 2.05in),
   [
     #formula([
-      $"Sensibilité" = "Rappel" = 16/20 = 80%$
+      $"Sensibilité" = 16/20 = 80%$
     ], height: 0.72in)
     #v(0.42em)
     #formula([
