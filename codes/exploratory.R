@@ -171,10 +171,6 @@ comparaison_regression <- data.frame(
 )
 
 print(comparaison_regression)
-cat(
-  "La MAE préfère A, tandis que la MSE préfère B. Le critère exprime donc une",
-  " préférence sur le coût des erreurs.\n", sep = ""
-)
 
 
 # 4. ERREUR DE CLASSIFICATION ET MATRICE DE CONFUSION -----------------------
@@ -270,8 +266,6 @@ comparaison_couts <- data.frame(
   )
 )
 print(comparaison_couts)
-cat("Le modèle fait davantage d'erreurs au total, mais réduit ici le coût des",
-    " fraudes manquées.\n", sep = "")
 
 
 # 5. COMPROMIS BIAIS-VARIANCE ----------------------------------------------
@@ -597,8 +591,6 @@ meilleur_degre <- resultats_cv$degre[which.min(resultats_cv$erreur_cv)]
 
 print(resultats_cv)
 cat("Degré choisi par validation croisée : ", meilleur_degre, "\n", sep = "")
-cat("La dispersion entre les plis complète la moyenne; elle ne constitue pas",
-    " automatiquement un intervalle de confiance.\n", sep = "")
 
 plot(
   resultats_cv$degre, resultats_cv$erreur_cv,

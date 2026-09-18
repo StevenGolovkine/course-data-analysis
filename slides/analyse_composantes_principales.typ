@@ -478,8 +478,10 @@ Exemple d'une ACP centrée réduite de six variables :
   #image("../figures/acp_nombre_composantes.svg", height: 4.5in)
 ]
 
-#small([Dans cet exemple, le coude illustratif au rang 4 suggère $q = 4$.
-  Sa position reste un jugement visuel à justifier.])
+#text(size: 17pt, fill: muted)[
+  Dans cet exemple, le coude illustratif au rang 4 suggère $q = 4$.
+  Sa position reste un jugement visuel à justifier.
+]
 
 == Plusieurs règles, plusieurs choix possibles
 
@@ -502,7 +504,7 @@ Exemple d'une ACP centrée réduite de six variables :
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Trois composantes retenues], [
-    $R_3 = 90%$ concerne l'espace formé par $Y_1$, $Y_2$ et $Y_3$.
+    $R_3 = 90%$ concerne l'espace formé par les trois premiers axes factoriels $Y_1$, $Y_2$ et $Y_3$.
   ], height: 1.65in),
   card([Deux plans différents], [
     $(Y_1,Y_2)$ conserve 75 %.
@@ -511,15 +513,12 @@ Exemple d'une ACP centrée réduite de six variables :
   ], fill: pale-blue, height: 1.65in),
 )
 
-#v(0.7em)
-#takeaway([Si les six valeurs propres valent toutes 1, deux axes ne conservent
-  que 33,3 % : aucune direction ne concentre davantage de variance.], fill: pale-orange)
 
 = Interpréter les plans factoriels
 
 == Lire la carte des individus
 
-Le point $i$ a pour coordonnées $(y_(i 1), y_(i 2))$ dans le premier plan.
+L'observation $i$ a pour coordonnées $(y_(i 1), y_(i 2))$ dans le premier plan factoriel.
 
 - Donner un sens aux axes à partir des variables avant de décrire les profils.
 - Utiliser la même échelle sur les deux axes pour lire les distances.
@@ -530,7 +529,7 @@ Le point $i$ a pour coordonnées $(y_(i 1), y_(i 2))$ dans le premier plan.
   columns: (1fr, 1fr, 1fr, 1fr),
   [*Individu*], [$y_1$], [$y_2$], [$y_3$],
   [D], [0,1], [0,1], [3],
-  [E], [0,1], [0,1], [−3],
+  [E], [0,1], [0,1], [-3],
 )
 
 #v(0.5em)
@@ -542,7 +541,7 @@ Le point $i$ a pour coordonnées $(y_(i 1), y_(i 2))$ dans le premier plan.
   columns: (1.2fr, 1.5fr, 2.5fr),
   [*Quantité*], [*Notation*], [*Ce qu'elle décrit*],
   [Coefficient], [$alpha_(j k)$], [Poids de la variable $j$ dans l'axe $k$],
-  [Score], [$y_(i k)$], [Position de l'individu $i$ sur l'axe $k$],
+  [Score], [$y_(i k)$], [Position de l'observation $i$ sur l'axe $k$],
   [Corrélation], [$rho_(j k)$], [Association entre la variable $j$ et l'axe $k$],
 )
 
@@ -570,8 +569,10 @@ Dans une ACP centrée réduite, pour $lambda_k > 0$ :
 )
 
 #v(0.45em)
-#small([Les flèches atteignent le cercle car les deux axes représentent toute
-  la variation. Le cosinus de leur angle vaut exactement 0,8.])
+#text(size: 17pt, fill: muted)[
+  Les flèches atteignent le cercle car les deux axes représentent toute
+  la variation. Le cosinus de leur angle vaut exactement 0,8.
+]
 
 == Longueurs et angles des flèches
 
@@ -591,9 +592,6 @@ Dans une ACP centrée réduite, pour $lambda_k > 0$ :
   ], fill: pale-blue, height: 2.5in),
 )
 
-#v(0.7em)
-#takeaway([Une flèche en $(0.1,0.2)$ ne représente que 5 % de la variation.
-  Consulter d'autres axes avant d'interpréter ses angles.], fill: pale-orange)
 
 == Contribution et qualité d'un individu
 
@@ -616,8 +614,10 @@ Dans une ACP centrée réduite, pour $lambda_k > 0$ :
 )
 
 #v(0.65em)
-#small([Contributions définies pour $lambda_k > 0$ ; cosinus carrés définis
-  pour $norm(z_i) > 0$. Dans un plan, additionner les cosinus carrés de ses axes.])
+#text(size: 17pt, fill: muted)[
+  Contributions définies pour $lambda_k > 0$ ; cosinus carrés définis
+  pour $norm(z_i) > 0$. Dans un plan, additionner les cosinus carrés de ses axes.
+]
 
 == Les profils A, B et C : deux lectures complémentaires
 
@@ -635,8 +635,9 @@ La contribution moyenne d'un individu est $1/45 approx 2.22%$.
 )
 
 #v(0.65em)
-#takeaway([A et B sont à la même distance du centre. B porte près du quart
-  de l'inertie du second axe, qui est beaucoup plus faible.])
+#text(size: 17pt, fill: muted)[
+  Les observations A et B sont à la même distance du centre. L' observation B porte près du quart de l'inertie du second axe, qui est beaucoup plus faible.
+]
 
 == Contribution et qualité d'une variable
 
@@ -650,14 +651,16 @@ Pour une ACP centrée réduite et $lambda_k > 0$ :
 #v(0.6em)
 #course-table(
   columns: (2fr, 1fr, 1fr),
-  [*Chaque examen*], [*Axe* $Y_1$], [*Axe* $Y_2$],
+  [*Indicateur*], [*Axe* $Y_1$], [*Axe* $Y_2$],
   [Contribution], [50 %], [50 %],
   [Qualité de représentation], [90 %], [10 %],
 )
 
 #v(0.6em)
-#small([Sur un axe, les contributions des variables totalisent 1.
-  Le repère $1/p$ est une contribution moyenne, pas un seuil de qualité.])
+#text(size: 17pt, fill: muted)[
+  Sur un axe, les contributions des variables totalisent 1.
+  Le repère $1/p$ est une contribution moyenne, pas un seuil de qualité.
+]
 
 = Limites et restitution
 
@@ -668,8 +671,7 @@ Pour une ACP centrée réduite et $lambda_k > 0$ :
   card([Un cercle], [
     $(cos(theta), sin(theta))$ dépend d'un seul angle.
 
-    Pour une distribution uniforme, un axe conserve seulement *50 %*
-    de la variance et confond des positions distinctes.
+    Pour une distribution uniforme sur le cercle, un axe conserve seulement *50 %* de la variance et confond des positions distinctes.
   ], height: 2.9in),
   card([Une cible portée par un axe faible], [
     $Y_1$ et $Y_2$ sont indépendantes, de variances 9 et 1.
@@ -680,29 +682,11 @@ Pour une ACP centrée réduite et $lambda_k > 0$ :
 )
 
 #v(0.6em)
-#small([L'optimalité concerne la reconstruction quadratique par projection
-  orthogonale. Elle ne garantit pas la pertinence pour chaque objectif.])
+#text(size: 17pt, fill: muted)[
+  L'optimalité concerne la reconstruction quadratique par projection
+  orthogonale. Elle ne garantit pas la pertinence pour chaque objectif.
+]
 
-== Échelle, observations extrêmes et stabilité
-
-#grid(
-  columns: (1fr, 1fr, 1fr), gutter: 0.65em,
-  card([Échelle], [
-    Sans réduction, la masse en grammes porte *99,96 %* de l'inertie
-    initiale des manchots.
-  ], height: 2.55in),
-  card([Points extrêmes], [
-    Les écarts au carré amplifient leur influence. Examiner les individus
-    très contributifs et les mesures originales.
-  ], fill: pale-orange, height: 2.55in),
-  card([Stabilité], [
-    Des valeurs propres proches peuvent produire des axes instables,
-    même si leur sous-espace commun reste stable.
-  ], fill: pale-blue, height: 2.55in),
-)
-
-#v(0.65em)
-#takeaway([Une inversion du signe d'un axe ne modifie pas sa géométrie.])
 
 == Questions pour interpréter une ACP
 
@@ -716,21 +700,3 @@ Pour une ACP centrée réduite et $lambda_k > 0$ :
 #v(0.6em)
 #takeaway([Les axes décrivent les données choisies. Ils ne démontrent ni
   une causalité, ni une classification validée.])
-
-== Exemple de restitution
-
-#card([Palmer Penguins], [
-  Nous réalisons une ACP centrée réduite de quatre mesures morphologiques
-  sur les *342 observations complètes*.
-
-  *Trois composantes* conservent *97,29 %* de la variance.
-  Le premier plan en conserve *88,16 %* et distingue notamment les Gentoo
-  selon le premier axe.
-
-  Le second axe décrit surtout les deux mesures du bec. Certains profils,
-  comme l'individu 327, nécessitent l'examen du troisième axe.
-], height: 3.3in)
-
-#v(0.6em)
-#small([Le compte rendu relie les données, la préparation, la dimension
-  retenue, l'interprétation et les limites de la représentation.])
