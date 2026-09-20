@@ -1,156 +1,649 @@
 #import "../styles/notes.typ": note, example
 
+#show figure.caption: set align(left)
+
 = Apprentissage supervisé
 
 == Introduction
 
-En apprentissage supervisé, les données d'entraînement contiennent une variable
-réponse. L'objectif est d'apprendre une règle qui associe les variables
-explicatives à cette réponse, puis de généraliser cette règle à de nouvelles
-observations.
+En apprentissage supervisé, on dispose d'exemples pour lesquels les variables
+explicatives et la réponse à prédire sont connues. On utilise ces exemples pour
+construire une règle de prédiction, puis on applique cette règle à de nouvelles
+observations dont la réponse est encore inconnue. Le mot *supervisé* désigne la
+présence de cette réponse dans les données d'apprentissage : elle fournit une
+référence pour apprendre et pour mesurer les erreurs.
 
-Lorsque la réponse est numérique, on parle de régression. Lorsque la réponse est
-une classe, on parle de classification. Ce chapitre met surtout l'accent sur la
-classification.
+Il faut distinguer la tâche de prédiction de la description des données. Une
+ACP résume la variabilité d'un ensemble de mesures sans utiliser de réponse.
+Un classificateur cherche au contraire les caractéristiques qui permettent
+de prévoir une étiquette donnée. Une variable très dispersée n'est donc pas
+nécessairement utile pour prédire, et une variable peu dispersée peut devenir
+essentielle si elle distingue bien les classes.
 
-On note souvent les variables explicatives $X$ et la réponse $Y$. À partir d'un
-échantillon d'apprentissage, on cherche une fonction $hat(f)$ telle que
-$hat(Y) = hat(f)(X)$ soit proche de la vraie réponse. Le modèle n'est pas évalué
-sur sa capacité à reproduire parfaitement les données déjà vues, mais sur sa
-capacité à prédire correctement de nouvelles observations.
+=== Données, modèle et prédiction
 
-#note[
-  Une méthode supervisée doit toujours être évaluée sur des observations qui
-  n'ont pas servi à l'ajustement. Sinon, on mesure surtout la capacité du modèle
-  à mémoriser les données d'entraînement.
+On note l'échantillon d'apprentissage
+
+$ cal(D) = {(x_i, y_i)}_(i=1)^n, quad
+  x_i = (x_(i 1), dots, x_(i p))^top in RR^p. $
+
+Le vecteur $x_i$ contient les $p$ variables explicatives de l'observation $i$,
+et $y_i$ est sa réponse. Les lettres majuscules $X$ et $Y$ désignent les
+variables aléatoires correspondantes. À partir de $cal(D)$, l'algorithme
+construit une fonction $hat(f)$ ; la prédiction pour une nouvelle observation
+$x$ est $hat(y) = hat(f)(x)$. Le chapeau rappelle que la règle est estimée à
+partir d'un échantillon et changerait si l'on changeait les données.
+
+#example[
+  Dans le jeu de données Palmer Penguins, on peut chercher à prédire `species`
+  à partir de `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et
+  `body_mass_g`. Les espèces sont connues pendant l'apprentissage. Pour prédire
+  l'espèce d'un nouveau manchot, le modèle ne reçoit que ses quatre mesures.
+
+  Une autre question serait de prédire `body_mass_g` à partir des trois mesures
+  de longueur ou de profondeur. La masse devient alors la réponse et doit être
+  retirée des variables explicatives. Le même tableau peut ainsi servir à
+  plusieurs tâches, mais chacune exige de préciser ce que l'on veut prédire.
 ]
+
+Avant de choisir une méthode, il faut définir l'unité observée, la population
+visée et les informations disponibles au moment de la prédiction. Une variable
+mesurée seulement après la réponse peut être très prédictive dans un fichier
+historique tout en étant inutilisable dans la situation réelle.
 
 === Régression et classification
 
-En régression, la réponse est quantitative. On peut mesurer l'erreur avec une
-erreur quadratique, une erreur absolue ou une autre perte adaptée au contexte.
-En classification, la réponse est qualitative. On peut utiliser le taux d'erreur,
-la matrice de confusion, la sensibilité, la spécificité ou l'aire sous la courbe
-ROC.
+En *régression*, la réponse est quantitative : une masse, une durée ou une
+quantité produite. Le modèle renvoie une valeur numérique. En *classification*,
+la réponse est qualitative : une espèce, un type de produit ou une catégorie
+de défaut. On note les classes $1, dots, K$ ; ces nombres sont des étiquettes
+et ne leur donnent pas un ordre ni des distances numériques.
 
-Le choix de la mesure d'erreur dépend de la décision visée. Dans un problème de
-diagnostic, une fausse alerte et un cas manqué n'ont pas forcément le même coût.
-Dans un problème de prix ou de demande, une erreur très grande peut être plus
-grave que plusieurs petites erreurs.
+Un classificateur peut produire deux sortes de résultats :
 
-=== Généralisation
+- des probabilités estimées $hat(eta)_g (x) approx P(Y=g mid X=x)$ pour chaque
+  classe $g$, de somme $1$ ;
+- une décision $hat(g)(x)$, obtenue en choisissant une classe à partir de ces
+  probabilités et d'une règle de décision.
 
-La difficulté centrale est le compromis biais-variance. Un modèle trop simple
-risque de sous-ajuster: il ignore une partie de la structure réelle. Un modèle
-trop flexible risque de surajuster: il apprend les particularités de l'échantillon
-d'entraînement plutôt que la structure générale.
+Par exemple, des probabilités $(0.55, 0.40, 0.05)$ conduisent à choisir la
+première classe si l'on retient la plus probable. Cette décision est moins
+tranchée qu'avec $(0.98, 0.01, 0.01)$, alors que l'étiquette prédite est la même.
+Une probabilité annoncée par un modèle n'est toutefois fiable que si le modèle
+est convenablement calibré, question reprise plus loin dans le chapitre.
 
-Pour contrôler ce risque, on sépare les données en ensembles d'entraînement, de
-validation et de test, ou on utilise la validation croisée. Les hyper-paramètres
-doivent être choisis sans consulter le jeu de test final.
+*Définir ce qu'est une erreur.* Une fonction de perte $L(y, hat(y))$ attribue un
+coût à l'écart entre la réponse réelle et la prédiction. Deux pertes usuelles
+en régression sont
+
+$ L_2(y, hat(y)) = (y-hat(y))^2, quad
+  L_1(y, hat(y)) = abs(y-hat(y)). $
+
+La perte quadratique pénalise particulièrement les grandes erreurs ; la perte
+absolue croît proportionnellement à leur taille. Au niveau de la population,
+la prédiction qui minimise l'erreur quadratique moyenne est
+$f^*(x) = E(Y mid X=x)$ ; pour l'erreur absolue moyenne, c'est une médiane de
+la loi conditionnelle de $Y$ sachant $X=x$. Le choix de la perte définit donc
+aussi la quantité que l'on cherche à prédire.
+
+En classification, la *perte 0–1* vaut $0$ si la classe prédite est correcte et
+$1$ sinon. Elle conduit à choisir la classe de probabilité conditionnelle
+maximale. Si certaines erreurs sont plus coûteuses que d'autres, la décision
+optimale peut être différente : les probabilités prédites et les coûts doivent
+alors être combinés explicitement.
+
+=== Évaluer les prédictions
+
+L'objectif est de réduire le *risque de prédiction*
+
+$ R(f) = E[L(Y, f(X))], $
+
+où l'espérance porte sur une nouvelle observation de la population visée.
+Ce risque est inconnu. Pour un modèle fixé, on l'estime sur $m$ observations
+de test qui n'ont pas servi à le construire ou à le sélectionner :
+
+$ hat(R)_"test" (hat(f)) = 1/m sum_(i=1)^m
+  L(y_i^"test", hat(f)(x_i^"test")). $
+
+En régression, on peut rapporter l'erreur absolue moyenne (MAE), l'erreur
+quadratique moyenne (MSE), ou sa racine carrée (RMSE). La MAE et la RMSE ont
+les mêmes unités que la réponse, ce qui facilite leur interprétation.
+
+En classification, le taux d'erreur est la proportion de mauvaises décisions.
+L'*exactitude* (_accuracy_) est la proportion complémentaire de bonnes
+décisions. La *matrice de confusion* détaille quelles classes sont confondues
+et permet de dépasser un seul pourcentage global.
 
 #example[
-  Pour choisir la profondeur maximale d'un arbre, on peut essayer plusieurs
-  valeurs par validation croisée sur l'ensemble d'entraînement. Le jeu de test
-  n'est utilisé qu'à la fin pour estimer la performance finale.
+  Un contrôle de qualité cherche à détecter les produits défectueux, qui
+  constituent la classe positive. Sur un jeu de test de $100$ produits,
+  on observe les résultats suivants ; les lignes donnent la réalité et les
+  colonnes la prédiction.
+
+  #table(
+    columns: (1.5fr, 1fr, 1fr), align: center,
+    inset: 6pt, stroke: 0.4pt + luma(210),
+    table.header([*Classe réelle*], [*Prédit défectueux*], [*Prédit conforme*]),
+    [Défectueux], [18], [12],
+    [Conforme], [7], [63],
+  )
+
+  L'exactitude vaut $(18+63)/100 = 0.81$, soit 81~%. Pourtant, le modèle ne
+  détecte que $18/30 = 60$~% des produits défectueux : c'est la *sensibilité*,
+  aussi appelée *rappel* de la classe positive. La *spécificité* vaut
+  $63/70 = 90$~% : elle mesure la proportion des produits conformes reconnus
+  comme tels. Enfin, parmi les produits signalés comme défectueux,
+  $18/25 = 72$~% le sont réellement : c'est la *précision* de la classe positive.
 ]
+
+Une bonne exactitude peut masquer l'échec sur une classe rare. Si 95~% des
+produits sont conformes, prédire systématiquement « conforme » donne 95~%
+d'exactitude et un rappel nul pour les défauts. Il faut donc comparer le modèle
+à une règle de référence simple, examiner les résultats par classe et choisir
+les métriques selon la décision visée. Pour une réponse binaire, les courbes
+ROC et précision-rappel permettent aussi d'examiner plusieurs seuils ; elles
+ne remplacent pas le choix d'un seuil adapté à l'utilisation.
+
+=== Généralisation et surajustement
+
+La performance sur les données d'apprentissage est généralement optimiste,
+puisque la règle a été choisie à partir de ces données. Un modèle peut obtenir
+une erreur d'entraînement nulle en mémorisant les exemples sans savoir prédire
+de nouvelles observations. Cette capacité à réussir sur de nouvelles données
+s'appelle la *généralisation*.
+
+Le compromis biais-variance aide à comprendre la difficulté. Un modèle trop
+contraint peut *sous-ajuster* : il ignore une structure importante et commet
+déjà beaucoup d'erreurs à l'entraînement. Un modèle très flexible peut
+*surajuster* : ses prédictions deviennent sensibles aux particularités de
+l'échantillon, et son erreur de validation reste élevée malgré une faible
+erreur d'entraînement. Une partie de l'incertitude peut aussi être irréductible
+avec les variables disponibles, par exemple lorsque deux espèces présentent
+des mesures similaires.
+
+Les *paramètres* sont estimés pendant l'ajustement, comme les moyennes des
+classes en analyse discriminante. Les *hyper-paramètres* contrôlent la manière
+d'apprendre, comme la profondeur maximale d'un arbre ou l'intensité d'une
+régularisation. Leur choix fait partie de la construction du modèle et doit
+être évalué sans consulter le jeu de test final.
+
+=== Entraînement, validation et test
+
+Les trois ensembles ont des rôles distincts :
+
+1. L'*entraînement* sert à estimer les paramètres de chaque modèle candidat.
+2. La *validation* sert à comparer les méthodes et les hyper-paramètres, et à
+   choisir éventuellement un seuil de décision.
+3. Le *test* sert à évaluer la procédure retenue, une fois ces choix arrêtés.
+
+Par exemple, on pourrait répartir $1 000$ observations indépendantes en $600$
+pour l'entraînement, $200$ pour la validation et $200$ pour le test. Ces
+proportions ne sont pas une règle universelle : chaque ensemble doit contenir
+assez d'observations et représenter la situation d'utilisation.
+
+La *validation croisée* réutilise plus efficacement les données disponibles
+pour le choix du modèle. Après avoir réservé le test, on partage les autres
+observations en $V$ plis. Pour chaque configuration, on ajuste $V$ modèles,
+chacun sur $V-1$ plis, puis on l'évalue sur le pli laissé de côté. On compare
+les erreurs moyennes, on retient une configuration et on la réajuste sur toutes
+les données hors test avant l'évaluation finale.
+
+#example[
+  Pour choisir la profondeur d'un arbre, on réserve $200$ observations de test
+  et on répartit les $800$ autres en cinq plis de $160$. Chaque ajustement
+  utilise $640$ observations et chaque validation en utilise $160$. Après
+  comparaison des profondeurs, l'arbre retenu est réajusté sur les $800$
+  observations. Les $200$ observations de test ne servent qu'à l'évaluation
+  finale. Si l'on change ensuite le modèle à la lumière de ce résultat,
+  ce jeu ne joue plus le rôle d'un test indépendant des choix effectués.
+]
+
+*Éviter les fuites d'information.* Toute opération qui apprend des paramètres
+à partir des données doit être incluse dans ce protocole : imputation,
+centrage-réduction, sélection de variables, ACP ou projection discriminante.
+Dans chaque pli, elle est ajustée sur la partie d'entraînement puis appliquée
+à la partie de validation avec les mêmes paramètres. Calculer une projection
+discriminante sur toutes les observations avant de les séparer transmettrait
+aux axes l'information sur les classes à prédire.
+
+Le découpage doit aussi respecter la structure des observations. Une séparation
+stratifiée conserve approximativement les proportions de classes. Des mesures
+répétées d'un même individu doivent rester dans un même ensemble si l'objectif
+est de généraliser à de nouveaux individus. Pour prévoir le futur, on entraîne
+sur le passé et on valide sur des périodes ultérieures. Enfin, une bonne
+performance sur un test issu de la même population ne garantit pas la même
+performance après un changement de population ou de protocole de mesure.
 
 === Trois familles de méthodes
 
-Ce chapitre présente trois familles classiques.
+Ce chapitre présente trois familles classiques, qui partagent le même besoin
+d'évaluation mais construisent leurs prédictions de façons différentes.
 
-- L'analyse discriminante construit une règle de classification à partir de la
-  séparation entre groupes.
-- Les arbres de classification et de régression découpent l'espace des variables
-  explicatives en régions simples.
-- Les méthodes ensemblistes combinent plusieurs modèles afin de stabiliser ou
-  d'améliorer les prédictions.
+- L'*analyse discriminante* décrit les distributions des variables dans les
+  classes, ou construit des projections qui séparent leurs moyennes en tenant
+  compte de leur dispersion. Elle relie géométrie et probabilités de classe.
+- Les *arbres de classification et de régression* découpent l'espace des
+  variables par une suite de conditions simples et prédisent dans chaque région.
+- Les *méthodes ensemblistes* combinent plusieurs modèles, notamment des arbres,
+  pour stabiliser ou améliorer les prédictions.
 
-Ces méthodes illustrent trois manières complémentaires de penser
-l'apprentissage supervisé: projeter, partitionner et agréger.
+Ces méthodes seront comparées selon leurs hypothèses, la forme de leurs
+frontières, leur sensibilité aux données et leur performance sur des
+observations non utilisées pour les choisir.
 
 == Analyse discriminante
 
 === Principe
 
-L'analyse discriminante vise à classer des individus dans plusieurs groupes à
-partir de variables explicatives continues. Les groupes sont connus dans les
-données d'apprentissage, et l'on cherche une règle de classification qui sépare
-au mieux ces groupes.
+L'analyse discriminante étudie des groupes *déjà connus* à partir de variables
+explicatives quantitatives. Elle poursuit deux objectifs liés : construire une
+représentation qui met en évidence la séparation entre groupes et affecter une
+nouvelle observation à l'un de ces groupes. Elle ne découvre donc pas des classes
+sans étiquettes, comme le ferait une méthode de regroupement.
 
-L'idée de Fisher consiste à projeter les observations sur un score linéaire:
+L'idée de Fisher est de construire un score linéaire
 
-$ f(x) = a^T x + b $
+$ z = a^top x, quad a in RR^p, $
 
-Le vecteur $a$ est choisi pour rendre les groupes aussi séparés que possible sur
-l'axe projeté, tout en gardant chaque groupe compact.
+où la direction $a$ rend les moyennes des groupes éloignées après projection,
+tout en limitant la dispersion à l'intérieur des groupes. Ajouter une constante
+au score déplacerait tous les points de la même quantité, sans modifier cette
+séparation. Le seuil utilisé pour classer sera déterminé dans un second temps.
 
-=== Critère de Fisher
-
-On décompose la variabilité totale en deux parties:
-
-- la variabilité intra-groupe, qui mesure la dispersion des observations autour
-  de leur moyenne de groupe;
-- la variabilité inter-groupe, qui mesure la dispersion des moyennes de groupe
-  autour de la moyenne globale.
-
-Le critère de Fisher maximise un rapport du type:
-
-$ J(a) = (a^T B a) / (a^T W a) $
-
-où $B$ représente la variabilité inter-groupe et $W$ la variabilité intra-groupe.
-On cherche donc un axe où les groupes sont éloignés entre eux et resserrés à
-l'intérieur.
-
-Dans le cas de deux groupes, cette idée produit un seul axe discriminant. Avec
-plus de deux groupes, plusieurs axes peuvent être nécessaires. Le nombre maximal
-d'axes discriminants est limité par le nombre de classes moins un et par le
-nombre de variables explicatives.
-
-=== Analyse discriminante linéaire
-
-L'analyse discriminante linéaire, ou LDA, suppose que les classes peuvent être
-décrites par des distributions normales ayant des matrices de covariance
-communes. Sous ces hypothèses, les frontières de décision sont linéaires.
-
-La LDA estime les moyennes de classe, une covariance commune et les probabilités
-initiales des classes. Une nouvelle observation est affectée à la classe dont le
-score discriminant est le plus élevé.
-
-=== Règle de classification
-
-Une fois l'axe discriminant estimé, chaque observation reçoit un score. Pour
-classer une nouvelle observation, on calcule son score puis on l'affecte au
-groupe dont le score moyen est le plus proche.
+Contrairement à l'ACP, le choix de l'axe utilise les classes. L'ACP recherche
+une forte variance totale ; Fisher recherche un contraste entre groupes
+relativement à leur variabilité interne.
 
 #example[
-  Dans une classification binaire, si le groupe 1 a un score moyen supérieur au
-  groupe 2, une règle simple consiste à classer une nouvelle observation dans le
-  groupe 1 lorsque son score dépasse le milieu des deux scores moyens.
+  Considérons deux classes équiprobables de moyennes $(0,-1)^top$ et
+  $(0,1)^top$, avec la même covariance $op("diag")(9, 0.25)$. Dans chaque
+  classe, $X_1$ varie beaucoup, mais sa distribution est la même pour les deux
+  classes. $X_2$ varie moins à l'intérieur de chaque classe et sépare leurs
+  moyennes.
+
+  La covariance totale est $op("diag")(9, 1.25)$ : l'ACP sur les variables
+  centrées, sans réduction, retient d'abord la direction $X_1$. La direction de
+  Fisher est $X_2$. Une direction qui conserve beaucoup de variance n'est donc
+  pas nécessairement celle qui permet de distinguer les classes.
 ]
 
-Lorsque les probabilités initiales des classes sont différentes, la règle peut
-être déplacée vers la classe la plus fréquente. Lorsque les coûts d'erreur sont
-asymétriques, on peut aussi ajuster le seuil de décision pour privilégier une
-classe.
+#figure(
+  image("../figures/discriminante_fisher.svg", width: 100%,
+    alt: "Deux classes simulées présentent une grande dispersion horizontale "
+      + "commune et des moyennes verticales différentes. La projection "
+      + "horizontale de l'ACP superpose les classes ; la projection verticale "
+      + "de Fisher les sépare."),
+  caption: [Variance totale et séparation des classes. À gauche, un échantillon
+    simulé ; à droite, les densités des projections sous les lois normales de
+    l'exemple. Les directions indiquées sont celles du modèle théorique.],
+)
 
-=== Extensions et limites
+=== Variabilités intra-groupe et inter-groupe
 
-L'analyse discriminante quadratique, ou QDA, autorise une matrice de covariance
-différente pour chaque classe. Les frontières peuvent alors être courbes, mais
-l'estimation demande plus de données.
+Notons $C_g = {i : y_i=g}$ l'ensemble des indices de la classe $g$, d'effectif
+$n_g$, pour $g = 1, dots, K$. Les moyennes de classe et la moyenne globale sont
 
-L'analyse discriminante est interprétable et efficace lorsque la séparation est
-essentiellement linéaire et que les classes sont suffisamment bien représentées.
-Elle devient moins adaptée si les frontières sont très non linéaires, si les
-variables sont très corrélées, si les matrices de covariance sont mal estimées ou
-si le nombre de variables est grand devant le nombre d'observations.
+$ bar(x)_g = 1/n_g sum_(i in C_g) x_i, quad
+  bar(x) = 1/n sum_(i=1)^n x_i = sum_(g=1)^K n_g/n bar(x)_g. $
+
+On définit les matrices de dispersion *intra-groupe* et *inter-groupe* :
+
+$
+  W = sum_(g=1)^K sum_(i in C_g)
+      (x_i-bar(x)_g)(x_i-bar(x)_g)^top,
+$
+$
+  B = sum_(g=1)^K n_g (bar(x)_g-bar(x))(bar(x)_g-bar(x))^top.
+$
+
+$W$ mesure les écarts de chaque observation à la moyenne de sa classe ; $B$
+mesure les écarts des moyennes de classe à la moyenne globale, pondérés par les
+effectifs. Ce sont ici des *sommes* de produits d'écarts, sans division par des
+degrés de liberté. La dispersion totale se décompose exactement en
+
+$ T = sum_(i=1)^n (x_i-bar(x))(x_i-bar(x))^top = W+B. $
+
+Les termes croisés disparaissent parce que les écarts à la moyenne somment à
+zéro dans chaque classe. Pour les scores $z_i=a^top x_i$, les dispersions
+intra-groupe et inter-groupe deviennent respectivement $a^top W a$ et
+$a^top B a$.
+
+=== Critère de Fisher et axes discriminants
+
+Le critère de Fisher maximise le rapport
+
+$ J(a) = (a^top B a) / (a^top W a), quad a != 0. $
+
+Une grande valeur indique que les moyennes projetées sont éloignées par rapport
+à la dispersion des observations autour de ces moyennes. Multiplier $a$ par
+une constante non nulle ne change pas $J(a)$ : on cherche une direction, et non
+une longueur particulière.
+
+Si $W$ est définie positive, on peut imposer $a^top W a = 1$ et maximiser
+$a^top B a$. La condition obtenue par un multiplicateur de Lagrange est
+
+$ B a = lambda W a. $
+
+La première direction correspond à la plus grande valeur propre généralisée.
+Les suivantes sont choisies avec $a_k^top W a_ell = 0$ pour $k != ell$.
+Elles sont donc orthogonales pour la métrique définie par $W$, sans être
+nécessairement orthogonales pour le produit scalaire usuel.
+
+*Deux classes.* En posant $d = bar(x)_2-bar(x)_1$, on obtient
+$B = (n_1 n_2/n) d d^top$. Lorsque $d != 0$, la direction optimale vérifie
+
+$ a prop W^(-1) d. $
+
+La différence des moyennes donne le contraste recherché, tandis que l'inverse
+de $W$ tient compte des dispersions et des corrélations internes. Une variable
+dont les moyennes diffèrent beaucoup peut être peu discriminante si elle varie
+encore davantage à l'intérieur des classes.
+
+*Plusieurs classes.* Les $K$ moyennes centrées engendrent un espace de dimension
+au plus $K-1$. Comme $op("rang")(B) <= min(p,K-1)$, il existe au plus
+$min(p,K-1)$ axes discriminants de valeur propre strictement positive.
+Pour trois classes et quatre variables, on obtient donc au plus deux axes.
+On note $k$ le rang d'un axe et $q$ le nombre d'axes retenus.
+
+Ces axes constituent une réduction de dimension *supervisée*. Les valeurs
+propres quantifient la séparation inter-groupe relativement à la dispersion
+intra-groupe. Leurs pourcentages relatifs ne sont ni des pourcentages de variance
+totale expliquée au sens de l'ACP, ni des taux de bonne classification.
+Choisir $q$ pour prédire demande une validation sur des observations distinctes.
 
 #note[
-  Avant d'utiliser une analyse discriminante, il faut examiner la standardisation
-  des variables, l'équilibre des classes et les observations atypiques. Ces
-  éléments peuvent déplacer fortement la règle de classification.
+  Le critère de Fisher se définit sans hypothèse de normalité. Il privilégie
+  toutefois une séparation des moyennes : si deux classes ont la même moyenne
+  mais des dispersions différentes, $B$ peut être nulle alors qu'une règle
+  fondée sur les dispersions permet de les distinguer.
 ]
+
+=== Analyse discriminante linéaire : modèle probabiliste
+
+L'analyse discriminante linéaire, ou *LDA* (_Linear Discriminant Analysis_),
+modélise les variables explicatives conditionnellement à la classe :
+
+$ X mid (Y=g) ~ cal(N)_p(mu_g, Sigma), quad P(Y=g) = pi_g. $
+
+Chaque classe a sa propre moyenne $mu_g$, mais toutes partagent la même matrice
+de covariance $Sigma$, supposée définie positive. Les probabilités *a priori*
+$pi_g > 0$ somment à $1$ et décrivent les fréquences des classes avant
+d'observer les mesures. La normalité est supposée *dans chaque classe* : la
+distribution globale, mélange de ces classes, n'a pas à être normale.
+
+Si $f_g(x)$ est la densité normale de la classe $g$, la formule de Bayes donne
+la probabilité *a posteriori*
+
+$ eta_g (x) = P(Y=g mid X=x)
+  = (pi_g f_g(x)) / (sum_(h=1)^K pi_h f_h(x)). $
+
+Sous la perte 0–1, on choisit la classe de plus grande probabilité. Le
+dénominateur étant commun, cela revient à maximiser
+$log pi_g + log f_g(x)$. Avec une covariance commune, le terme quadratique
+$-1/2 x^top Sigma^(-1) x$ est identique dans toutes les classes et s'élimine de
+la comparaison. Il reste les *scores discriminants*#footnote[
+  Les formulations probabilistes de la LDA et de la QDA sont présentées dans
+  la #link("https://scikit-learn.org/stable/modules/lda_qda.html")[documentation
+  de scikit-learn, _Linear and Quadratic Discriminant Analysis_].
+] :
+
+$ delta_g (x) = x^top Sigma^(-1) mu_g
+  - 1/2 mu_g^top Sigma^(-1) mu_g + log pi_g. $
+
+Chaque score est affine en $x$, d'où la règle
+
+$ hat(g)(x) = op("argmax")_(g in {1, dots, K}) hat(delta)_g (x). $
+
+La frontière entre les classes $g$ et $h$ est définie par
+$hat(delta)_g (x) = hat(delta)_h (x)$ : c'est une droite en dimension deux,
+un plan en dimension trois, et plus généralement un hyperplan. Les probabilités
+estimées se calculent à partir des mêmes scores :
+
+$ hat(eta)_g (x) = exp(hat(delta)_g (x)) /
+  (sum_(h=1)^K exp(hat(delta)_h (x))). $
+
+*Estimer le modèle.* À partir du seul ensemble d'entraînement, on utilise
+habituellement
+
+$ hat(mu)_g = bar(x)_g, quad
+  hat(Sigma) = W/(n-K), quad hat(pi)_g = n_g/n. $
+
+La covariance commune regroupe les dispersions *à l'intérieur* des classes ;
+elle ne doit pas être remplacée par la covariance totale, qui inclut leurs
+différences de moyenne. Les proportions empiriques sont adaptées si
+l'échantillon représente les fréquences visées. Si le plan d'échantillonnage
+a surreprésenté certaines classes, les probabilités a priori doivent être
+choisies en tenant compte de la population d'utilisation.
+
+=== Règle de classification et seuil de décision
+
+*La géométrie de la LDA.* Lorsque les probabilités a priori sont égales, la
+règle choisit la moyenne de classe la plus proche au sens de la distance de
+Mahalanobis :
+
+$ d_g^2(x) = (x-mu_g)^top Sigma^(-1)(x-mu_g). $
+
+Cette distance corrige les échelles et les corrélations. Il ne s'agit donc pas,
+en général, de choisir la moyenne la plus proche pour la distance euclidienne
+sur les variables brutes. Avec des probabilités a priori différentes, la règle
+minimise $d_g^2(x) - 2 log pi_g$.
+
+Pour deux classes, notons
+
+$ a = Sigma^(-1)(mu_2-mu_1), quad z=a^top x. $
+
+La différence des scores s'écrit
+
+$ delta_2 (x)-delta_1 (x)
+  = z - 1/2 a^top (mu_1+mu_2) + log(pi_2/pi_1). $
+
+On prédit la classe $2$ lorsque
+
+$ z > 1/2 a^top (mu_1+mu_2) - log(pi_2/pi_1). $
+
+À probabilités a priori égales, le seuil est le milieu des deux moyennes
+projetées. Si la classe $2$ est plus rare, le seuil augmente : il faut des
+mesures plus favorables à cette classe pour la choisir. La direction $a$ est
+proportionnelle à celle de Fisher lorsque la covariance est estimée par
+$W/(n-K)$. Le lien entre projection et classification est donc précis, mais
+la direction seule ne détermine pas le seuil.
+
+#example[
+  Supposons $mu_1=(0,0)^top$, $mu_2=(2,1)^top$,
+  $Sigma=op("diag")(1,4)$ et $pi_1=pi_2=0.5$. Alors
+
+  $ a=(2,0.25)^top, quad
+    delta_2 (x)-delta_1 (x)=2x_1+0.25x_2-2.125. $
+
+  La frontière est la droite $2x_1+0.25x_2=2.125$. Pour $x=(1,1)^top$,
+  la différence vaut $0.125$ : on choisit la classe $2$, avec une probabilité
+  $eta_2 (x)=1/(1+exp(-0.125)) approx 0.531$. La décision est donc peu tranchée.
+  Pour $x=(1,0)^top$, la différence vaut $-0.125$ et l'on choisit la classe $1$.
+]
+
+*Tenir compte des coûts.* Dans une classification binaire, appelons la classe
+$2$ « positive ». Notons $C_"FP"$ le coût d'un faux positif et $C_"FN"$ celui
+d'un faux négatif, les décisions correctes ayant un coût nul. Les coûts
+conditionnels des deux décisions sont
+
+$ R("prédire 2" mid x) = C_"FP" (1-eta_2 (x)), quad
+  R("prédire 1" mid x) = C_"FN" eta_2 (x). $
+
+Pour des coûts strictement positifs, on prédit donc la classe $2$ si
+
+$ eta_2 (x) > C_"FP"/(C_"FP"+C_"FN"). $
+
+Si manquer un produit défectueux coûte quatre fois plus qu'une fausse alerte,
+on prend $C_"FN"=4$ et $C_"FP"=1$, ce qui donne un seuil de $0.20$ au lieu de
+$0.50$. On détecte alors davantage de défauts, au prix de davantage de fausses
+alertes. Les probabilités a priori figurent déjà dans les probabilités
+a posteriori : il ne faut pas les appliquer une seconde fois à ce seuil.
+
+=== Analyse discriminante quadratique
+
+La *QDA* (_Quadratic Discriminant Analysis_) autorise une covariance propre
+à chaque classe :
+
+$ X mid (Y=g) ~ cal(N)_p(mu_g, Sigma_g). $
+
+Les classes peuvent donc avoir des dispersions et des orientations différentes.
+En supprimant seulement les termes communs à toutes les classes, on obtient
+
+$ delta_g^"QDA" (x) = -1/2 log det(Sigma_g)
+  -1/2 (x-mu_g)^top Sigma_g^(-1)(x-mu_g) + log pi_g. $
+
+Le terme en $x$ au carré ne s'annule généralement plus entre deux classes.
+Les frontières peuvent être des courbes quadratiques en dimension deux, ou des
+surfaces quadratiques en dimension supérieure. Si les covariances sont égales,
+on retrouve la règle linéaire.
+
+#figure(
+  image("../figures/discriminante_lda_qda.svg", width: 100%,
+    alt: "LDA et QDA ajustées aux mêmes deux classes simulées de covariances "
+      + "différentes. La LDA produit une frontière droite ; la QDA produit "
+      + "une frontière courbe. Les fonds colorés indiquent les classes prédites."),
+  caption: [Deux modèles ajustés au même échantillon simulé. Les fonds colorés
+    donnent les régions de décision. La flexibilité de la QDA permet de tenir
+    compte des covariances distinctes ; ce graphique d'entraînement ne mesure
+    pas sa performance sur de nouvelles observations.],
+)
+
+Cette flexibilité a un coût. Une covariance symétrique contient
+$p(p+1)/2$ paramètres : la LDA en estime une seule, la QDA en estime $K$.
+Pour $p=4$ et $K=3$, cela représente $10$ paramètres de covariance pour la LDA
+contre $30$ pour la QDA, en plus des moyennes et des probabilités a priori.
+Chaque covariance de QDA est calculée à partir de sa propre classe : les
+petites classes peuvent donc poser problème même si l'effectif total est grand.
+Le choix entre LDA et QDA repose sur une validation, pas uniquement sur
+l'ajustement apparent aux données d'apprentissage.
+
+=== Exemple pratique : Palmer Penguins
+
+Reprenons les quatre mesures utilisées dans le chapitre sur l'ACP, mais
+utilisons cette fois `species` comme réponse. On cherche à distinguer `Adelie`,
+`Chinstrap` et `Gentoo`. L'ACP utilisait ces espèces seulement pour commenter
+les graphiques ; la LDA utilise leurs étiquettes pour estimer les moyennes,
+la covariance intra-groupe et la règle de classification.
+
+Le fichier local `assets/penguins.csv` contient $344$ observations. On retire
+les deux lignes auxquelles il manque une des quatre mesures, ce qui laisse
+$342$ manchots : $151$ `Adelie`, $68$ `Chinstrap` et $123$ `Gentoo`. Les valeurs
+manquantes de `sex` n'interviennent pas, puisque cette variable n'est pas
+utilisée. Cette analyse porte donc sur les individus dont les quatre mesures
+sont disponibles ; elle ne fournit pas une méthode de traitement des mesures
+manquantes lors d'une future prédiction.
+
+Le script `codes/analyse_discriminante.R` reproduit l'exemple à partir des
+données locales. On réserve environ 30~% de chaque espèce pour le test, avec
+une graine fixée avant d'observer les résultats. Les $240$ observations
+d'entraînement servent à ajuster une LDA ; les $102$ autres servent uniquement
+à l'évaluer. Le modèle et les quatre variables sont fixés pour cet exemple,
+sans recherche d'hyper-paramètres.
+
+#block(breakable: true)[
+```r
+penguins <- read.csv("assets/penguins.csv")
+variables <- c("bill_length_mm", "bill_depth_mm",
+               "flipper_length_mm", "body_mass_g")
+d <- penguins[complete.cases(penguins[c("species", variables)]),
+              c("species", variables)]
+d$species <- factor(d$species)
+
+RNGkind("Mersenne-Twister", "Inversion", "Rejection")
+set.seed(2200)
+indices <- split(seq_len(nrow(d)), d$species)
+idx_train <- unlist(lapply(indices, function(i) {
+  sample(i, size = round(0.70 * length(i)))
+}), use.names = FALSE)
+train <- d[idx_train, ]
+test <- d[-idx_train, ]
+
+modele <- MASS::lda(species ~ ., data = train)
+prediction <- predict(modele, newdata = test)
+table(Reelle = test$species, Predite = prediction$class)
+mean(prediction$class == test$species)
+```
+]
+
+La fonction `lda` du paquet `MASS` utilise ici les proportions de classes de
+l'entraînement comme probabilités a priori.#footnote[
+  Voir la #link("https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/lda.html")[documentation
+  de `MASS::lda`], notamment l'argument `prior`.
+] Les prédictions donnent la matrice de confusion suivante :
+
+#table(
+  columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
+  inset: 6pt, stroke: 0.4pt + luma(210),
+  table.header([*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*],
+    [*Prédit Gentoo*]),
+  [Adelie], [45], [0], [0],
+  [Chinstrap], [2], [18], [0],
+  [Gentoo], [0], [0], [37],
+)
+
+Le modèle classe correctement $100$ manchots sur $102$, soit 98,04~%
+d'exactitude. Les deux erreurs sont des `Chinstrap` prédits `Adelie` : le rappel
+de `Chinstrap` vaut 90~%, contre 100~% pour les deux autres espèces dans ce test.
+La règle qui prédit toujours `Adelie`, classe majoritaire de l'entraînement,
+atteint seulement $45/102 approx 44.12$~% d'exactitude sur ce même test.
+
+Ces résultats décrivent un partage précis d'un petit jeu de données. Ils ne
+garantissent pas 98~% de réussite dans une autre population. Pour comparer
+plusieurs sélections de variables, une LDA régularisée et une QDA, on ajouterait
+une validation croisée sur les $240$ observations d'entraînement, en conservant
+le test à l'écart. Une évaluation par année ou par site répondrait également
+à une autre question que ce partage aléatoire d'individus.
+
+=== Régularisation, interprétation et limites
+
+*Des covariances qui doivent être estimables.* La LDA usuelle exige une
+covariance intra-groupe inversible. Comme $op("rang")(W) <= n-K$, elle est
+singulière si $p > n-K$, et peut l'être aussi à cause de dépendances exactes
+entre variables. En QDA, la covariance de la classe $g$ a un rang au plus
+$n_g-1$ : il faut notamment $n_g > p$ pour espérer l'inverser. Même lorsque
+l'inverse existe, une estimation sur peu de données peut être très instable.
+
+Une solution est de régulariser la covariance, par exemple
+
+$ hat(Sigma)_alpha = (1-alpha) hat(Sigma) + alpha tau I_p,
+  quad tau = op("tr")(hat(Sigma))/p, quad 0 <= alpha <= 1. $
+
+Si $tau>0$, un $alpha>0$ rend cette matrice définie positive. La régularisation
+stabilise les petites valeurs propres en rapprochant la covariance d'une
+matrice plus simple. Le choix de $alpha$ doit être fait sur les données
+d'entraînement, par validation ; la cible $tau I_p$ dépend des unités, ce qui
+rend le choix d'une standardisation pertinent pour cette procédure.
+
+*Échelles et corrélations.* La LDA classique à covariance pleine est invariante,
+en arithmétique exacte, à une transformation affine inversible commune à toutes
+les observations. Changer une variable de grammes en kilogrammes ne change
+donc pas sa règle de décision lorsqu'on réestime tous les paramètres de façon
+cohérente. La standardisation n'est pas une obligation théorique comme choix
+de géométrie, mais elle peut faciliter le calcul et l'interprétation des
+coefficients. Elle doit être apprise sur l'entraînement et réutilisée telle
+quelle pour la validation et le test.
+
+Des variables corrélées ne rendent pas automatiquement la LDA inadaptée :
+la covariance sert précisément à tenir compte de ces corrélations. Ce sont
+les dépendances exactes ou presque exactes qui rendent l'estimation difficile.
+De plus, la taille d'un coefficient brut dépend des unités et des autres
+variables ; elle ne constitue pas à elle seule une mesure d'importance.
+
+*Hypothèses et observations atypiques.* Les moyennes et les covariances sont
+sensibles aux valeurs extrêmes. Des classes très asymétriques, multimodales ou
+de covariances différentes peuvent être mal décrites par la LDA gaussienne.
+La QDA assouplit l'égalité des covariances, mais conserve une forme gaussienne
+dans chaque classe. Les méthodes peuvent encore fournir une règle utile si
+les hypothèses ne sont pas exactes ; leur performance et la calibration des
+probabilités doivent alors être vérifiées empiriquement.
+
+*Séparation visuelle et prédiction.* Un beau plan discriminant construit avec
+toutes les étiquettes ne prouve pas une bonne généralisation. La projection
+doit être estimée dans chaque entraînement, et la qualité des décisions doit
+être mesurée sur des observations laissées de côté. Enfin, les axes décrivent
+des contrastes associés aux classes : ils ne démontrent ni une relation
+causale ni l'existence de groupes sans recouvrement.
+
 
 == Arbres de classification et de régression
 
