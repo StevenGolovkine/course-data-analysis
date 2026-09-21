@@ -6,33 +6,20 @@
 
 == Introduction
 
-En apprentissage supervisé, on dispose d'exemples pour lesquels les variables
-explicatives et la réponse à prédire sont connues. On utilise ces exemples pour
-construire une règle de prédiction, puis on applique cette règle à de nouvelles
-observations dont la réponse est encore inconnue. Le mot *supervisé* désigne la
-présence de cette réponse dans les données d'apprentissage : elle fournit une
-référence pour apprendre et pour mesurer les erreurs.
+En apprentissage supervisé, on dispose d'exemples pour lesquels les variables explicatives et la réponse à prédire ou à expliquer sont connues. On utilise ces exemples pour construire une règle de prédiction, puis on applique cette règle à de nouvelles observations dont la réponse est encore inconnue. Le mot *supervisé* désigne ainsi la présence de cette réponse dans les données d'apprentissage : elle fournit une référence pour apprendre et pour mesurer les erreurs.
 
-Il faut distinguer la tâche de prédiction de la description des données. Une
-ACP résume la variabilité d'un ensemble de mesures sans utiliser de réponse.
-Un classificateur cherche au contraire les caractéristiques qui permettent
-de prévoir une étiquette donnée. Une variable très dispersée n'est donc pas
-nécessairement utile pour prédire, et une variable peu dispersée peut devenir
-essentielle si elle distingue bien les classes.
+Il faut distinguer la tâche de prédiction et celle de l'explication des données. Un classificateur (_classifier_) cherche les caractéristiques qui permettent de prévoir une étiquette ou un nombre donnés. Une variable très dispersée n'est ainsi pas nécessairement utile pour prédire, alors qu'une variable peu dispersée peut devenir essentielle si elle distingue bien les classes.
 
 === Données, modèle et prédiction
 
 On note l'échantillon d'apprentissage
 
 $ cal(D) = {(x_i, y_i)}_(i=1)^n, quad
-  x_i = (x_(i 1), dots, x_(i p))^top in RR^p. $
+  x_i = (x_(i 1), dots, x_(i p))^top. $
 
-Le vecteur $x_i$ contient les $p$ variables explicatives de l'observation $i$,
-et $y_i$ est sa réponse. Les lettres majuscules $X$ et $Y$ désignent les
-variables aléatoires correspondantes. À partir de $cal(D)$, l'algorithme
-construit une fonction $hat(f)$ ; la prédiction pour une nouvelle observation
-$x$ est $hat(y) = hat(f)(x)$. Le chapeau rappelle que la règle est estimée à
-partir d'un échantillon et changerait si l'on changeait les données.
+Le vecteur $x_i$ contient les $p$ variables explicatives, qualitatives ou quantitatives, de l'observation $i$, et $y_i$ est sa réponse, qui peut aussi être qualitative ou quantitative. Les lettres majuscules $X$ et $Y$ désignent les variables aléatoires correspondantes. À partir de $cal(D)$, on cherche à construire une fonction $hat(f)$. La prédiction pour une nouvelle observation $x$ est $hat(y) = hat(f)(x)$. Le chapeau rappelle que la règle est estimée à partir d'un échantillon et changerait si l'on changeait les données.
+
+Avant de choisir une méthode, il faut définir l'unité observée, la population visée et les informations disponibles au moment de la prédiction. Une variable mesurée seulement après la réponse peut être très prédictive dans un fichier historique tout en étant inutilisable dans la situation réelle.
 
 #example[
   Dans le jeu de données Palmer Penguins, on peut chercher à prédire `species`
@@ -46,179 +33,26 @@ partir d'un échantillon et changerait si l'on changeait les données.
   plusieurs tâches, mais chacune exige de préciser ce que l'on veut prédire.
 ]
 
-Avant de choisir une méthode, il faut définir l'unité observée, la population
-visée et les informations disponibles au moment de la prédiction. Une variable
-mesurée seulement après la réponse peut être très prédictive dans un fichier
-historique tout en étant inutilisable dans la situation réelle.
 
 === Régression et classification
 
-En *régression*, la réponse est quantitative : une masse, une durée ou une
-quantité produite. Le modèle renvoie une valeur numérique. En *classification*,
-la réponse est qualitative : une espèce, un type de produit ou une catégorie
-de défaut. On note les classes $1, dots, K$ ; ces nombres sont des étiquettes
-et ne leur donnent pas un ordre ni des distances numériques.
+En *régression*, la réponse est quantitative : une masse, une durée ou une quantité produite par exemple. Le modèle renvoie une valeur numérique. En *classification*, la réponse est qualitative : une espèce, un type de produit ou une catégorie de défaut par exemple. On note les classes $1, dots, K$. Ces nombres sont des étiquettes et ne leur donnent pas un ordre ni des distances numériques.
 
 Un classificateur peut produire deux sortes de résultats :
 
-- des probabilités estimées $hat(eta)_g (x) approx P(Y=g mid X=x)$ pour chaque
-  classe $g$, de somme $1$ ;
+- des probabilités estimées $hat(eta)_g (x) approx P(Y=g bar.v X=x)$ pour chaque classe $g in \{1, dots, K\}$, de somme $1$ ;
 - une décision $hat(g)(x)$, obtenue en choisissant une classe à partir de ces
   probabilités et d'une règle de décision.
 
-Par exemple, des probabilités $(0.55, 0.40, 0.05)$ conduisent à choisir la
-première classe si l'on retient la plus probable. Cette décision est moins
-tranchée qu'avec $(0.98, 0.01, 0.01)$, alors que l'étiquette prédite est la même.
-Une probabilité annoncée par un modèle n'est toutefois fiable que si le modèle
-est convenablement calibré, question reprise plus loin dans le chapitre.
+Par exemple, des probabilités $(0.55, 0.40, 0.05)$ conduisent à choisir la première classe si l'on retient la plus probable. Cette décision est moins tranchée qu'avec $(0.98, 0.01, 0.01)$, alors que l'étiquette prédite est la même. Une probabilité annoncée par un modèle n'est toutefois fiable que si le modèle est convenablement calibré.
 
-*Définir ce qu'est une erreur.* Une fonction de perte $L(y, hat(y))$ attribue un
-coût à l'écart entre la réponse réelle et la prédiction. Deux pertes usuelles
-en régression sont
+=== Quatre familles de méthodes
 
-$ L_2(y, hat(y)) = (y-hat(y))^2, quad
-  L_1(y, hat(y)) = abs(y-hat(y)). $
-
-La perte quadratique pénalise particulièrement les grandes erreurs ; la perte
-absolue croît proportionnellement à leur taille. Au niveau de la population,
-la prédiction qui minimise l'erreur quadratique moyenne est
-$f^*(x) = E(Y mid X=x)$ ; pour l'erreur absolue moyenne, c'est une médiane de
-la loi conditionnelle de $Y$ sachant $X=x$. Le choix de la perte définit donc
-aussi la quantité que l'on cherche à prédire.
-
-En classification, la *perte 0–1* vaut $0$ si la classe prédite est correcte et
-$1$ sinon. Elle conduit à choisir la classe de probabilité conditionnelle
-maximale. Si certaines erreurs sont plus coûteuses que d'autres, la décision
-optimale peut être différente : les probabilités prédites et les coûts doivent
-alors être combinés explicitement.
-
-=== Évaluer les prédictions
-
-L'objectif est de réduire le *risque de prédiction*
-
-$ R(f) = E[L(Y, f(X))], $
-
-où l'espérance porte sur une nouvelle observation de la population visée.
-Ce risque est inconnu. Pour un modèle fixé, on l'estime sur $m$ observations
-de test qui n'ont pas servi à le construire ou à le sélectionner :
-
-$ hat(R)_"test" (hat(f)) = 1/m sum_(i=1)^m
-  L(y_i^"test", hat(f)(x_i^"test")). $
-
-En régression, on peut rapporter l'erreur absolue moyenne (MAE), l'erreur
-quadratique moyenne (MSE), ou sa racine carrée (RMSE). La MAE et la RMSE ont
-les mêmes unités que la réponse, ce qui facilite leur interprétation.
-
-En classification, le taux d'erreur est la proportion de mauvaises décisions.
-L'*exactitude* (_accuracy_) est la proportion complémentaire de bonnes
-décisions. La *matrice de confusion* détaille quelles classes sont confondues
-et permet de dépasser un seul pourcentage global.
-
-#example[
-  Un contrôle de qualité cherche à détecter les produits défectueux, qui
-  constituent la classe positive. Sur un jeu de test de $100$ produits,
-  on observe les résultats suivants ; les lignes donnent la réalité et les
-  colonnes la prédiction.
-
-  #table(
-    columns: (1.5fr, 1fr, 1fr), align: center,
-    inset: 6pt, stroke: 0.4pt + luma(210),
-    table.header([*Classe réelle*], [*Prédit défectueux*], [*Prédit conforme*]),
-    [Défectueux], [18], [12],
-    [Conforme], [7], [63],
-  )
-
-  L'exactitude vaut $(18+63)/100 = 0.81$, soit 81~%. Pourtant, le modèle ne
-  détecte que $18/30 = 60$~% des produits défectueux : c'est la *sensibilité*,
-  aussi appelée *rappel* de la classe positive. La *spécificité* vaut
-  $63/70 = 90$~% : elle mesure la proportion des produits conformes reconnus
-  comme tels. Enfin, parmi les produits signalés comme défectueux,
-  $18/25 = 72$~% le sont réellement : c'est la *précision* de la classe positive.
-]
-
-Une bonne exactitude peut masquer l'échec sur une classe rare. Si 95~% des
-produits sont conformes, prédire systématiquement « conforme » donne 95~%
-d'exactitude et un rappel nul pour les défauts. Il faut donc comparer le modèle
-à une règle de référence simple, examiner les résultats par classe et choisir
-les métriques selon la décision visée. Pour une réponse binaire, les courbes
-ROC et précision-rappel permettent aussi d'examiner plusieurs seuils ; elles
-ne remplacent pas le choix d'un seuil adapté à l'utilisation.
-
-=== Généralisation et surajustement
-
-La performance sur les données d'apprentissage est généralement optimiste,
-puisque la règle a été choisie à partir de ces données. Un modèle peut obtenir
-une erreur d'entraînement nulle en mémorisant les exemples sans savoir prédire
-de nouvelles observations. Cette capacité à réussir sur de nouvelles données
-s'appelle la *généralisation*.
-
-Le compromis biais-variance aide à comprendre la difficulté. Un modèle trop
-contraint peut *sous-ajuster* : il ignore une structure importante et commet
-déjà beaucoup d'erreurs à l'entraînement. Un modèle très flexible peut
-*surajuster* : ses prédictions deviennent sensibles aux particularités de
-l'échantillon, et son erreur de validation reste élevée malgré une faible
-erreur d'entraînement. Une partie de l'incertitude peut aussi être irréductible
-avec les variables disponibles, par exemple lorsque deux espèces présentent
-des mesures similaires.
-
-Les *paramètres* sont estimés pendant l'ajustement, comme les moyennes des
-classes en analyse discriminante. Les *hyper-paramètres* contrôlent la manière
-d'apprendre, comme la profondeur maximale d'un arbre ou l'intensité d'une
-régularisation. Leur choix fait partie de la construction du modèle et doit
-être évalué sans consulter le jeu de test final.
-
-=== Entraînement, validation et test
-
-Les trois ensembles ont des rôles distincts :
-
-1. L'*entraînement* sert à estimer les paramètres de chaque modèle candidat.
-2. La *validation* sert à comparer les méthodes et les hyper-paramètres, et à
-   choisir éventuellement un seuil de décision.
-3. Le *test* sert à évaluer la procédure retenue, une fois ces choix arrêtés.
-
-Par exemple, on pourrait répartir $1 000$ observations indépendantes en $600$
-pour l'entraînement, $200$ pour la validation et $200$ pour le test. Ces
-proportions ne sont pas une règle universelle : chaque ensemble doit contenir
-assez d'observations et représenter la situation d'utilisation.
-
-La *validation croisée* réutilise plus efficacement les données disponibles
-pour le choix du modèle. Après avoir réservé le test, on partage les autres
-observations en $V$ plis. Pour chaque configuration, on ajuste $V$ modèles,
-chacun sur $V-1$ plis, puis on l'évalue sur le pli laissé de côté. On compare
-les erreurs moyennes, on retient une configuration et on la réajuste sur toutes
-les données hors test avant l'évaluation finale.
-
-#example[
-  Pour choisir la profondeur d'un arbre, on réserve $200$ observations de test
-  et on répartit les $800$ autres en cinq plis de $160$. Chaque ajustement
-  utilise $640$ observations et chaque validation en utilise $160$. Après
-  comparaison des profondeurs, l'arbre retenu est réajusté sur les $800$
-  observations. Les $200$ observations de test ne servent qu'à l'évaluation
-  finale. Si l'on change ensuite le modèle à la lumière de ce résultat,
-  ce jeu ne joue plus le rôle d'un test indépendant des choix effectués.
-]
-
-*Éviter les fuites d'information.* Toute opération qui apprend des paramètres
-à partir des données doit être incluse dans ce protocole : imputation,
-centrage-réduction, sélection de variables, ACP ou projection discriminante.
-Dans chaque pli, elle est ajustée sur la partie d'entraînement puis appliquée
-à la partie de validation avec les mêmes paramètres. Calculer une projection
-discriminante sur toutes les observations avant de les séparer transmettrait
-aux axes l'information sur les classes à prédire.
-
-Le découpage doit aussi respecter la structure des observations. Une séparation
-stratifiée conserve approximativement les proportions de classes. Des mesures
-répétées d'un même individu doivent rester dans un même ensemble si l'objectif
-est de généraliser à de nouveaux individus. Pour prévoir le futur, on entraîne
-sur le passé et on valide sur des périodes ultérieures. Enfin, une bonne
-performance sur un test issu de la même population ne garantit pas la même
-performance après un changement de population ou de protocole de mesure.
-
-=== Trois familles de méthodes
-
-Ce chapitre présente trois familles classiques, qui partagent le même besoin
+Ce chapitre présente quatre méthodes, qui partagent le même besoin
 d'évaluation mais construisent leurs prédictions de façons différentes.
 
+- Les *$k$ plus proches voisins* prédisent la réponse à partir des observations
+  d'entraînement les plus semblables à l'observation à classer ou à prédire.
 - L'*analyse discriminante* décrit les distributions des variables dans les
   classes, ou construit des projections qui séparent leurs moyennes en tenant
   compte de leur dispersion. Elle relie géométrie et probabilités de classe.
@@ -227,9 +61,207 @@ d'évaluation mais construisent leurs prédictions de façons différentes.
 - Les *méthodes ensemblistes* combinent plusieurs modèles, notamment des arbres,
   pour stabiliser ou améliorer les prédictions.
 
-Ces méthodes seront comparées selon leurs hypothèses, la forme de leurs
-frontières, leur sensibilité aux données et leur performance sur des
-observations non utilisées pour les choisir.
+
+== Les $k$ plus proches voisins <knn>
+
+=== Principe : prédire à partir d'observations semblables
+
+La méthode des *$k$ plus proches voisins* (*k-NN*, _k-nearest neighbors_), repose sur une idée locale : des observations proches par leurs variables explicatives devraient avoir des réponses semblables. Pour prédire la réponse d'une nouvelle observation $x$, on recherche les $k$ observations d'entraînement les plus proches, puis on combine leurs réponses. La méthode s'utilise aussi bien en classification qu'en régression.#footnote[Voir la #link("https://scikit-learn.org/stable/modules/neighbors.html")[documentation de scikit-learn, _Nearest Neighbors_], pour les variantes de classification, de régression et de recherche des voisins.
+]
+
+On utilise les notations : $n$ observations d'entraînement, $p$ variables explicatives et, en classification, $K$ classes. Ici, $k$ désigne le nombre de voisins, avec $1 <= k <= n$. Il ne faut pas le confondre avec le nombre de classes $K$. On choisit une distance $d$ et on note $cal(N)_k (x)$ l'ensemble des indices des $k$ voisins retenus pour $x$. La recherche utilise uniquement les variables explicatives, puisque la réponse de $x$ est précisément ce que l'on cherche à prédire.
+
+L'algorithme suit quatre étapes :
+
+1. Préparer les variables explicatives, notamment leurs échelles, à partir des
+   seules données d'entraînement.
+2. Calculer les distances entre $x$ et les observations d'entraînement.
+3. Retenir les $k$ distances les plus petites, selon une règle de départage
+   fixée en cas d'égalité.
+4. Faire voter les voisins pour une classification, ou moyenner leurs réponses
+   pour une régression.
+
+Contrairement à la régression linéaire, la méthode des k-NN n'estime pas une équation globale $hat(f)$ avec un nombre fixé de coefficients. C'est une méthode *non paramétrique* qui conserve les exemples d'entraînement pour prédire sur les nouvelles observations. Cela ne signifie pas qu'elle soit sans choix ni hypothèses. En effet, sa réussite dépend de la distance, des variables retenues et de la pertinence d'une prédiction locale.
+
+=== Classification par vote des voisins
+
+En faisant l'hypothèse que chaque voisin apporte une voix (donc qu'ils ont le même poids), la proportion locale de la classe $g$ et la décision correspondante sont
+
+$ hat(eta)_g (x) = 1/k sum_(i in cal(N)_k (x)) bold(1)\{y_i=g\}, quad "et" quad
+  hat(g)(x) = op("argmax")_(g in {1, dots, K}) hat(eta)_g (x). $
+
+L'indicatrice $bold(1)\{y_i=g\}$ vaut $1$ si le voisin $i$ appartient à la classe
+$g$, et $0$ sinon. On choisit donc la classe la plus représentée dans le
+voisinage. Avec plus de deux classes, la classe gagnante n'a pas nécessairement
+plus de 50~% des voix. Les proportions locales peuvent servir d'estimations des
+probabilités de classe, mais un vote de $2$ voisins sur $3$ ne garantit pas à
+lui seul une probabilité bien calibrée de $2/3$.
+
+#example[
+  On cherche à classer le point $x=(0,0)^top$ à partir de deux variables
+  exprimées sur des échelles comparables. Ses cinq plus proches voisins,
+  ordonnés selon la distance euclidienne, sont les suivants :
+
+  #table(
+    columns: (0.8fr, 1.5fr, 1.1fr, 0.8fr), align: center,
+    inset: 6pt, stroke: 0.4pt + luma(210),
+    table.header([*Voisin*], [*Coordonnées*], [*Distance à $x$*], [*Classe*]),
+    [1], [$(0.2, 0)$], [0,2], [B],
+    [2], [$(0, 0.4)$], [0,4], [A],
+    [3], [$(-0.5, 0)$], [0,5], [A],
+    [4], [$(0, -0.7)$], [0,7], [B],
+    [5], [$(0.8, 0.6)$], [1,0], [B],
+  )
+
+  Pour $k=1$, on prédit B. Pour $k=3$, A reçoit deux voix contre une : on
+  prédit A, avec une proportion locale de $2/3$. Pour $k=5$, B reçoit trois
+  voix contre deux et redevient la classe prédite. Le choix de $k$ peut donc
+  modifier la décision pour une même observation.
+
+  #figure(
+  image("../figures/knn_voisinage.svg", width: 100%,
+    alt: "Un point à l'origine est classé A avec trois voisins, dont deux A, "
+      + "puis B avec cinq voisins, dont trois B. Chaque cercle contient le "
+      + "nombre de voisins choisi ; les numéros renvoient au tableau."),
+  caption: [Deux voisinages autour du même point. Le cercle passe par le
+    $k$-ième voisin ; seuls les points retenus participent au vote. Les deux points les plus éloignés ne figurent pas parmi les cinq premiers voisins du tableau.],
+)
+]
+
+*Départager les égalités.* Deux situations sont à distinguer. D'abord,
+plusieurs observations peuvent être à la même distance que le $k$-ième voisin.
+Pour garder exactement $k$ voisins, il faut préciser lesquelles retenir, par
+exemple selon un ordre stable des observations. Ensuite, plusieurs classes
+peuvent recevoir le même nombre de voix. On peut alors choisir celle dont le
+voisin le plus proche est le plus proche de $x$.
+
+Un $k$ impair évite une égalité de voix avec deux classes et un vote uniforme,
+mais pas avec trois classes ou davantage : cinq voisins peuvent donner
+$2$ voix à A, $2$ à B et $1$ à C. La règle de départage fait partie de la
+méthode et doit être fixée avant l'évaluation.
+
+
+=== Régression par pondération des voisins
+
+Lorsque la réponse est quantitative, on remplace le vote par la moyenne des
+réponses du voisinage :
+
+$ hat(f)_k (x) = 1/k sum_(i in cal(N)_k (x)) y_i. $
+
+Cette moyenne minimise la somme des erreurs quadratiques sur les réponses des voisins. Si les trois voisins ont pour réponses $10$, $12$ et $14$, la prédiction pour $k=3$ est $12$. Une variante utilisant leur médiane répondrait plutôt à un critère d'erreur absolue et serait moins sensible aux réponses extrêmes.
+
+Dans le vote uniforme comme dans la moyenne simple, un voisin situé tout près
+de $x$ a le même poids que le $k$-ième voisin. Une variante attribue des poids
+$w_i (x) >= 0$ de somme non nulle, plus élevés pour les points proches :
+
+$ hat(f)_k (x) =
+  (sum_(i in cal(N)_k (x)) w_i (x) y_i) /
+  (sum_(i in cal(N)_k (x)) w_i (x)). $
+
+Par exemple, on peut prendre $w_i (x)= d(x,x_i)^(-1)$ lorsque toutes les distances
+retenues sont strictement positives.
+
+Une distance nulle exige une convention explicite pour éviter une division
+par zéro. On peut, dans ce cas, ne faire voter que les voisins retenus dont
+les variables explicatives coïncident avec celles de $x$, ou moyenner leurs
+réponses en régression. Le choix entre poids uniformes et poids dépendant de
+la distance fait lui aussi partie des choix à valider.
+
+=== Choisir le nombre de voisins
+
+Le paramètre $k$ contrôle le degré de localisation de la prédiction.
+
+- Avec un petit $k$, la règle peut suivre des détails fins, mais elle devient sensible au bruit, aux erreurs d'étiquetage ou de mesure et aux observations atypiques. Une seule observation peut changer la décision dans son voisinage.
+- Avec un grand $k$, le vote ou la moyenne est généralement plus stable, mais peut mélanger des observations appartenant à des régions différentes et effacer une structure utile.
+
+Ce compromis correspond au compromis entre biais et variance. À l'extrême, $k=1$ utilise une seule réponse connue. Avec $k=n$ et des poids uniformes, la classification prédit partout la classe majoritaire et la régression prédit partout la moyenne globale.
+
+#figure(
+  image("../figures/knn_frontieres.svg", width: 100%,
+    alt: "Trois classificateurs k-NN sur le même échantillon simulé, avec "
+      + "k égal à 1, 9 et 51. Les petites régions isolées présentes pour "
+      + "k égal à 1 disparaissent quand le voisinage devient plus large."),
+  caption: [Effet de $k$ sur les régions de décision, pour les mêmes données
+    simulées avec quelques étiquettes bruitées. Un voisinage plus large atténue
+    les détails locaux. L'aspect du graphique d'entraînement ne suffit pas à
+    choisir la valeur qui prédit le mieux.],
+)
+
+On choisit donc $k$ par jeu de validation ou par validation croisée, par exemple en comparant $k = 1,3,5,7,9,15,21,31$ sur les mêmes plis. Chaque valeur doit être inférieure ou égale à l'effectif d'entraînement dans chaque pli. Il n'existe pas de valeur universelle. Le résultat dépend de la taille de l'échantillon, du bruit, des variables et de la distance.
+
+#note[
+  Pour $k=1$, si les observations d'entraînement ont des vecteurs explicatifs
+  distincts, chacune est son propre voisin le plus proche. L'erreur calculée
+  sur ces mêmes observations est alors nulle, même avec des étiquettes bruitées.
+  Ce résultat ne renseigne pas sur la généralisation. Avec une validation
+  laissant une observation de côté, celle-ci doit être retirée de l'ensemble dans lequel on cherche ses voisins.
+]
+
+La préparation des variables doit être répétée à l'intérieur de chaque pli :
+on calcule les moyennes et écarts-types sur la partie d'entraînement, puis on
+transforme la partie de validation avec ces paramètres. Il en va de même pour
+une imputation, une sélection de variables ou une réduction de dimension.
+Le jeu de test ne sert ni à choisir $k$, ni à choisir la distance ou les poids.
+
+=== Exemple pratique : Palmer Penguins
+
+On cherche à prédire `species` à partir de `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g`. On conserve les $342$ observations complètes pour ces quatre mesures. Le partage stratifié donne $240$ observations d'entraînement et $102$ de test. Les noms des espèces sont les réponses à prédire ; ils n'entrent donc pas dans le calcul des distances.
+
+On peut utiliser la distance euclidienne sur les variables centrées et réduites, un vote uniforme et cinq plis stratifiés dans l'entraînement. Les mêmes plis servent pour toutes les valeurs de $k$ candidates. La standardisation est réestimée dans chaque pli. Voici les nombres d'erreurs obtenus en regroupant les prédictions de validation des $240$ observations :
+
+#table(
+  columns: (0.8fr, 1.3fr, 1.3fr), align: center,
+  inset: 4pt, stroke: 0.4pt + luma(210),
+  table.header([*$k$*], [*Erreurs sur 240*], [*Taux d'erreur*]),
+  [1], [4], [1,67~%],
+  [3], [3], [1,25~%],
+  [5], [4], [1,67~%],
+  [7], [4], [1,67~%],
+  [9], [4], [1,67~%],
+  [*15*], [*3*], [*1,25~%*],
+  [21], [5], [2,08~%],
+  [31], [6], [2,50~%],
+)
+
+Les valeurs $k=3$ et $k=15$ donnent la même erreur minimale. La règle fixée avant l'évaluation retient le plus grand $k$ en cas d'égalité, donc $k=15$, afin de privilégier un voisinage plus large. Ce départage ne signifie pas que $k = 15$ soit intrinsèquement meilleur : les différences de validation portent ici sur très peu d'observations et peuvent changer avec les plis.
+
+On recalcule ensuite les moyennes et écarts-types sur les $240$ observations d'entraînement et on les utilise pour transformer les $102$ observations de test. Chaque prédiction de test repose sur ses $15$ voisins les plus proches parmi les seules observations d'entraînement. On obtient la matrice de confusion suivante, qui compare les espèces réelles et prédites :
+
+#table(
+  columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
+  inset: 6pt, stroke: 0.4pt + luma(210),
+  table.header([*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*],
+    [*Prédit Gentoo*]),
+  [Adelie], [45], [0], [0],
+  [Chinstrap], [4], [16], [0],
+  [Gentoo], [0], [0], [37],
+)
+
+L'exactitude vaut $98/102 approx 0.96$, soit 96~%. Les quatre erreurs concernent des `Chinstrap` prédits `Adelie` ; la sensibilité de l'espèce `Chinstrap` est donc $16/20=80$~%. Le résultat global ne résume pas à lui seul la performance sur chaque espèce. Il décrit ce partage précis des données, sans garantir la même performance dans une autre population.
+
+
+=== Forces et limites
+
+*Une règle locale simple et flexible.* La méthode des k-NN ne suppose ni une relation linéaire, ni des distributions normales dans les classes. Il peut suivre des frontières irrégulières et permet d'expliquer une prédiction en examinant les voisins qui y participent. Cette explication dépend toutefois de la pertinence des variables et de la distance choisies.
+
+*La difficulté des grandes dimensions.* Lorsque $p$ augmente, il devient
+souvent difficile de trouver assez d'observations réellement proches. Pour
+illustrer ce phénomène, supposons les données uniformes dans un cube unité de
+dimension $p$. Un sous-cube de côté $h$ représente une fraction $h^p$ du volume.
+Pour couvrir 10~% du volume, il faut un côté $h=0.1^(1/p)$, soit environ $0.32$
+en dimension $2$, mais $0.79$ en dimension $10$. Le voisinage doit donc
+s'étendre sur une grande partie de chaque coordonnée.
+
+C'est un aspect de la malédiction de la dimension. Des variables inutiles
+peuvent dégrader les distances même après standardisation. Une sélection de
+variables ou une réduction de dimension peut aider, à condition d'être
+apprise dans les plis d'entraînement et évaluée pour l'objectif prédictif.
+
+*Classes rares et régions peu observées.* Un grand voisinage peut être dominé par une classe fréquente et masquer une petite région d'une classe rare. Il faut examiner les sensibilités par classe, pas seulement l'exactitude globale. Par ailleurs, la méthode des k-NN donne une prédiction même si les voisins les plus proches sont très éloignés. Ainso, une majorité nette de voix n'est pas une garantie de fiabilité hors des régions bien couvertes par l'entraînement.
+
+*Une extrapolation limitée en régression.* Avec des poids non négatifs, la prédiction est comprise entre les réponses minimale et maximale des voisins. La méthode ne prolonge donc pas une tendance au-delà des valeurs observées comme peut le faire un modèle de régression paramétrique. L'effet est particulièrement visible près des bords du domaine des données.
+
+*Un coût reporté sur la prédiction.* La recherche directe calcule $n$ distances à $p$ coordonnées, soit un coût de l'ordre de $n p$ pour chaque nouvelle observation, auquel s'ajoute la sélection des voisins. Un tri complet a un coût de l'ordre de $n log n$. Il faut aussi conserver les observations d'entraînement. Des structures de recherche peuvent accélérer les calculs, surtout en faible dimension, mais leur avantage diminue souvent lorsque la dimension augmente.
 
 == Analyse discriminante
 
@@ -283,17 +315,17 @@ relativement à leur variabilité interne.
 Notons $C_g = {i : y_i=g}$ l'ensemble des indices de la classe $g$, d'effectif
 $n_g$, pour $g = 1, dots, K$. Les moyennes de classe et la moyenne globale sont
 
-$ bar(x)_g = 1/n_g sum_(i in C_g) x_i, quad
-  bar(x) = 1/n sum_(i=1)^n x_i = sum_(g=1)^K n_g/n bar(x)_g. $
+$ overline(x)_g = 1/n_g sum_(i in C_g) x_i, quad
+  overline(x) = 1/n sum_(i=1)^n x_i = sum_(g=1)^K n_g/n overline(x)_g. $
 
 On définit les matrices de dispersion *intra-groupe* et *inter-groupe* :
 
 $
   W = sum_(g=1)^K sum_(i in C_g)
-      (x_i-bar(x)_g)(x_i-bar(x)_g)^top,
+      (x_i-overline(x)_g)(x_i-overline(x)_g)^top,
 $
 $
-  B = sum_(g=1)^K n_g (bar(x)_g-bar(x))(bar(x)_g-bar(x))^top.
+  B = sum_(g=1)^K n_g (overline(x)_g-overline(x))(overline(x)_g-overline(x))^top.
 $
 
 $W$ mesure les écarts de chaque observation à la moyenne de sa classe ; $B$
@@ -301,7 +333,7 @@ mesure les écarts des moyennes de classe à la moyenne globale, pondérés par 
 effectifs. Ce sont ici des *sommes* de produits d'écarts, sans division par des
 degrés de liberté. La dispersion totale se décompose exactement en
 
-$ T = sum_(i=1)^n (x_i-bar(x))(x_i-bar(x))^top = W+B. $
+$ T = sum_(i=1)^n (x_i-overline(x))(x_i-overline(x))^top = W+B. $
 
 Les termes croisés disparaissent parce que les écarts à la moyenne somment à
 zéro dans chaque classe. Pour les scores $z_i=a^top x_i$, les dispersions
@@ -329,8 +361,8 @@ Les suivantes sont choisies avec $a_k^top W a_ell = 0$ pour $k != ell$.
 Elles sont donc orthogonales pour la métrique définie par $W$, sans être
 nécessairement orthogonales pour le produit scalaire usuel.
 
-*Deux classes.* En posant $d = bar(x)_2-bar(x)_1$, on obtient
-$B = (n_1 n_2/n) d d^top$. Lorsque $d != 0$, la direction optimale vérifie
+*Deux classes.* En posant $d = overline(x)_2-overline(x)_1$, on obtient
+$B = ((n_1 n_2)/n) d d^top$. Lorsque $d != 0$, la direction optimale vérifie
 
 $ a prop W^(-1) d. $
 
@@ -363,7 +395,7 @@ Choisir $q$ pour prédire demande une validation sur des observations distinctes
 L'analyse discriminante linéaire, ou *LDA* (_Linear Discriminant Analysis_),
 modélise les variables explicatives conditionnellement à la classe :
 
-$ X mid (Y=g) ~ cal(N)_p(mu_g, Sigma), quad P(Y=g) = pi_g. $
+$ X bar.v (Y=g) tilde.op cal(N)_p (mu_g, Sigma), quad P(Y=g) = pi_g. $
 
 Chaque classe a sa propre moyenne $mu_g$, mais toutes partagent la même matrice
 de covariance $Sigma$, supposée définie positive. Les probabilités *a priori*
@@ -371,15 +403,15 @@ $pi_g > 0$ somment à $1$ et décrivent les fréquences des classes avant
 d'observer les mesures. La normalité est supposée *dans chaque classe* : la
 distribution globale, mélange de ces classes, n'a pas à être normale.
 
-Si $f_g(x)$ est la densité normale de la classe $g$, la formule de Bayes donne
+Si $f_g (x)$ est la densité normale de la classe $g$, la formule de Bayes donne
 la probabilité *a posteriori*
 
-$ eta_g (x) = P(Y=g mid X=x)
-  = (pi_g f_g(x)) / (sum_(h=1)^K pi_h f_h(x)). $
+$ eta_g (x) = P(Y=g bar.v X=x)
+  = (pi_g f_g (x)) / (sum_(h=1)^K pi_h f_h (x)). $
 
 Sous la perte 0–1, on choisit la classe de plus grande probabilité. Le
 dénominateur étant commun, cela revient à maximiser
-$log pi_g + log f_g(x)$. Avec une covariance commune, le terme quadratique
+$log pi_g + log f_g (x)$. Avec une covariance commune, le terme quadratique
 $-1/2 x^top Sigma^(-1) x$ est identique dans toutes les classes et s'élimine de
 la comparaison. Il reste les *scores discriminants*#footnote[
   Les formulations probabilistes de la LDA et de la QDA sont présentées dans
@@ -405,7 +437,7 @@ $ hat(eta)_g (x) = exp(hat(delta)_g (x)) /
 *Estimer le modèle.* À partir du seul ensemble d'entraînement, on utilise
 habituellement
 
-$ hat(mu)_g = bar(x)_g, quad
+$ hat(mu)_g = overline(x)_g, quad
   hat(Sigma) = W/(n-K), quad hat(pi)_g = n_g/n. $
 
 La covariance commune regroupe les dispersions *à l'intérieur* des classes ;
@@ -466,8 +498,8 @@ $2$ « positive ». Notons $C_"FP"$ le coût d'un faux positif et $C_"FN"$ celui
 d'un faux négatif, les décisions correctes ayant un coût nul. Les coûts
 conditionnels des deux décisions sont
 
-$ R("prédire 2" mid x) = C_"FP" (1-eta_2 (x)), quad
-  R("prédire 1" mid x) = C_"FN" eta_2 (x). $
+$ R("prédire 2" bar.v x) = C_"FP" (1-eta_2 (x)), quad
+  R("prédire 1" bar.v x) = C_"FN" eta_2 (x). $
 
 Pour des coûts strictement positifs, on prédit donc la classe $2$ si
 
@@ -484,7 +516,7 @@ a posteriori : il ne faut pas les appliquer une seconde fois à ce seuil.
 La *QDA* (_Quadratic Discriminant Analysis_) autorise une covariance propre
 à chaque classe :
 
-$ X mid (Y=g) ~ cal(N)_p(mu_g, Sigma_g). $
+$ X bar.v (Y=g) tilde.op cal(N)_p (mu_g, Sigma_g). $
 
 Les classes peuvent donc avoir des dispersions et des orientations différentes.
 En supprimant seulement les termes communs à toutes les classes, on obtient
@@ -606,7 +638,7 @@ l'inverse existe, une estimation sur peu de données peut être très instable.
 Une solution est de régulariser la covariance, par exemple
 
 $ hat(Sigma)_alpha = (1-alpha) hat(Sigma) + alpha tau I_p,
-  quad tau = op("tr")(hat(Sigma))/p, quad 0 <= alpha <= 1. $
+  quad tau = (op("tr")(hat(Sigma)))/p, quad 0 <= alpha <= 1. $
 
 Si $tau>0$, un $alpha>0$ rend cette matrice définie positive. La régularisation
 stabilise les petites valeurs propres en rapprochant la covariance d'une
