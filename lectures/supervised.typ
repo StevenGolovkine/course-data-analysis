@@ -729,7 +729,7 @@ on conserve les deux axes possibles, soit $q=2$, fixé avant l'évaluation.
 Les matrices $W$ et $B$, la moyenne globale et les centres des espèces sont
 calculés sur les $240$ observations d'entraînement seulement. On
 résout le problème $B a=lambda W a$ et vérifie $A^top W A=I_2$.
-Les mesures sont dans leurs unités d'origine ; la normalisation des
+Les mesures sont dans leurs unités d'origine et la normalisation des
 axes tient compte de la dispersion intra-groupe et des corrélations.
 
 Les deux valeurs propres sont environ $13.783$ et $2.749$, soit 83,37~%
@@ -737,7 +737,7 @@ et 16,63~% de leur somme. Le second axe porte donc un contraste que le
 premier ne résume pas. Ces pourcentages décrivent le critère de Fisher,
 pas l'exactitude de la classification.
 
-Avec l'orientation des axes fixée dans le script, les centres projetés sont :
+Avec l'orientation des axes fixée, les centres projetés sont :
 
 #table(
   columns: (1.4fr, 1fr, 1fr), align: center,
@@ -756,18 +756,17 @@ constante sans modifier les décisions. Le signe des axes est également
 conventionnel ; il ne change pas les distances aux centres.
 
 #example[
-  La première observation du jeu de test correspond à la troisième ligne
-  de données du CSV. Ses mesures, dans l'ordre retenu, sont
+  Considérons une nouvelle observation. Ses mesures, dans l'ordre retenu, sont
 
   $ x=(40.3,18,195,3250)^top. $
 
   On soustrait la moyenne de l'entraînement, puis on applique les deux axes
-  appris. On obtient environ $z(x)=(0.18346,0.01658)^top$. Les distances
+  appris. On obtient environ $z(x)=(0.18,0.017)^top$. Les distances
   euclidiennes au carré aux trois centres sont
 
-  $ D_"Adelie" (x) approx 0.00925, quad
-    D_"Chinstrap" (x) approx 0.04263, quad
-    D_"Gentoo" (x) approx 0.25173. $
+  $ D_"Adelie" (x) approx 0.01, quad
+    D_"Chinstrap" (x) approx 0.04, quad
+    D_"Gentoo" (x) approx 0.25. $
 
   La plus petite distance est celle du centre `Adelie` : on prédit donc
   cette espèce. L'étiquette réelle, consultée seulement pour vérifier la
@@ -791,16 +790,9 @@ Les prédictions des $102$ observations de test donnent la matrice de confusion 
 
 L'exactitude vaut $100/102 approx 98.04$~% et le taux d'erreur
 $2/102 approx 1.96$~%. Les deux erreurs sont des `Chinstrap` classés
-`Adelie` : le rappel de `Chinstrap` est $18/20=90$~%. Celui des deux autres
-espèces vaut 100~% sur ce test.
+`Adelie` : la sensibilité de `Chinstrap` est $18/20=90$~%. Celui des deux autres espèces vaut 100~% sur ce test.
 
-Ces résultats coïncident ici avec ceux de la LDA présentée plus loin, mais
-le calcul effectué est bien une projection de Fisher suivie d'une affectation
-au centre le plus proche, sans correction par des probabilités a priori
-ni estimation de probabilités a posteriori. Une coïncidence sur ce jeu
-de test ne suffit pas à identifier les démarches.
-
-Enfin, ce résultat décrit un partage précis des données. Les deux axes et
+Ce résultat décrit un partage précis des données. Les deux axes et
 la règle de proximité ont été fixés avant le test ; celui-ci n'a servi ni
 à les choisir ni à les ajuster. Pour comparer un seul axe à deux axes, ou
 une autre règle dans l'espace projeté, il faudrait une validation sur les
