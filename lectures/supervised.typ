@@ -1,4 +1,6 @@
-#import "../styles/notes.typ": note, example
+#import "../styles/notes.typ": definition-box, note, example, property-box, proof, set-qed-symbol
+
+#set-qed-symbol[$square$]
 
 #show figure.caption: set align(left)
 
@@ -46,16 +48,20 @@ Un classificateur peut produire deux sortes de résultats :
 
 Par exemple, des probabilités $(0.55, 0.40, 0.05)$ conduisent à choisir la première classe si l'on retient la plus probable. Cette décision est moins tranchée qu'avec $(0.98, 0.01, 0.01)$, alors que l'étiquette prédite est la même. Une probabilité annoncée par un modèle n'est toutefois fiable que si le modèle est convenablement calibré.
 
-=== Quatre familles de méthodes
+=== Familles de méthodes
 
-Ce chapitre présente quatre méthodes, qui partagent le même besoin
-d'évaluation mais construisent leurs prédictions de façons différentes.
+Ce chapitre présente plusieurs approches de représentation et de prédiction
+supervisées, qui partagent le même besoin d'évaluation mais reposent sur des
+principes différents.
 
 - Les *$k$ plus proches voisins* prédisent la réponse à partir des observations
   d'entraînement les plus semblables à l'observation à classer ou à prédire.
-- L'*analyse discriminante* décrit les distributions des variables dans les
-  classes, ou construit des projections qui séparent leurs moyennes en tenant
-  compte de leur dispersion. Elle relie géométrie et probabilités de classe.
+- L'*analyse discriminante de Fisher* construit des projections qui séparent
+  les moyennes des classes relativement à leur dispersion interne. C'est une
+  approche géométrique de réduction de dimension supervisée.
+- L'*analyse discriminante probabiliste*, linéaire (*LDA*) ou quadratique
+  (*QDA*), modélise les distributions des variables dans les classes et utilise
+  la formule de Bayes pour obtenir des probabilités et une règle de décision.
 - Les *arbres de classification et de régression* découpent l'espace des
   variables par une suite de conditions simples et prédisent dans chaque région.
 - Les *méthodes ensemblistes* combinent plusieurs modèles, notamment des arbres,
@@ -263,43 +269,39 @@ apprise dans les plis d'entraînement et évaluée pour l'objectif prédictif.
 
 *Un coût reporté sur la prédiction.* La recherche directe calcule $n$ distances à $p$ coordonnées, soit un coût de l'ordre de $n p$ pour chaque nouvelle observation, auquel s'ajoute la sélection des voisins. Un tri complet a un coût de l'ordre de $n log n$. Il faut aussi conserver les observations d'entraînement. Des structures de recherche peuvent accélérer les calculs, surtout en faible dimension, mais leur avantage diminue souvent lorsque la dimension augmente.
 
-== Analyse discriminante
+== Analyse discriminante de Fisher <discriminante-fisher>
 
 === Principe
 
-L'analyse discriminante étudie des groupes *déjà connus* à partir de variables
-explicatives quantitatives. Elle poursuit deux objectifs liés : construire une
-représentation qui met en évidence la séparation entre groupes et affecter une
-nouvelle observation à l'un de ces groupes. Elle ne découvre donc pas des classes
+L'analyse discriminante de Fisher étudie des groupes déjà connus à partir de
+variables explicatives quantitatives. Elle construit une représentation de
+faible dimension qui met en évidence les différences entre leurs moyennes,
+relativement à leur dispersion interne. Elle ne découvre donc pas des classes
 sans étiquettes, comme le ferait une méthode de regroupement.
 
-L'idée de Fisher est de construire un score linéaire
+Cette approche repose sur un critère géométrique, sans imposer de loi de
+probabilité aux observations dans chaque classe. Elle ne doit donc pas être
+confondue avec les modèles probabilistes LDA et QDA. Elle peut servir à préparer une classification, mais le choix d'une projection ne fournit pas à lui seul des probabilités de classe ni une règle d'affectation.
+
+L'idée de Fisher est de construire un score qui est une combinaison linéaire
+des variables explicatives :
 
 $ z = a^top x, quad a in RR^p, $
 
 où la direction $a$ rend les moyennes des groupes éloignées après projection,
 tout en limitant la dispersion à l'intérieur des groupes. Ajouter une constante
 au score déplacerait tous les points de la même quantité, sans modifier cette
-séparation. Le seuil utilisé pour classer sera déterminé dans un second temps.
+séparation. Si l'on souhaite utiliser ce score pour classer, il faut lui
+associer une règle de décision supplémentaire.
 
-Contrairement à l'ACP, le choix de l'axe utilise les classes. L'ACP recherche
-une forte variance totale ; Fisher recherche un contraste entre groupes
-relativement à leur variabilité interne.
+Contrairement à l'ACP, le choix de l'axe utilise les classes. L'ACP recherche une forte variance totale, alors que l'analyse discriminante de Fisher recherche un contraste entre groupes relativement à leur variabilité interne.
 
 #example[
-  Considérons deux classes équiprobables de moyennes $(0,-1)^top$ et
-  $(0,1)^top$, avec la même covariance $op("diag")(9, 0.25)$. Dans chaque
-  classe, $X_1$ varie beaucoup, mais sa distribution est la même pour les deux
-  classes. $X_2$ varie moins à l'intérieur de chaque classe et sépare leurs
-  moyennes.
+  Considérons deux classes équiprobables de moyennes $(0,-1)^top$ et $(0,1)^top$, avec la même covariance $op("diag")(9, 0.25)$. Dans chaque classe, la variable $X_1$ varie beaucoup, mais sa distribution est la même pour les deux classes. La variable $X_2$ varie moins à l'intérieur de chaque classe et sépare leurs moyennes.
 
-  La covariance totale est $op("diag")(9, 1.25)$ : l'ACP sur les variables
-  centrées, sans réduction, retient d'abord la direction $X_1$. La direction de
-  Fisher est $X_2$. Une direction qui conserve beaucoup de variance n'est donc
-  pas nécessairement celle qui permet de distinguer les classes.
-]
+  La covariance totale est $op("diag")(9, 1.25)$ : l'ACP sur les variables centrées, sans réduction, retient d'abord la direction donnée par $X_1$. La direction donnée par le critère de Fisher est $X_2$. Une direction qui conserve beaucoup de variance n'est donc pas nécessairement celle qui permet de distinguer les classes.
 
-#figure(
+  #figure(
   image("../figures/discriminante_fisher.svg", width: 100%,
     alt: "Deux classes simulées présentent une grande dispersion horizontale "
       + "commune et des moyennes verticales différentes. La projection "
@@ -309,88 +311,526 @@ relativement à leur variabilité interne.
     simulé ; à droite, les densités des projections sous les lois normales de
     l'exemple. Les directions indiquées sont celles du modèle théorique.],
 )
+]
+
 
 === Variabilités intra-groupe et inter-groupe
 
+#definition-box(supplement: "Définition")[
 Notons $C_g = {i : y_i=g}$ l'ensemble des indices de la classe $g$, d'effectif
-$n_g$, pour $g = 1, dots, K$. Les moyennes de classe et la moyenne globale sont
+$n_g$, pour $g = 1, dots, K$. Les moyennes de classe et la moyenne globale sont données par
 
 $ overline(x)_g = 1/n_g sum_(i in C_g) x_i, quad
   overline(x) = 1/n sum_(i=1)^n x_i = sum_(g=1)^K n_g/n overline(x)_g. $
+]
 
-On définit les matrices de dispersion *intra-groupe* et *inter-groupe* :
+#definition-box(supplement: "Définition")[
+On définit les matrices de dispersion *intra-groupe* $W$, *inter-groupe* $B$
+et *totale* $T$ par, respectivement :
 
 $
   W = sum_(g=1)^K sum_(i in C_g)
       (x_i-overline(x)_g)(x_i-overline(x)_g)^top,
 $
 $
-  B = sum_(g=1)^K n_g (overline(x)_g-overline(x))(overline(x)_g-overline(x))^top.
+  B = sum_(g=1)^K n_g (overline(x)_g-overline(x))(overline(x)_g-overline(x))^top,
 $
+$
+  T = sum_(i=1)^n (x_i-overline(x))(x_i-overline(x))^top.
+$
+]
 
-$W$ mesure les écarts de chaque observation à la moyenne de sa classe ; $B$
-mesure les écarts des moyennes de classe à la moyenne globale, pondérés par les
-effectifs. Ce sont ici des *sommes* de produits d'écarts, sans division par des
-degrés de liberté. La dispersion totale se décompose exactement en
+#figure(
+  image("../figures/discriminante_dispersions.svg", width: 100%,
+    alt: "Deux groupes de huit et six observations dans un plan. Les traits "
+      + "fins relient les observations à leur moyenne de groupe, indiquée "
+      + "par une croix. Les flèches épaisses vont de la moyenne globale, "
+      + "indiquée par un losange, aux deux moyennes de groupe."),
+  caption: [Dispersions intra-groupe et inter-groupe sur des données
+    illustratives à deux variables. Les traits fins représentent les écarts
+    $x_i-overline(x)_g$ qui interviennent dans $W$. Les flèches épaisses
+    représentent les écarts $overline(x)_g-overline(x)$ qui interviennent dans
+    $B$, avec une pondération par l'effectif $n_g$ de chaque groupe. La moyenne
+    globale est donc plus proche du centre du groupe le plus nombreux.],
+)
 
-$ T = sum_(i=1)^n (x_i-overline(x))(x_i-overline(x))^top = W+B. $
+La quantité $W$ mesure les écarts de chaque observation à la moyenne de sa classe et la quantité $B$ mesure les écarts des moyennes de classe à la moyenne globale, pondérés par les effectifs. Ce sont ici des sommes de produits d'écarts, sans division par des degrés de liberté. La dispersion totale se décompose exactement en
+
+$ T = W+B. $
 
 Les termes croisés disparaissent parce que les écarts à la moyenne somment à
-zéro dans chaque classe. Pour les scores $z_i=a^top x_i$, les dispersions
-intra-groupe et inter-groupe deviennent respectivement $a^top W a$ et
-$a^top B a$.
+zéro dans chaque classe.
 
 === Critère de Fisher et axes discriminants
 
-Le critère de Fisher maximise le rapport
+On cherche une combinaison linéaire $z_i=a^top x_i$ qui rende les moyennes
+des classes éloignées, sans amplifier excessivement leur dispersion interne.
+Une grande distance entre les moyennes projetées ne suffit donc pas : elle
+doit être appréciée relativement à la dispersion des observations autour
+de ces moyennes. On conserve ici les matrices de dispersion $W$ et $B$
+définies précédemment, sans normalisation par des degrés de liberté.
 
-$ J(a) = (a^top B a) / (a^top W a), quad a != 0. $
+*Un rapport de dispersions.* Pour une direction $a$, les moyennes des scores par groupe sont $overline(z)_g=a^top overline(x)_g$ et la moyenne globale est $overline(z)=a^top overline(x)$. On retrouve alors
 
-Une grande valeur indique que les moyennes projetées sont éloignées par rapport
-à la dispersion des observations autour de ces moyennes. Multiplier $a$ par
-une constante non nulle ne change pas $J(a)$ : on cherche une direction, et non
-une longueur particulière.
+$ a^top W a = sum_(g=1)^K sum_(i in C_g) (z_i-overline(z)_g)^2 quad "et" quad
+a^top B a = sum_(g=1)^K n_g (overline(z)_g-overline(z))^2. $
 
-Si $W$ est définie positive, on peut imposer $a^top W a = 1$ et maximiser
-$a^top B a$. La condition obtenue par un multiplicateur de Lagrange est
+#definition-box(supplement: "Définition")[
+  Le critère de Fisher d'une direction $a$ telle que $a^top W a>0$ est
 
-$ B a = lambda W a. $
+  $ J(a) = (a^top B a) / (a^top W a). $
 
-La première direction correspond à la plus grande valeur propre généralisée.
-Les suivantes sont choisies avec $a_k^top W a_ell = 0$ pour $k != ell$.
-Elles sont donc orthogonales pour la métrique définie par $W$, sans être
-nécessairement orthogonales pour le produit scalaire usuel.
-
-*Deux classes.* En posant $d = overline(x)_2-overline(x)_1$, on obtient
-$B = ((n_1 n_2)/n) d d^top$. Lorsque $d != 0$, la direction optimale vérifie
-
-$ a prop W^(-1) d. $
-
-La différence des moyennes donne le contraste recherché, tandis que l'inverse
-de $W$ tient compte des dispersions et des corrélations internes. Une variable
-dont les moyennes diffèrent beaucoup peut être peu discriminante si elle varie
-encore davantage à l'intérieur des classes.
-
-*Plusieurs classes.* Les $K$ moyennes centrées engendrent un espace de dimension
-au plus $K-1$. Comme $op("rang")(B) <= min(p,K-1)$, il existe au plus
-$min(p,K-1)$ axes discriminants de valeur propre strictement positive.
-Pour trois classes et quatre variables, on obtient donc au plus deux axes.
-On note $k$ le rang d'un axe et $q$ le nombre d'axes retenus.
-
-Ces axes constituent une réduction de dimension *supervisée*. Les valeurs
-propres quantifient la séparation inter-groupe relativement à la dispersion
-intra-groupe. Leurs pourcentages relatifs ne sont ni des pourcentages de variance
-totale expliquée au sens de l'ACP, ni des taux de bonne classification.
-Choisir $q$ pour prédire demande une validation sur des observations distinctes.
-
-#note[
-  Le critère de Fisher se définit sans hypothèse de normalité. Il privilégie
-  toutefois une séparation des moyennes : si deux classes ont la même moyenne
-  mais des dispersions différentes, $B$ peut être nulle alors qu'une règle
-  fondée sur les dispersions permet de les distinguer.
+  Un premier axe discriminant est une direction qui maximise ce rapport.
+  Son score $z=a^top x$ est appelé une variable discriminante.
 ]
 
-=== Analyse discriminante linéaire : modèle probabiliste
+Le numérateur mesure la séparation des moyennes projetées, pondérée par les
+effectifs, et le dénominateur la dispersion à l'intérieur des classes. Ainsi,
+$J(a)=0$ signifie que toutes les moyennes projetées coïncident. En effet, une grande
+valeur indique une séparation importante relativement à la dispersion interne.
+Ce rapport est positif ou nul, mais il n'est pas borné par $1$ et ne représente
+pas une probabilité de bonne classification.
+
+Pour tout scalaire $c != 0$, on a $J(c a)=J(a)$ : le facteur $c^2$ s'annule
+entre le numérateur et le dénominateur. La longueur et le signe de $a$ ne sont
+donc pas déterminés par le critère. Remplacer $a$ par $-a$ retourne simplement
+l'axe, sans changer la séparation.
+
+*Du problème d'optimisation aux valeurs propres.* Supposons désormais $W$
+définie positive, de sorte que $a^top W a>0$ pour tout $a != 0$. Grâce à
+l'invariance par changement d'échelle, le problème précédent est équivalent à
+
+$ "maximiser" quad a^top B a
+  quad "sous la contrainte" quad a^top W a=1. $
+
+La contrainte fixe la dispersion intra-groupe projetée à $1$. Elle ne fixe
+pas la variance totale du score. Introduisons le lagrangien
+
+$ cal(L)(a,lambda)=a^top B a-lambda(a^top W a-1). $
+
+Puisque $W$ et $B$ sont symétriques, l'annulation du gradient par rapport à $a$
+donne $2B a-2lambda W a=0$, soit
+
+$ B a=lambda W a. $
+
+C'est un problème de valeurs propres généralisées, i.e. on compare l'action de
+$B$ à celle de $W$. Lorsque $W$ est inversible, on peut aussi écrire
+$W^(-1)B a=lambda a$. En multipliant à gauche par $a^top$, on obtient
+$J(a)=lambda$. La valeur propre mesure donc directement le critère atteint
+sur la direction correspondante. La condition de Lagrange fournit toutefois
+plusieurs directions candidates. Il nous reste à identifier celle qui maximise
+le rapport.#footnote[
+  Une présentation complémentaire figure dans le cours _Multivariate
+  Statistics_ de Richard D. Wilkinson, section
+  #link("https://rich-d-wilkinson.github.io/MATH3030/8.3-FLDA.html")[« Fisher's
+  linear discriminant rule »].
+]
+
+#property-box(supplement: "Propriétés")[
+  Si $W$ est définie positive, les valeurs propres généralisées de $(B,W)$
+  sont réelles et positives ou nulles. En les ordonnant
+  $lambda_1 >= lambda_2 >= dots >= lambda_p >= 0$, on a
+
+  $ max_(a != 0) J(a)=lambda_1. $
+
+  Un vecteur propre généralisé associé à $lambda_1$ définit donc un premier
+  axe discriminant.
+]
+
+#proof(title: "Preuve")[
+  La décomposition spectrale de $W$ définit sa racine carrée symétrique
+  $W^(1/2)$ et son inverse $W^(-1/2)$. Posons $u=W^(1/2)a$ et
+  $M=W^(-1/2)B W^(-1/2)$. Alors
+
+  $ J(a)=(u^top M u)/(u^top u). $
+
+  La matrice $M$ est symétrique semi-définie positive. Dans une base
+  orthonormée de ses vecteurs propres $u_1,dots,u_p$, écrivons
+  $u=sum_(j=1)^p c_j u_j$. Le rapport devient
+
+  $ J(a)=(sum_(j=1)^p lambda_j c_j^2)/(sum_(j=1)^p c_j^2)
+    <= lambda_1. $
+
+  L'égalité est atteinte pour $u=u_1$, donc pour $a=W^(-1/2)u_1$.
+  Enfin, $M u_j=lambda_j u_j$ équivaut à
+  $B a_j=lambda_j W a_j$ avec $a_j=W^(-1/2)u_j$. Ce sont bien
+  les valeurs propres généralisées recherchées.
+]
+
+Cette transformation donne aussi une lecture géométrique. En effet, appliquer
+$W^(-1/2)$ aux données ramène la dispersion intra-groupe à la matrice identité.
+Dans cet espace transformé, on cherche les directions où les moyennes des
+classes, pondérées par leurs effectifs, sont les plus dispersées. Ce n'est
+donc pas une ACP du nuage initial, mais une recherche de dispersion des
+centres des classes après correction de la dispersion interne.#footnote[
+  Voir la section « Mathematical formulation of LDA dimensionality reduction »
+  de la #link("https://scikit-learn.org/stable/modules/lda_qda.html#mathematical-formulation-of-lda-dimensionality-reduction")[documentation
+  de scikit-learn] pour cette interprétation géométrique.
+]
+
+*Construire les axes suivants.* Le deuxième axe maximise le même critère
+parmi les directions satisfaisant $a^top W a_1=0$, et ainsi de suite.
+On peut choisir les vecteurs $a_k$ de façon à vérifier
+
+$ a_k^top W a_k=1, quad a_k^top W a_ell=0 quad "si" quad k != ell. $
+
+Les axes sont ainsi orthogonaux pour la métrique définie par $W$, mais pas
+nécessairement pour le produit scalaire usuel. En effet, ici, on n'impose pas
+$a_k^top a_ell=0$. Chaque nouvel axe décrit un contraste entre groupes
+complémentaire aux précédents, avec $J(a_k)=lambda_k$. En cas de valeurs
+propres égales, les axes associés ne sont pas uniques. Différentes bases
+du même sous-espace discriminant conviennent.
+
+*Le cas de deux classes.* Posons $d=overline(x)_2-overline(x)_1$. Puisque
+$n=n_1+n_2$, les écarts des moyennes à la moyenne globale sont
+
+$ overline(x)_1-overline(x)=-(n_2/n)d, quad
+  overline(x)_2-overline(x)=(n_1/n)d. $
+
+En remplaçant dans la définition de $B$, on trouve
+
+$ B=((n_1 n_2)/n)d d^top quad "et" quad
+  J(a)=((n_1 n_2)/n) (a^top d)^2/(a^top W a). $
+
+Si $d != 0$, la matrice $B$ est de rang $1$. Il existe donc un seul axe
+discriminant de valeur propre positive, qui vérifie
+
+$ a_1 prop W^(-1)d, quad
+  lambda_1=((n_1 n_2)/n)d^top W^(-1)d. $
+
+La différence des moyennes donne le contraste recherché, tandis que $W^(-1)$
+tient compte des dispersions et des corrélations internes. Si $W$ est
+diagonale, le coefficient de la variable $j$ est proportionnel à
+$d_j/W_(j j)$. Un grand écart de moyennes peut donc être compensé par une
+grande dispersion intra-groupe. Si $d=0$, tous les rapports valent zéro et donc
+le critère ne privilégie aucune direction.
+
+#example[
+  Considérons deux classes d'effectifs $n_1=n_2=10$, dont les moyennes et la
+  dispersion intra-groupe sont
+
+  $ overline(x)_1=(0,0)^top, quad overline(x)_2=(2,1)^top,
+    quad W=mat(16,0;0,4). $
+
+  On obtient $d=(2,1)^top$ et $B=5d d^top=mat(20,10;10,5)$. La direction
+  optimale est proportionnelle à
+
+  $ W^(-1)d=(1/8,1/4)^top prop (1,2)^top. $
+
+  On peut donc utiliser le score $z=x_1+2x_2$. La deuxième variable reçoit
+  un coefficient plus élevé malgré son plus petit écart de moyennes :
+  sa dispersion interne est quatre fois plus faible.
+
+  Pour $a=(1,2)^top$, les moyennes projetées sont $0$ et $4$, d'où
+
+  $ a^top B a=80, quad a^top W a=32, quad J(a)=80/32=2.5. $
+
+  En utilisant seulement $x_1$ ou seulement $x_2$, on obtiendrait
+  respectivement $20/16=1.25$ et $5/4=1.25$. La combinaison est donc plus
+  discriminante au sens de Fisher que chacune des deux variables isolées.
+  Pour respecter la normalisation $a_1^top W a_1=1$, on prend
+  $a_1=(1,2)^top/sqrt(32)$, sans changer la valeur du critère.
+]
+
+*Combien d'axes peut-on obtenir ?* Avec plusieurs classes, les moyennes
+centrées vérifient la relation
+
+$ sum_(g=1)^K n_g (overline(x)_g-overline(x))=0. $
+
+Ces $K$ vecteurs sont donc linéairement dépendants et engendrent un espace
+de dimension au plus $K-1$. Puisque $W$ est définie positive, le nombre $r$
+de valeurs propres généralisées strictement positives est
+
+$ r=op("rang")(B) <= min(p,K-1). $
+
+Pour trois classes et quatre variables, il existe au plus deux axes
+discriminants de valeur propre positive. Il peut n'y en avoir qu'un si
+les trois moyennes sont alignées, ou aucun si elles coïncident. Multiplier
+le nombre de variables ne permet donc pas de dépasser la limite de $K-1$
+axes décrivant des différences de moyennes.
+
+*Projeter et interpréter les observations.* Pour $1 <= q <= r$, réunissons
+  les $q$ premières directions en une matrice $A=(a_1,dots,a_q)$ de taille
+  $p times q$. Les coordonnées discriminantes centrées sont
+
+  $ z_i=A^top (x_i-overline(x)) in RR^q, quad "avec" quad
+    z_(i k)=a_k^top (x_i-overline(x)). $
+
+Il s'agit d'une réduction de dimension supervisée, puisque les étiquettes
+des classes interviennent dans le calcul de $A$. Le centrage global déplace
+l'origine des scores sans changer les écarts
+entre observations ni le critère. Les dispersions dans cet espace vérifient
+
+$ A^top W A=I_q, quad "et" quad
+  A^top B A=op("diag")(lambda_1,dots,lambda_q). $
+
+Les dispersions intra-groupes sont ainsi mises sur la même échelle, tandis
+que les dispersions inter-groupes décroissent d'un axe au suivant. Les
+produits croisés intra-groupes sont nuls après regroupement des classes.
+Cela ne signifie cependant ni absence de corrélation dans chaque classe séparément,
+ni indépendance des scores. On interprète un plan discriminant en examinant
+les positions des moyennes projetées, le recouvrement des nuages et les
+variables qui contribuent aux contrastes. Les coefficients bruts dépendent
+des unités et des corrélations. Ainsi, leur valeur seule ne mesure pas l'importance
+d'une variable.
+
+Lorsque $r>0$, on peut résumer le poids relatif de l'axe $k$ par
+
+$ lambda_k/(sum_(ell=1)^r lambda_ell). $
+
+Par exemple, si $lambda_1=9$ et $lambda_2=1$, ces valeurs propres attribuent 90~% de leur poids au premier axe. Ce pourcentage n'est ni une proportion de variance totale expliquée au sens de l'ACP, ni un taux de bonne classification. Avec deux
+classes de moyennes distinctes, l'unique axe représente toujours 100~% de
+cette somme, même si les distributions projetées se recouvrent fortement.
+
+#note[
+  Le critère de Fisher se définit sans hypothèse de normalité, mais privilégie les différences de moyennes. Si deux classes ont la même moyenne et des dispersions différentes, $B=0$ alors qu'une autre règle pourrait peut-être les distinguer. De plus, un axe est une règle de calcul de score, pas encore une règle d'affectation : un seuil, ou un classificateur utilisant les coordonnées projetées, reste à définir. Cette étape ne découle pas du seul critère de Fisher et n'impose pas de choisir un modèle LDA ou QDA.
+]
+
+*En pratique.* On calcule les moyennes, les matrices $W$ et $B$ sur l'entraînement, on résout le problème aux valeurs propres généralisées, puis on conserve les $q$ directions choisies. Pour une nouvelle observation, on réutilise la même moyenne globale et la même matrice $A$, sans avoir besoin de son étiquette. Si $q$ est choisi pour prédire, on le sélectionne par validation et on réestime la projection dans chaque pli d'entraînement.
+
+L'écriture $W^(-1)B$ est surtout théorique : les logiciels peuvent résoudre
+le problème généralisé sans former explicitement l'inverse. Si $W$ est
+singulière, l'argument précédent ne s'applique plus et si elle est presque
+singulière, les axes peuvent être instables. On peut alors supprimer des
+redondances ou régulariser la dispersion intra-groupe.
+
+*Séparation visuelle et prédiction.* Un beau plan discriminant construit avec
+toutes les étiquettes ne prouve pas une bonne généralisation. La projection
+doit être estimée dans chaque entraînement, et la qualité des décisions doit
+être mesurée sur des observations laissées de côté. Enfin, les axes décrivent
+des contrastes associés aux classes : ils ne démontrent ni une relation
+causale ni l'existence de groupes sans recouvrement.
+
+=== Classification dans l'espace de Fisher
+
+Les axes de Fisher fournissent une représentation supervisée des observations.
+Pour en faire un classificateur, il faut leur associer une règle d'affectation.
+Une règle simple consiste à choisir la classe dont le centre projeté est
+le plus proche de l'observation à classer. On compare donc une observation
+aux moyennes des classes, et non à ses plus proches voisins individuels.
+
+#definition-box(supplement: "Définition")[
+  Soit $A=(a_1,dots,a_q)$ la matrice des axes retenus, normalisés de sorte que
+  $A^top W A=I_q$. Pour une nouvelle observation $x$, on définit son score
+  vectoriel et les centres projetés des classes par
+
+  $ z(x)=A^top (x-overline(x)), quad
+    m_g=A^top (overline(x)_g-overline(x)). $
+
+  Le critère d'affectation au centre le plus proche est la distance
+  euclidienne au carré dans l'espace discriminant :
+
+  $ D_g (x)=norm(z(x)-m_g)^2
+    =sum_(k=1)^q [a_k^top (x-overline(x)_g)]^2. $
+
+  La règle de classification est
+
+  $ hat(g)_F (x)=op("argmin")_(g in {1,dots,K}) D_g (x). $
+]
+
+Ici, le $F$ rappelle que les distances sont calculées dans l'espace de
+Fisher. En cas d'égalité, on fixe une règle de départage avant l'évaluation,
+par exemple la première classe dans un ordre prédéfini. La règle du centre
+projeté le plus proche est une manière de compléter la projection de
+Fisher, et non une conséquence imposée par la maximisation de $J$.#footnote[
+  Voir la règle d'affectation et son extension à plusieurs projections dans
+  le cours de Richard D. Wilkinson,
+  #link("https://rich-d-wilkinson.github.io/MATH3030/8.3-FLDA.html")[« Fisher's
+  linear discriminant rule »].
+]
+
+*Pourquoi normaliser les axes ?* Le critère $J(a)$ ne fixe pas la longueur
+de $a$, mais une distance utilisant plusieurs scores dépend de leurs
+échelles relatives. Multiplier un seul axe par $10$ multiplierait sa
+contribution à $D_g$ par $100$ et pourrait changer la classe prédite.
+La convention $A^top W A=I_q$ met les axes sur une même échelle de dispersion
+intra-groupe. On ne multiplie donc pas les distances par les valeurs propres.
+Changer le signe d'un axe, ou appliquer une rotation orthogonale commune aux
+scores et aux centres, ne change pas les distances ni les décisions.
+
+*Deux classes et un seul axe.* Supposons les moyennes projetées ordonnées
+$m_1<m_2$. Comparer $(z-m_1)^2$ et $(z-m_2)^2$ revient à couper l'axe au
+milieu des deux centres :
+
+$ "prédire la classe 2 si" quad z(x)>(m_1+m_2)/2. $
+
+Pour le score non centré $s(x)=a_1^top x$, la même règle s'écrit
+
+$ "prédire la classe 2 si" quad
+  s(x)>1/2 a_1^top (overline(x)_1+overline(x)_2). $
+
+Si l'on inverse le signe de l'axe, l'ordre des centres et le sens de
+l'inégalité s'inversent ensemble. La décision, elle, reste inchangée.
+
+#example[
+  Reprenons les moyennes $(0,0)^top$ et $(2,1)^top$ de l'exemple précédent,
+  et le score de Fisher $s(x)=x_1+2x_2$. Les centres projetés non centrés
+  valent $0$ et $4$ : le seuil est donc $2$.
+
+  Pour $x=(1,1)^top$, le score vaut $3$ et les distances au carré aux centres
+  valent $9$ et $1$ : on prédit la classe $2$. Pour $x=(0.5,0.5)^top$, le
+  score vaut $1.5$, avec des distances au carré $2.25$ et $6.25$ : on prédit
+  la classe $1$. La frontière est la droite $x_1+2x_2=2$.
+
+  Ici, il n'y a qu'un axe : le facteur commun $1/sqrt(32)$ qui le normalise
+  multiplie toutes les distances au carré par $1/32$ et ne change donc pas
+  la décision.
+]
+
+*Plusieurs classes.* Dans un plan discriminant, les centres découpent le plan
+en régions de proximité. La frontière entre deux centres distincts $m_g$ et
+$m_h$ vérifie
+
+$ D_g (x)=D_h (x)
+  quad <=> quad
+  2(m_h-m_g)^top z(x)=norm(m_h)^2-norm(m_g)^2. $
+
+Il s'agit d'une droite dans un plan discriminant, ou d'un hyperplan en
+dimension supérieure. Seules les portions où aucune autre classe n'est
+plus proche constituent les frontières effectives des régions de décision.
+
+#note[
+  Cette règle est géométrique : elle ne suppose pas de lois normales et ne
+  produit pas de probabilités a posteriori. Les effectifs interviennent
+  dans l'estimation de $W$, de $B$ et des axes, mais la comparaison des
+  distances n'ajoute aucun terme de priorité à une classe ni de coût d'erreur.
+  Une petite distance au centre le plus proche n'est donc pas une probabilité
+  de classification correcte. Si les classes sont multimodales ou de formes
+  très différentes, les résumer par leurs centres peut être insuffisant.
+]
+
+Toutes les étapes sont apprises sur l'entraînement : centrage, axes et
+centres projetés. L'étiquette d'une observation de test ne sert qu'à évaluer
+la décision. Le nombre d'axes $q$ et le choix de la règle d'affectation font
+partie de la méthode ; si on les compare, on utilise une validation interne
+à l'entraînement, en réestimant les axes et les centres dans chaque pli.
+
+=== Exemple de classification : Palmer Penguins
+
+On cherche à prédire l'espèce, `Adelie`, `Chinstrap` ou `Gentoo`, à partir
+de quatre mesures : `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`
+et `body_mass_g`. Le fichier `penguins.csv` contient $344$
+manchots ; le retrait des deux observations incomplètes pour ces mesures
+laisse $342$ individus. Ni `sex`, ni `island`, ni `year` ne sont utilisés.
+
+
+#table(
+  columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
+  inset: 5pt, stroke: 0.4pt + luma(210),
+  table.header([*Espèce*], [*Total*], [*Entraînement*], [*Test*]),
+  [Adelie], [151], [106], [45],
+  [Chinstrap], [68], [48], [20],
+  [Gentoo], [123], [86], [37],
+  [*Total*], [*342*], [*240*], [*102*],
+)
+
+*Apprendre le plan discriminant.* Avec $K=3$ classes et $p=4$ variables,
+on conserve les deux axes possibles, soit $q=2$, fixé avant l'évaluation.
+Les matrices $W$ et $B$, la moyenne globale et les centres des espèces sont
+calculés sur les $240$ observations d'entraînement seulement. On
+résout le problème $B a=lambda W a$ et vérifie $A^top W A=I_2$.
+Les mesures sont dans leurs unités d'origine ; la normalisation des
+axes tient compte de la dispersion intra-groupe et des corrélations.
+
+Les deux valeurs propres sont environ $13.783$ et $2.749$, soit 83,37~%
+et 16,63~% de leur somme. Le second axe porte donc un contraste que le
+premier ne résume pas. Ces pourcentages décrivent le critère de Fisher,
+pas l'exactitude de la classification.
+
+Avec l'orientation des axes fixée dans le script, les centres projetés sont :
+
+#table(
+  columns: (1.4fr, 1fr, 1fr), align: center,
+  inset: 5pt, stroke: 0.4pt + luma(210),
+  table.header([*Espèce*], [*Axe 1*], [*Axe 2*]),
+  [Adelie], [$0.20829$], [$-0.07633$],
+  [Chinstrap], [$0.10755$], [$0.20857$],
+  [Gentoo], [$-0.31676$], [$-0.02234$],
+)
+
+Le premier axe oppose surtout `Gentoo` aux deux autres espèces. Le second
+sépare plus nettement les centres `Adelie` et `Chinstrap`. Les coordonnées
+sont petites parce que la somme des dispersions intra-groupes vaut $1$
+sur chaque axe. On pourrait afficher des scores multipliés par une même
+constante sans modifier les décisions. Le signe des axes est également
+conventionnel ; il ne change pas les distances aux centres.
+
+#example[
+  La première observation du jeu de test correspond à la troisième ligne
+  de données du CSV. Ses mesures, dans l'ordre retenu, sont
+
+  $ x=(40.3,18,195,3250)^top. $
+
+  On soustrait la moyenne de l'entraînement, puis on applique les deux axes
+  appris. On obtient environ $z(x)=(0.18346,0.01658)^top$. Les distances
+  euclidiennes au carré aux trois centres sont
+
+  $ D_"Adelie" (x) approx 0.00925, quad
+    D_"Chinstrap" (x) approx 0.04263, quad
+    D_"Gentoo" (x) approx 0.25173. $
+
+  La plus petite distance est celle du centre `Adelie` : on prédit donc
+  cette espèce. L'étiquette réelle, consultée seulement pour vérifier la
+  prédiction, est bien `Adelie`. Les distances ont été calculées avec les
+  coordonnées non arrondies.
+]
+
+#block(breakable: false)[
+Les prédictions des $102$ observations de test donnent la matrice de confusion suivante :
+
+#table(
+  columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
+  inset: 6pt, stroke: 0.4pt + luma(210),
+  table.header([*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*],
+    [*Prédit Gentoo*]),
+  [Adelie], [45], [0], [0],
+  [Chinstrap], [2], [18], [0],
+  [Gentoo], [0], [0], [37],
+)
+]
+
+L'exactitude vaut $100/102 approx 98.04$~% et le taux d'erreur
+$2/102 approx 1.96$~%. Les deux erreurs sont des `Chinstrap` classés
+`Adelie` : le rappel de `Chinstrap` est $18/20=90$~%. Celui des deux autres
+espèces vaut 100~% sur ce test.
+
+Ces résultats coïncident ici avec ceux de la LDA présentée plus loin, mais
+le calcul effectué est bien une projection de Fisher suivie d'une affectation
+au centre le plus proche, sans correction par des probabilités a priori
+ni estimation de probabilités a posteriori. Une coïncidence sur ce jeu
+de test ne suffit pas à identifier les démarches.
+
+Enfin, ce résultat décrit un partage précis des données. Les deux axes et
+la règle de proximité ont été fixés avant le test ; celui-ci n'a servi ni
+à les choisir ni à les ajuster. Pour comparer un seul axe à deux axes, ou
+une autre règle dans l'espace projeté, il faudrait une validation sur les
+seules données d'entraînement.
+
+== Analyse discriminante probabiliste : LDA et QDA <discriminante-probabiliste>
+
+=== Principe : modéliser les classes pour prédire
+
+L'analyse discriminante probabiliste part d'une autre démarche que celle de
+Fisher : elle modélise la distribution des variables explicatives dans chaque
+classe, puis en déduit la probabilité d'appartenance d'une observation à chaque
+classe. Son objectif est de construire une règle de classification, et non
+de maximiser directement un rapport de dispersions.
+
+On note $f_g(x)$ la densité de $X$ conditionnellement à $Y=g$, et
+$pi_g=P(Y=g)$ la probabilité a priori de la classe $g$. La formule de Bayes
+donne la probabilité *a posteriori*
+
+$ eta_g (x) = P(Y=g bar.v X=x)
+  = (pi_g f_g (x)) / (sum_(h=1)^K pi_h f_h (x)). $
+
+Sous la perte 0–1, on choisit la classe de plus grande probabilité a posteriori.
+La LDA et la QDA utilisent toutes deux des densités normales multivariées,
+mais diffèrent par leurs hypothèses sur les covariances : une covariance
+commune pour la LDA, une covariance propre à chaque classe pour la QDA.
+Elles peuvent s'appliquer directement aux variables explicatives ; une
+projection préalable sur les axes de Fisher n'est pas nécessaire.
+
+=== Analyse discriminante linéaire (LDA)
 
 L'analyse discriminante linéaire, ou *LDA* (_Linear Discriminant Analysis_),
 modélise les variables explicatives conditionnellement à la classe :
@@ -403,14 +843,8 @@ $pi_g > 0$ somment à $1$ et décrivent les fréquences des classes avant
 d'observer les mesures. La normalité est supposée *dans chaque classe* : la
 distribution globale, mélange de ces classes, n'a pas à être normale.
 
-Si $f_g (x)$ est la densité normale de la classe $g$, la formule de Bayes donne
-la probabilité *a posteriori*
-
-$ eta_g (x) = P(Y=g bar.v X=x)
-  = (pi_g f_g (x)) / (sum_(h=1)^K pi_h f_h (x)). $
-
-Sous la perte 0–1, on choisit la classe de plus grande probabilité. Le
-dénominateur étant commun, cela revient à maximiser
+Le dénominateur de la formule de Bayes étant commun aux classes, maximiser
+la probabilité a posteriori revient à maximiser
 $log pi_g + log f_g (x)$. Avec une covariance commune, le terme quadratique
 $-1/2 x^top Sigma^(-1) x$ est identique dans toutes les classes et s'élimine de
 la comparaison. Il reste les *scores discriminants*#footnote[
@@ -440,6 +874,9 @@ habituellement
 $ hat(mu)_g = overline(x)_g, quad
   hat(Sigma) = W/(n-K), quad hat(pi)_g = n_g/n. $
 
+La matrice $W$ désigne la même somme de produits d'écarts intra-groupes que
+dans la section sur Fisher. Réutiliser cette quantité ne revient pas à
+appliquer son critère : elle sert ici à estimer une covariance du modèle.
 La covariance commune regroupe les dispersions *à l'intérieur* des classes ;
 elle ne doit pas être remplacée par la covariance totale, qui inclut leurs
 différences de moyenne. Les proportions empiriques sont adaptées si
@@ -475,10 +912,19 @@ $ z > 1/2 a^top (mu_1+mu_2) - log(pi_2/pi_1). $
 
 À probabilités a priori égales, le seuil est le milieu des deux moyennes
 projetées. Si la classe $2$ est plus rare, le seuil augmente : il faut des
-mesures plus favorables à cette classe pour la choisir. La direction $a$ est
-proportionnelle à celle de Fisher lorsque la covariance est estimée par
-$W/(n-K)$. Le lien entre projection et classification est donc précis, mais
-la direction seule ne détermine pas le seuil.
+mesures plus favorables à cette classe pour la choisir.
+
+#note[
+  *Un lien avec Fisher, pas une identité de démarches.* Dans le cas de deux
+  classes de moyennes empiriques distinctes, si l'on estime les moyennes par
+  ces moyennes empiriques et la covariance commune par $W/(n-2)$ avec $W$
+  inversible, la direction estimée
+  de la LDA est proportionnelle à $W^(-1)(overline(x)_2-overline(x)_1)$ :
+  on retrouve la direction de Fisher. Cette correspondance algébrique ne
+  confond pas les méthodes. Fisher optimise un critère de projection ; la
+  LDA part d'un modèle probabiliste qui fournit aussi les probabilités de
+  classe et le seuil de décision, en tenant compte des probabilités a priori.
+]
 
 #example[
   Supposons $mu_1=(0,0)^top$, $mu_2=(2,1)^top$,
@@ -511,7 +957,7 @@ $0.50$. On détecte alors davantage de défauts, au prix de davantage de fausses
 alertes. Les probabilités a priori figurent déjà dans les probabilités
 a posteriori : il ne faut pas les appliquer une seconde fois à ce seuil.
 
-=== Analyse discriminante quadratique
+=== Analyse discriminante quadratique (QDA)
 
 La *QDA* (_Quadratic Discriminant Analysis_) autorise une covariance propre
 à chaque classe :
@@ -668,14 +1114,6 @@ La QDA assouplit l'égalité des covariances, mais conserve une forme gaussienne
 dans chaque classe. Les méthodes peuvent encore fournir une règle utile si
 les hypothèses ne sont pas exactes ; leur performance et la calibration des
 probabilités doivent alors être vérifiées empiriquement.
-
-*Séparation visuelle et prédiction.* Un beau plan discriminant construit avec
-toutes les étiquettes ne prouve pas une bonne généralisation. La projection
-doit être estimée dans chaque entraînement, et la qualité des décisions doit
-être mesurée sur des observations laissées de côté. Enfin, les axes décrivent
-des contrastes associés aux classes : ils ne démontrent ni une relation
-causale ni l'existence de groupes sans recouvrement.
-
 
 == Arbres de classification et de régression
 
@@ -937,7 +1375,7 @@ automatisées.
 #heading(level: 2, outlined: false)[Exercices]
 
 1. Expliquez le rapport entre variabilité inter-groupe et intra-groupe dans
-   l'analyse discriminante.
+   l'analyse discriminante de Fisher.
 2. Pourquoi un arbre non élagué risque-t-il de surajuster ?
 3. Comparez bagging et boosting en une phrase.
 4. Proposez un protocole de validation pour choisir la profondeur maximale d'un
