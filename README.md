@@ -23,3 +23,18 @@ For live preview while editing:
 ```sh
 typst watch main.typ
 ```
+
+
+## Topics
+
+[X] Analyse exploratoire (~~notes~~, ~~slides~~, ~~code~~)
+[ ] Réduction de dimension
+    [X] ACP (~~notes~~, ~~slides~~, ~~code~~)
+[ ] Apprentissage supervisée
+    [X] kNN (~~notes~~, ~~slides~~, ~~code~~)
+    [ ] Analyse discriminante de Fisher (~~notes~~, slides, code)
+    [ ] LDA / QDA (notes, slides, code)
+[ ] Apprentissage non-supervisée
+    [ ] k-means (notes, slides, code)
+[ ] Données manquantes 
+
