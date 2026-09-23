@@ -33,13 +33,13 @@ typst watch main.typ
     * [ ] ACP (~~notes~~, ~~slides~~, ~~code~~, exercices)
 
 - [ ] Apprentissage supervisée
-    * [X] kNN (~~notes~~, ~~slides~~, ~~code~~, exercices)
+    * [ ] kNN (~~notes~~, ~~slides~~, ~~code~~, exercices)
     * [ ] Analyse discriminante de Fisher (~~notes~~, slides, code, exercices)
     * [ ] LDA / QDA (notes, slides, code, exercices)
 
 - [ ] Apprentissage non-supervisée
     * [ ] Concepts (~~notes~~, slides, code, exercices)
-    * [ ] k-means (notes, slides, code, exercices)
+    * [ ] k-means (~~notes~~, slides, code, exercices)
 
 - [ ] Données manquantes 
 

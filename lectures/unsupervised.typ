@@ -177,23 +177,18 @@ aux nouvelles observations sans utiliser leurs réponses.
 ]
 
 
-== Les $k$-means <kmeans>
+== Les $k$-moyennes <kmeans>
 
 === Principe et critère à minimiser
 
-La méthode des *k-means*, ou *$K$-moyennes*, répartit des observations numériques
-autour de $K$ centroïdes. Le nombre $K$ est fixé pour un ajustement donné.
-On travaille dans l'espace choisi après les éventuelles transformations ;
-les vecteurs $x_i$ ci-dessous désignent les observations dans cet espace.
+La méthode des *$k$-moyennes* (*$k$-means)*, répartit des observations numériques autour de $k$ centroïdes. Le nombre $k$ est fixé pour un ajustement donné. On travaille dans l'espace choisi après les éventuelles transformations. Les vecteurs $x_i$ ci-dessous désignent les observations dans cet espace.
 
-Pour une partition $cal(C)$ et des centres $mu_1, dots, mu_K$, on considère
+Pour une partition $cal(C)$ et des centres $mu_1, dots, mu_k$, on considère
 
-$ Q(cal(C),mu_1,dots,mu_K)
-  = sum_(g=1)^K sum_(i in C_g) norm(x_i-mu_g)^2. $
+$ Q(cal(C),mu_1,dots,mu_k)
+  = sum_(g=1)^k sum_(i in C_g) norm(x_i-mu_g)^2. $
 
-On cherche à minimiser ce critère à la fois sur les affectations et sur les
-centres. Si la partition est fixée, le meilleur centre du groupe $g$ est sa
-moyenne $overline(x)_g$, car, pour tout vecteur $m$,
+On cherche à minimiser ce critère à la fois sur les affectations et sur les centres. Si la partition $cal(C)$ est fixée, le "meilleur" centre du groupe $g$ (au sens de celui qui minimise le critère) est sa moyenne $overline(x)_g$, car, pour tout vecteur $m$,
 
 $ sum_(i in C_g) norm(x_i-m)^2
   = sum_(i in C_g) norm(x_i-overline(x)_g)^2
@@ -202,35 +197,29 @@ $ sum_(i in C_g) norm(x_i-m)^2
 Le second terme est positif ou nul et s'annule pour $m=overline(x)_g$.
 En remplaçant chaque centre par cette moyenne, le critère devient exactement
 l'inertie intra-groupe $W(cal(C))$. Le centroïde peut être un point qui
-n'existe pas parmi les observations : il résume leur position moyenne.
+n'existe pas parmi les observations, il l'est d'ailleurs généralement. Il résume la position moyenne des observations du groupe.
 
-La moyenne est donc liée au *carré de la distance euclidienne*. Remplacer la
-distance par une autre dissimilarité tout en conservant la même mise à jour
-des moyennes ne garantit plus la minimisation du critère correspondant.
+La moyenne est donc liée au carré de la distance euclidienne. Remplacer la distance euclidienne par une autre dissimilarité tout en conservant la même mise à jour des moyennes ne garantit plus la minimisation du critère $Q$ correspondant.
 
 === L'algorithme de Lloyd
 
-Explorer toutes les partitions possibles est trop coûteux dès que les données
-deviennent nombreuses. L'algorithme de Lloyd alterne deux problèmes plus
-simples, chacun résolu exactement conditionnellement à l'autre.
+Explorer toutes les partitions possibles est trop coûteux dès que le nombre d'observations devient important. L'algorithme de Lloyd alterne deux problèmes plus simples, chacun résolu exactement conditionnellement à l'autre.
 
-*Initialisation.* On choisit $K$ centres initiaux $mu_g^(0)$, par exemple parmi
-des observations distinctes. Ce mode d'initialisation exige au moins $K$
-profils distincts dans les données.
+*Initialisation.* À l'itération $t=0$, on choisit $k$ centres initiaux $mu_g^(0)$ aléatoirement, par exemple parmi des observations distinctes. Ce mode d'initialisation exige au moins $k$ observations distinctes dans les données.
 
 *Affectation.* À l'itération $t+1$, chaque observation rejoint le centre le
-plus proche :
+plus proche, suivant une distance euclidienne :
 
-$ c_i^(t+1) = op("argmin")_(g in {1,dots,K}) norm(x_i-mu_g^(t))^2, quad
+$ c_i^(t+1) = op("argmin")_(g in {1,dots,k}) norm(x_i-mu_g^(t))^2, quad
   C_g^(t+1) = {i : c_i^(t+1)=g}. $
 
 En cas d'égalité, on applique une règle de départage fixée. Cette étape
 n'augmente pas le critère, puisque les centres sont inchangés et que chaque
 observation choisit sa meilleure affectation.
 
-*Mise à jour.* Pour chaque groupe non vide, on recalcule la moyenne :
+*Mise à jour.* On note $n_g^(t+1) = abs(C_g^(t+1))$. Pour chaque groupe non vide, on recalcule la moyenne :
 
-$ mu_g^(t+1) = 1/abs(C_g^(t+1)) sum_(i in C_g^(t+1)) x_i. $
+$ mu_g^(t+1) = 1/n_g^(t+1) sum_(i in C_g^(t+1)) x_i. $
 
 Cette étape n'augmente pas non plus le critère, puisque la moyenne minimise
 la somme des distances au carré pour les affectations fixées. On répète les
@@ -246,9 +235,7 @@ une stratégie, par exemple réinitialiser ce centre sur une observation mal
 représentée.
 
 #example[
-  Reprenons $0,1,2,8,9,10$ avec $K=2$, en initialisant les centres à $0$ et $2$.
-  La valeur $1$ est à égale distance des deux centres ; on l'affecte au premier
-  groupe selon la règle de départage fixée.
+  Reprenons les observations $0,1,2,8,9,10$ avec $k=2$, en initialisant les centres à $0$ et $2$. La valeur $1$ est à égale distance des deux centres. On l'affecte au premier groupe selon la règle de départage fixée.
 
   La première affectation donne $C_1={0,1}$ et $C_2={2,8,9,10}$. Les centres
   recalculés sont $0.5$ et $7.25$, et l'inertie intra-groupe vaut $39.25$.
@@ -261,25 +248,15 @@ représentée.
 
 === Initialisation et solutions locales
 
-Deux initialisations peuvent conduire à deux partitions stables différentes,
-avec des valeurs de $W$ différentes. Il est donc utile de lancer plusieurs
-ajustements pour le même $K$ et de conserver celui de plus faible inertie.
-Le nombre d'initialisations et le nombre d'itérations par initialisation sont
-deux réglages distincts : laisser plus longtemps évoluer une partition déjà
-stable ne lui permet pas de quitter cette solution.
+Deux initialisations peuvent conduire à deux partitions stables différentes, avec des valeurs de $W$ différentes. Il est donc utile de lancer plusieurs ajustements pour le même $k$ et de conserver celui de plus faible inertie intra-groupe. Le nombre d'initialisations et le nombre d'itérations par initialisation sont deux réglages distincts. En effet, laisser plus longtemps évoluer une partition déjà stable ne lui permet pas de quitter cette solution.
 
-#example[
+#example(breakable: true)[
   Considérons les quatre points $(-2,-1)$, $(-2,1)$, $(2,-1)$ et $(2,1)$,
-  avec $K=2$. Une séparation gauche/droite donne les centres $(-2,0)$ et
-  $(2,0)$ et une inertie $W=4$. Une séparation bas/haut donne les centres
-  $(0,-1)$ et $(0,1)$ et une inertie $W=16$.
+  avec $k=2$. Une séparation gauche/droite donne les centres $(-2,0)$ et $(2,0)$ et une inertie intra-groupe $W=4$. Une séparation bas/haut donne les centres $(0,-1)$ et $(0,1)$ et une inertie intra-groupe $W=16$.
 
-  Dans les deux cas, chaque point est affecté à son centre le plus proche et
-  chaque centre est la moyenne de son groupe. Les deux partitions sont donc
-  stables pour Lloyd, alors que la seconde est moins bonne pour le critère.
-]
+  Dans les deux cas, chaque point est affecté à son centre le plus proche et chaque centre est la moyenne de son groupe. Les deux partitions sont donc stables pour l'algorithme de Lloyd, alors que la seconde est moins bonne pour le critère.
 
-#figure(
+  #figure(
   image("../figures/kmeans_initialisations.svg", width: 100%,
     alt: "Les mêmes quatre sommets d'un rectangle sont regroupés à gauche "
       + "selon leur position gauche ou droite, avec une inertie de 4, et à "
@@ -289,21 +266,17 @@ stable ne lui permet pas de quitter cette solution.
     étaient les deux points du bas ; à droite, les deux points de gauche.
     Les segments relient les observations à leur centroïde final.],
 )
+]
 
-L'initialisation *k-means++* cherche à mieux répartir les centres de départ.
-Elle choisit un premier point au hasard, puis les suivants avec une probabilité
-proportionnelle au carré de leur distance au centre déjà choisi le plus
-proche. Les régions encore mal couvertes ont ainsi davantage de chances de
-recevoir un centre. Cette initialisation améliore souvent le départ, sans
-garantir que l'ajustement final atteigne l'optimum global.
 
-Fixer une graine aléatoire permet de reproduire un calcul ; cela ne rend pas
-sa partition meilleure. Pour examiner la sensibilité à l'initialisation, il
-faut comparer plusieurs départs, leurs inerties et leurs affectations.
+
+L'initialisation *$k$-means++* cherche à mieux répartir les centres lors de l'initialisation. Elle choisit un premier point au hasard, puis les suivants avec une probabilité proportionnelle au carré de leur distance au centre déjà choisi le plus proche. Les régions encore mal couvertes ont ainsi davantage de chances de recevoir un centre. Cette initialisation améliore souvent le départ de l'algorithme, sans garantir que l'ajustement final atteigne l'optimum global.
+
+Fixer une graine aléatoire permet de reproduire un calcul ; cela ne rend pas sa partition meilleure. Pour examiner la sensibilité à l'initialisation, il faut comparer plusieurs départs, leurs inerties et leurs affectations.
 
 === Géométrie des groupes et affectation d'un nouveau point
 
-Pour des centres fixés, les observations sont réparties en régions de
+Pour des centres de groupes fixés, les observations sont réparties en régions de
 Voronoï : la région du centre $mu_g$ contient les points plus proches de ce
 centre que des autres. La frontière entre deux centres distincts vérifie
 
@@ -331,26 +304,19 @@ que les anciennes affectations. La proximité à un centre ne fournit pas,
 
 === Choisir le nombre de groupes
 
-Pour chaque valeur candidate de $K$, on compare plusieurs initialisations.
-L'inertie minimale théorique $W_K^*$ est non croissante avec $K$ : on peut
+Pour chaque valeur candidate de $k$, on compare plusieurs initialisations.
+L'inertie minimale théorique $W_k^*$ est non croissante avec $k$ : on peut
 scinder un groupe sans augmenter la somme des carrés. Minimiser directement
-$W_K^*$ sur $K$ conduirait donc à multiplier les groupes. Les valeurs obtenues
+$W_k^*$ sur $k$ conduirait donc à multiplier les groupes. Les valeurs obtenues
 par un algorithme local peuvent exceptionnellement ne pas suivre cette
 décroissance si certains ajustements restent dans de mauvaises solutions.
 
-La *méthode du coude* cherche une rupture dans la courbe des inerties : après
-une forte baisse, chaque groupe supplémentaire apporte une amélioration plus
-modeste. Pour les six valeurs $0,1,2,8,9,10$, on passe de $W=100$ avec un groupe
-à $W=4$ avec deux groupes ; un troisième groupe peut ramener $W$ à $2.5$.
-Le gain principal vient ici du passage à deux groupes. Dans des données moins
-nettement séparées, plusieurs coudes peuvent être plausibles, ou aucun coude
-ne ressortir clairement.
+La *méthode du coude* cherche une rupture dans la courbe des inerties : après une forte baisse, chaque groupe supplémentaire apporte une amélioration plus modeste. Lorsque les observations ne sont pas bien séparées, plusieurs coudes peuvent être plausibles, ou aucun coude ne ressortir clairement.
 
 On peut compléter cette lecture par la *silhouette moyenne* et l'indice de
-*Calinski–Harabasz*. Ces critères comparent des compromis entre compacité et
-séparation, sans nécessairement sélectionner le même $K$. La silhouette est
-calculée avec une distance explicitement choisie ; dans l'exemple qui suit,
-on utilise les distances euclidiennes, et non leurs carrés.
+*Calinski-Harabasz*. Ces critères comparent des compromis entre compacité et
+séparation, sans nécessairement sélectionner le même $k$. La silhouette est
+calculée avec une distance explicitement choisie.
 
 Le choix final tient aussi compte des effectifs, des profils et de la stabilité
 des groupes. Une subdivision supplémentaire peut être utile pour une question
@@ -358,20 +324,61 @@ précise, même si elle ne maximise pas un indice global. Inversement, un
 nouveau groupe constitué de quelques valeurs extrêmes peut traduire une
 sensibilité du critère plutôt qu'un profil d'intérêt.
 
-=== Exemple pratique : Palmer Penguins
+#example(breakable: true)[
+  *Retenir trois groupes plutôt que quatre.* Considérons les neuf observations
+  $0,1,2,10,11,12,20,21,22$, avec la distance euclidienne, sans transformation.
+  Leur moyenne est $11$ et leur inertie totale vaut $T=606$.
+
+  Pour chaque $k$, on retient une partition qui minimise l'inertie intra-groupe.
+  Dans ce petit exemple, on peut vérifier ce minimum en examinant toutes les
+  découpes des valeurs ordonnées en $k$ groupes consécutifs. Les partitions
+  retenues sont les suivantes, avec les groupes écrits en termes de valeurs :
+
+  - $k=1$ : toutes les observations dans un même groupe ;
+  - $k=2$ : ${0,1,2}$ et ${10,11,12,20,21,22}$ ;
+  - $k=3$ : ${0,1,2}$, ${10,11,12}$ et ${20,21,22}$ ;
+  - $k=4$ : ${0}$, ${1,2}$, ${10,11,12}$ et ${20,21,22}$.
+
+  Pour $k=2$ et $k=4$, plusieurs partitions atteignent le même minimum
+  d'inertie ; les critères ci-dessous correspondent aux partitions indiquées.
+
+  #block(breakable: false)[
+    #table(
+      columns: (0.5fr, 1fr, 1.5fr, 1fr),
+      align: center, inset: 4pt, stroke: 0.4pt + luma(210),
+      table.header([*$k$*], [*Inertie $W$*], [*Silhouette moyenne*], [*CH*]),
+      [1], [606], [—], [—],
+      [2], [156], [0,641], [20,19],
+      [*3*], [*6*], [*0,862*], [*300*],
+      [4], [4,5], [0,628], [222,78],
+    )
+  ]
+
+  *Lecture du coude.* Ajouter un deuxième groupe réduit $W$ de $450$, puis
+  un troisième le réduit encore de $150$. En revanche, le quatrième groupe
+  ne fait gagner que $1.5$. La courbe des inerties présente donc un coude
+  marqué à $k=3$ : au-delà, le gain devient faible.
+
+  *Confronter les critères et les profils.* Parmi les valeurs comparées,
+  la silhouette moyenne et CH sont aussi maximaux pour $k=3$. Les centres
+  sont alors $1$, $11$ et $21$, et chaque groupe contient trois observations
+  proches. Passer à quatre groupes isole la valeur $0$ de ses voisines $1$
+  et $2$, sans faire apparaître un nouvel ensemble nettement séparé.
+  On retient donc ici *trois groupes*, même si quatre groupes donnent une
+  inertie plus petite. La silhouette et CH ne sont pas définis pour $k=1$
+]
+
+=== Exemple : Palmer Penguins
 
 On regroupe les manchots à partir des quatre mesures `bill_length_mm`,
 `bill_depth_mm`, `flipper_length_mm` et `body_mass_g`. Les deux observations
-auxquelles il manque une de ces mesures sont retirées ; les $342$ autres sont
+auxquelles il manque une de ces mesures sont retirées et les $342$ autres sont
 conservées. Les données sont centrées et réduites avec les écarts-types
 empiriques, de diviseur $n-1$. Il s'agit d'une exploration descriptive de
 l'ensemble disponible : `species` n'intervient ni dans les distances,
 ni dans les ajustements, ni dans le choix de $K$.
 
-Le script `codes/k_means.R` compare $K=1, dots, 8$ avec $50$ initialisations
-par valeur et une graine fixée à $2200$. Il utilise la fonction `kmeans` de R
-avec l'algorithme de Hartigan–Wong, qui optimise le même critère d'inertie par
-une procédure différente de l'alternance de Lloyd.#footnote[
+On compare $k=1, dots, 8$ avec $50$ initialisations par valeur. On utilise la fonction `kmeans` de R avec l'algorithme de Hartigan-Wong, qui optimise le même critère d'inertie par une procédure différente de l'alternance de Lloyd.#footnote[
   Voir la #link("https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html")[documentation
   de `stats::kmeans`], notamment les arguments `algorithm`, `nstart` et `iter.max`.
 ] L'inertie totale vaut ici $T=4 times (342-1)=1364$ : chacune des quatre
@@ -380,7 +387,7 @@ variables réduites a une somme de carrés égale à $341$.
 #table(
   columns: (0.6fr, 1.2fr, 1.2fr, 1.3fr, 1fr), align: center,
   inset: 4pt, stroke: 0.4pt + luma(210),
-  table.header([*$K$*], [*Inertie $W$*], [*Pseudo-$R^2$*],
+  table.header([*$k$*], [*Inertie $W$*], [*Pseudo-$R^2$*],
     [*Silhouette moyenne*], [*CH*]),
   [1], [1364,00], [0,00~%], [—], [—],
   [*2*], [*564,05*], [*58,65~%*], [*0,532*], [*482,2*],
@@ -392,8 +399,8 @@ variables réduites a une somme de carrés égale à $341$.
   [8], [170,47], [87,50~%], [0,299], [334,1],
 )
 
-La silhouette moyenne est maximale pour $K=2$ parmi les valeurs évaluées.
-L'indice de Calinski–Harabasz donne ici le même choix. On retient donc deux
+La silhouette moyenne est maximale pour $k=2$ parmi les valeurs évaluées.
+L'indice de Calinski-Harabasz donne ici le même choix. On retient donc deux
 groupes pour cette description. L'inertie continue de diminuer au-delà,
 mais le passage à trois groupes ne donne pas une meilleure silhouette moyenne.
 Cela ne démontre pas qu'il existe exactement deux sous-populations naturelles.
@@ -403,9 +410,9 @@ Cela ne démontre pas qu'il existe exactement deux sous-populations naturelles.
     alt: "Sur Palmer Penguins, l'inertie intra-groupe diminue de 1364 pour "
       + "un groupe à 564 pour deux groupes, puis continue à diminuer. "
       + "La silhouette moyenne est maximale à deux groupes, avec 0,532."),
-  caption: [Choisir $K$ sur les quatre mesures réduites. La baisse de l'inertie
+  caption: [Choisir $k$ sur les quatre mesures réduites. La baisse de l'inertie
     ne suffit pas à arrêter le nombre de groupes. Le trait vertical indique
-    $K=2$, retenu ici à partir de la silhouette moyenne.],
+    $k=2$, retenu ici à partir de la silhouette moyenne.],
 )
 
 *Décrire les groupes.* Pour faciliter la présentation, les groupes sont
@@ -435,7 +442,7 @@ dépassent tous ceux de l'autre sur chaque mesure.
       + "principales, avec une couleur par groupe de k-means. Le groupe 1 "
       + "contient 219 individus et le groupe 2 en contient 123. Les croix "
       + "représentent les projections des centroïdes."),
-  caption: [Visualisation de la partition sur un plan d'ACP. Les k-means sont
+  caption: [Visualisation de la partition sur un plan d'ACP. Les $k$-means sont
     ajustés dans l'espace des quatre mesures réduites ; l'ACP sert uniquement
     à afficher le résultat. Les croix sont les centroïdes projetés. Les
     pourcentages des axes décrivent la variance conservée par l'ACP et se
@@ -449,41 +456,10 @@ reproduisent donc pas les trois espèces. Ils résument une séparation
 morphologique forte pour les variables et la pondération choisies, sans
 obligation de retrouver une classification biologique donnée.
 
-Le calcul des critères, les profils et ce tableau croisé se reproduisent dans
-R, depuis la racine du projet :
-
-```r
-source("codes/k_means.R", encoding = "UTF-8")
-```
-
-Pour ajuster directement une partition avec la même préparation, les
-opérations essentielles sont les suivantes ; le script complet réalise en
-plus la comparaison de plusieurs valeurs de $K$ :
-
-#block(breakable: true)[
-```r
-penguins <- read.csv("assets/penguins.csv")
-variables <- c("bill_length_mm", "bill_depth_mm",
-               "flipper_length_mm", "body_mass_g")
-x <- penguins[complete.cases(penguins[variables]), variables]
-z <- scale(x)
-set.seed(2200)
-modele <- kmeans(z, centers = 2, nstart = 50, iter.max = 100,
-                 algorithm = "Hartigan-Wong")
-modele$size
-modele$tot.withinss
-mean(cluster::silhouette(modele$cluster, dist(z))[, "sil_width"])
-```
-]
-
-Les nouvelles observations doivent être réduites avec les moyennes et les
-écarts-types conservés dans `attr(z, "scaled:center")` et
-`attr(z, "scaled:scale")`, puis comparées aux centres de `modele$centers`.
-Les numéros des groupes renvoyés par le logiciel restent arbitraires.
 
 === Limites et variantes
 
-*Une géométrie liée aux centres.* Les k-means fonctionnent particulièrement
+*Une géométrie liée aux centres.* Les $k$-means fonctionnent particulièrement
 bien lorsque la distance à une moyenne résume convenablement chaque groupe.
 Ils peuvent couper un groupe très étendu ou fusionner de petits groupes
 voisins lorsque les dispersions et les effectifs diffèrent fortement.
@@ -491,7 +467,7 @@ Ils n'imposent pas formellement des tailles égales ou des covariances
 sphériques identiques, mais ces différences peuvent rendre leur critère peu
 adapté à la structure recherchée.
 
-Deux anneaux concentriques illustrent cette limite : avec $K=2$, la frontière
+Deux anneaux concentriques illustrent cette limite : avec $k=2$, la frontière
 entre les deux centres est une droite, qui ne peut pas séparer un anneau
 intérieur d'un anneau extérieur. Des méthodes par densité, des méthodes
 spectrales ou une autre représentation peuvent être plus pertinentes selon
@@ -510,21 +486,6 @@ aux frontières. Une partition stable ou une baisse importante de $W$ ne
 garantit pas une interprétation substantielle. Les différences de distance
 aux centres peuvent renseigner sur une ambiguïté, sans devenir pour autant
 des probabilités d'appartenance.
-
-*Des variantes qui changent le critère ou le calcul.* Les *$K$-médoïdes*
-choisissent comme représentant une observation réelle de chaque groupe et
-minimisent une somme de dissimilarités à ces représentants. Ils permettent
-d'autres distances et sont généralement plus robustes aux valeurs extrêmes,
-avec un coût de calcul souvent supérieur. Avec la distance de Manhattan,
-une mise à jour par médianes coordonnée par coordonnée conduit plutôt aux
-*$K$-médianes*.
-
-Enfin, les *mini-batch k-means* mettent à jour les centres à partir de petits
-lots d'observations et peuvent accélérer l'analyse de grands tableaux, au prix
-d'une optimisation approchée. Pour Lloyd, le calcul direct des affectations
-coûte de l'ordre de $n K p$ par itération ; multiplier les initialisations
-multiplie aussi ce travail. La vitesse de calcul ne dispense pas de choisir
-une représentation pertinente et de vérifier la stabilité des résultats.
 
 
 == La classification hiérarchique
