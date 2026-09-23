@@ -27,14 +27,19 @@ typst watch main.typ
 
 ## Topics
 
-[X] Analyse exploratoire (~~notes~~, ~~slides~~, ~~code~~)
-[ ] Réduction de dimension
-    [X] ACP (~~notes~~, ~~slides~~, ~~code~~)
-[ ] Apprentissage supervisée
-    [X] kNN (~~notes~~, ~~slides~~, ~~code~~)
-    [ ] Analyse discriminante de Fisher (~~notes~~, slides, code)
-    [ ] LDA / QDA (notes, slides, code)
-[ ] Apprentissage non-supervisée
-    [ ] k-means (notes, slides, code)
-[ ] Données manquantes 
+- [X] Analyse exploratoire (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
+
+- [ ] Réduction de dimension
+    * [ ] ACP (~~notes~~, ~~slides~~, ~~code~~, exercices)
+
+- [ ] Apprentissage supervisée
+    * [X] kNN (~~notes~~, ~~slides~~, ~~code~~, exercices)
+    * [ ] Analyse discriminante de Fisher (~~notes~~, slides, code, exercices)
+    * [ ] LDA / QDA (notes, slides, code, exercices)
+
+- [ ] Apprentissage non-supervisée
+    * [ ] Concepts (~~notes~~, slides, code, exercices)
+    * [ ] k-means (notes, slides, code, exercices)
+
+- [ ] Données manquantes 
 

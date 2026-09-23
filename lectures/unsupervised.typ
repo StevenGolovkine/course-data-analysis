@@ -95,10 +95,7 @@ Comme il repose sur des distances extrêmes,
 cet indice peut être fortement modifié par une seule observation atypique.
 
 #example(breakable: true)[
-  *Comparer trois partitions des mêmes observations.* Considérons les six
-  valeurs $0,1,2,8,9,10$, avec la distance $d(x_i,x_ell)=abs(x_i-x_ell)$.
-  Leur moyenne est $5$ et leur inertie totale, calculée sans division par $n$,
-  vaut $T=sum_(i=1)^6 (x_i-5)^2=100$.
+  *Comparer trois partitions des mêmes observations.* Considérons les six valeurs suivante : $0,1,2,8,9,10$, et considérons la distance $d(x_i,x_ell)=abs(x_i-x_ell)$. Leur moyenne est $5$ et leur inertie totale, calculée sans division par $n$, vaut $ T=sum_(i=1)^6 (x_i-5)^2=100. $
 
   On compare les partitions suivantes, en écrivant les valeurs dans les
   groupes plutôt que les indices des observations :
@@ -113,24 +110,22 @@ cet indice peut être fortement modifié par une seule observation atypique.
   $ R^2=1-4/100=0.96, quad op("CH")=96/4 times (6-2)/(2-1)=96. $
 
   Pour l'observation de valeur $2$, les distances moyennes sont
-  $a_i=(2+1)/2=1.5$ et $b_i=(6+7+8)/3=7$ : sa silhouette vaut
+  $a_i=(2+1)/2=1.5$ et $b_i=(6+7+8)/3=7$ : sa silhouette vaut donc
   $s_i=(7-1.5)/7 approx 0.786$. La silhouette moyenne est calculée sur les
   six observations. Enfin, la plus petite distance entre les deux groupes
   est $8-2=6$ et leur diamètre maximal est $2$, d'où $D=6/2=3$.
 
-  #block(breakable: false)[
-    Les mêmes calculs pour les trois partitions donnent :
+  Les mêmes calculs pour les trois partitions donnent :
 
-    #table(
-      columns: (1fr, 0.45fr, 0.65fr, 1fr, 0.8fr, 1.3fr, 0.7fr),
-      align: center, inset: 4pt, stroke: 0.4pt + luma(210),
-      table.header([*Partition*], [*$K$*], [*$W$*], [*Pseudo-$R^2$*],
-        [*CH*], [*Silhouette moyenne*], [*Dunn*]),
-      [A], [2], [4], [96~%], [96], [0,831], [3],
-      [B], [2], [76], [24~%], [1,26], [0,030], [0,125],
-      [C], [3], [2,5], [97,5~%], [58,5], [0,493], [0,5],
-    )
-  ]
+  #table(
+    columns: (1fr, 0.45fr, 0.65fr, 1fr, 0.8fr, 1.3fr, 0.7fr),
+    align: center, inset: 4pt, stroke: 0.4pt + luma(210),
+    table.header([*Partition*], [*$K$*], [*$W$*], [*Pseudo-$R^2$*],
+    [*CH*], [*Silhouette moyenne*], [*Dunn*]),
+    [A], [2], [4], [96~%], [96], [0,831], [3],
+    [B], [2], [76], [24~%], [1,26], [0,030], [0,125],
+    [C], [3], [2,5], [97,5~%], [58,5], [0,493], [0,5],
+  )
 
   À nombre de groupes égal, tous les critères préfèrent *A* à *B*. Dans *B*,
   les valeurs $2$ et $8$ ont chacune une silhouette de $-0.6$ : elles sont
@@ -151,21 +146,16 @@ et à la question qui motive l'analyse.
 === Stabilité, interprétation et démarche pratique
 
 Une partition utile doit être suffisamment stable pour que son interprétation
-ne dépende pas d'un détail arbitraire. Il faut distinguer deux vérifications :
-répéter l'algorithme avec plusieurs initialisations examine sa sensibilité au
-point de départ ; modifier légèrement les données ou les rééchantillonner
-examine la sensibilité des groupes à l'échantillon. Des initialisations qui
-donnent toujours la même solution ne prouvent pas à elles seules une stabilité
-aux variations des données.
+ne dépende pas d'une observation arbitraire. Il faut distinguer deux vérifications :
 
-Pour comparer deux partitions, on doit tenir compte du caractère arbitraire
-de leurs numéros. On peut notamment examiner quels couples d'observations
-restent regroupés, plutôt que comparer directement les étiquettes « 1 »,
-« 2 », etc. Une visualisation aide également, mais une projection en deux
-dimensions peut masquer des séparations ou des chevauchements présents dans
-l'espace complet.
+- répéter l'algorithme avec plusieurs initialisations examine sa sensibilité au point de départ ;
+- modifier légèrement les données ou les rééchantillonner examine la sensibilité des groupes à l'échantillon.
 
-Une démarche d'analyse suit ainsi plusieurs étapes :
+Des initialisations qui donnent toujours la même solution ne prouvent pas à elles seules une stabilité aux variations des données.
+
+Pour comparer deux partitions, on doit tenir compte du caractère arbitraire de leurs numéros. On peut notamment examiner quels couples d'observations restent regroupés, plutôt que comparer directement les étiquettes des groupes « 1 », « 2 », etc. Une visualisation aide également, mais une projection en deux ou trois dimensions peut masquer des séparations ou des chevauchements présents dans l'espace complet.
+
+Une démarche d'analyse en apprentissage non-supervisée suit ainsi plusieurs étapes :
 
 1. Définir les observations, les variables et le type de similarité recherché.
 2. Traiter les valeurs manquantes, choisir les transformations et examiner
@@ -183,18 +173,11 @@ regroupement doivent être appris sur les données d'entraînement et appliqués
 aux nouvelles observations sans utiliser leurs réponses.
 
 #note[
-  Un algorithme peut découper un nuage continu sans que des groupes nettement
-  séparés existent dans la population. Les noms attribués aux groupes sont
-  des descriptions à justifier ; ils ne démontrent ni des catégories naturelles
-  ni des mécanismes causaux.
+  Un algorithme peut découper un nuage continu sans que des groupes nettement séparés existent dans la population. Les noms attribués aux groupes sont des descriptions à justifier. En effet, ils ne démontrent ni des catégories naturelles ni des mécanismes causaux.
 ]
 
-Le chapitre commence par les k-means, qui construisent une partition autour
-de moyennes. La classification hiérarchique décrit ensuite plusieurs niveaux
-de regroupement, les mélanges gaussiens introduisent une appartenance
-probabiliste et les méthodes par densité permettent d'autres formes de groupes.
 
-== Les k-means <kmeans>
+== Les $k$-means <kmeans>
 
 === Principe et critère à minimiser
 
