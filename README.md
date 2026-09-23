@@ -31,6 +31,8 @@ typst watch main.typ
 
 - [ ] Réduction de dimension
     * [ ] ACP (~~notes~~, ~~slides~~, ~~code~~, exercices)
+    * [ ] AFC (notes, slides, code, exercices)
+    * [ ] ACM (notes, slides, code, exercices)
 
 - [ ] Apprentissage supervisée
     * [ ] kNN (~~notes~~, ~~slides~~, ~~code~~, exercices)
