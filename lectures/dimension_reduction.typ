@@ -139,8 +139,6 @@ valeurs extrêmes et traiter les données manquantes.
   $ hat(Sigma) = 1 / (n - 1) Zmat^top Zmat in RR^(p times p). $
 ]
 
-Cette écriture matricielle applique aux données centrées la définition générale
-de @annexe-statistiques.
 
 #remark[
   Si les colonnes de $Zmat$ ont été réduites, $hat(Sigma)$ est la matrice de corrélation empirique des variables originales.
@@ -178,10 +176,9 @@ L'ACP cherche ainsi des directions unitaires qui maximisent cette forme quadrati
 
 #proof[
   On applique à la matrice symétrique $hat(Sigma)$ le résultat sur le quotient
-  de Rayleigh énoncé dans @prop-projections-rayleigh.
-  En notant $u_1,dots,u_p$ ses vecteurs propres orthonormés, associés à
-  $lambda_1 >= dots >= lambda_p >= 0$, le maximum est atteint pour
-  $alpha_1=u_1$. Ainsi, $Y_1=Zmat alpha_1$ et $Var(Y_1)=lambda_1$.
+  de Rayleigh (voir plus bas). En notant $u_1,dots,u_p$ ses vecteurs propres
+  orthonormés, associés à $lambda_1 >= dots >= lambda_p >= 0$, le maximum est
+  atteint pour $alpha_1=u_1$. Ainsi, $Y_1=Zmat alpha_1$ et $Var(Y_1)=lambda_1$.
 ]
 
 *Composantes suivantes.* Pour $2 <= k <= p$, on maximise la même variance en imposant en plus l'orthogonalité aux directions déjà retenues. Si $cal(A)_k$ est l'ensemble des vecteurs $alpha$ tels que $alpha^top alpha = 1$ et $alpha^top alpha_j = 0$ pour tout $j < k$, alors :
@@ -1211,7 +1208,7 @@ tous les profils de chaque nuage coïncident avec leur centre. Plus l'inertie
 est grande, plus les profils s'en écartent, pour cette géométrie.
 
 #remark[
-  L'AFC décrit la structure du tableau ; elle ne constitue pas à elle seule un
+  L'AFC décrit la structure du tableau. Elle ne constitue pas à elle seule un
   test d'indépendance. Multiplier tous les effectifs par deux ne change ni les
   profils, ni l'inertie, ni la carte, mais double $chi^2$. L'interprétation d'une
   valeur $p$ dépend en outre du plan d'échantillonnage et des conditions du test.
@@ -1219,23 +1216,17 @@ est grande, plus les profils s'en écartent, pour cette géométrie.
 
 === Construction des axes factoriels
 
-L'AFC peut se comprendre comme une analyse en composantes principales des
-profils, avec leurs masses et la distance du chi-deux. Sa construction repose
-sur la décomposition en valeurs singulières des écarts à l'indépendance.
-On pose $P = N/n$, $D_r = diag(r_1, dots, r_I)$ et
-$D_c = diag(c_1, dots, c_J)$, puis
+L'AFC peut se voir comme une ACP des profils, avec leurs masses et la distance du $chi^2$. Sa construction repose sur la décomposition en valeurs singulières de la matrice des écarts à l'indépendance. Posons $P = N/n$, $D_r = diag(r_1, dots, r_I)$ et $D_c = diag(c_1, dots, c_J)$, puis
 
 $
-  S = D_r^(-1/2) (P - r c^top) D_c^(-1/2), quad
-  S_(i j) = (p_(i j) - r_i c_j) / sqrt(r_i c_j).
+  S = D_r^(-1/2) (P - r c^top) D_c^(-1/2), quad "avec" quad S_(i j) = (p_(i j) - r_i c_j) / sqrt(r_i c_j).
 $
 
 La soustraction de $r c^top$ retire la situation d'indépendance. Les facteurs
 diagonaux appliquent les pondérations liées aux marges. La somme des carrés des
 éléments de $S$ est précisément l'inertie $inertia$.
 
-Pour un tableau qui n'est pas exactement indépendant, la décomposition réduite
-de $S$ est
+Pour un tableau qui n'est pas exactement indépendant, la décomposition en valeurs singulières de $S$ est
 
 $
   S = U D V^top, quad D = diag(sigma_1, dots, sigma_(r_S)),
@@ -1258,8 +1249,8 @@ les lignes des matrices#footnote[
 
 $ F = D_r^(-1/2) U D, quad G = D_c^(-1/2) V D. $
 
-Ainsi, $F_(i k)$ est la coordonnée du programme $i$ sur l'axe $k$, et
-$G_(j k)$ celle de l'admission $j$. Dans l'espace complet des $r_S$ axes, les
+Ainsi, $F_(i k)$ est la coordonnée du profil-ligne $i$ sur l'axe $k$, et
+$G_(j k)$ celle du profil-colonne $j$. Dans l'espace complet des $r_S$ axes, les
 distances euclidiennes entre lignes de $F$ reproduisent exactement les distances
 du chi-deux entre profils-lignes. Il en va de même pour $G$ et les
 profils-colonnes. En ne conservant que $q$ axes, on projette les points : les
@@ -1271,7 +1262,7 @@ L'inertie de l'axe $k$ est la valeur propre $lambda_k = sigma_k^2$. Elle vérifi
 $
   sum_(i=1)^I r_i F_(i k)^2
   = sum_(j=1)^J c_j G_(j k)^2
-  = lambda_k, quad
+  = lambda_k, quad "et" quad
   sum_(k=1)^(r_S) lambda_k = inertia.
 $
 
@@ -1307,15 +1298,15 @@ l'AFC.
 
 === Représentation barycentrique
 
-Les deux nuages sont liés par des *relations de transition*. Pour les exprimer
+Les deux nuages sont liés par des relations de transition. Pour les exprimer
 comme des barycentres, il faut distinguer les coordonnées principales $F, G$
-des *coordonnées standard*
+des coordonnées standard
 
 $ Phi = D_r^(-1/2) U = F D^(-1), quad
   Gamma = D_c^(-1/2) V = G D^(-1). $
 
 Dans les coordonnées standard, l'inertie pondérée de chaque axe vaut $1$ ; dans
-les coordonnées principales, elle vaut $lambda_k$. On obtient les relations
+les coordonnées principales, elle vaut $lambda_k$. On obtient donc les relations
 
 $ F = D_r^(-1) P Gamma, quad G = D_c^(-1) P^top Phi, $
 
@@ -1344,7 +1335,7 @@ coordonnées standard.
   l'origine sur tous les axes.
 ]
 
-Une carte dite *symétrique*, comme celle ci-dessous, affiche les deux ensembles
+Une carte dite symétrique, comme celle ci-dessous, affiche les deux ensembles
 en coordonnées principales $F$ et $G$. Dans cette convention, la relation devient
 
 $ F_(i k) = 1 / sigma_k sum_(j=1)^J a_(i j) G_(j k). $
@@ -1353,7 +1344,7 @@ Le facteur $1/sigma_k$ est essentiel : une ligne n'est généralement pas le
 barycentre direct des colonnes telles qu'elles sont dessinées sur cette carte.
 Une carte asymétrique représentant $F$ et $Gamma$ permet la lecture barycentrique
 directe pour les lignes, mais les distances entre colonnes n'y sont plus les
-distances du chi-deux. Il faut donc connaître la convention du graphique fourni
+distances du $chi^2$. Il faut donc connaître la convention du graphique fourni
 par le logiciel avant d'en interpréter les distances.
 
 === Lecture du plan factoriel
@@ -1387,13 +1378,13 @@ plutôt que donner un sens intrinsèque aux côtés positif et négatif.
 semblables si les axes affichés les représentent bien. Deux admissions proches
 ont des répartitions semblables entre programmes, sous la même réserve. En
 revanche, la distance entre un programme et une admission n'est pas une
-distance du chi-deux entre profils : ces points appartiennent à deux espaces
+distance du $chi^2$ entre profils : ces points appartiennent à deux espaces
 initiaux différents. La proximité d'un cercle et d'un triangle ne mesure donc
 pas directement leur association, même dans un plan qui conserve toute l'inertie.
 
 Pour relier les deux ensembles, on examine leurs positions sur les axes et on
 revient aux écarts à l'indépendance. Avec tous les axes, l'identité suivante
-exprime ce lien de façon précise :
+exprime précisément ce lien :
 
 $ p_(i j) / (r_i c_j) - 1
   = sum_(k=1)^(r_S) (F_(i k) G_(j k)) / sigma_k. $
@@ -1505,25 +1496,25 @@ $(0.40, 0.35, 0.25)$ est projeté à l'origine. Si l'on souhaite au contraire
 qu'il participe à la construction des axes, il faut refaire l'analyse du
 tableau augmenté.
 
-*Des modalités rares parfois instables.* La distance du chi-deux donne un poids
-élevé à certains écarts impliquant de petites masses. Quelques observations
+*Des modalités rares parfois instables.* La distance du $chi^2$ donne un poids
+élevé à certains écarts impliquant de petites valeurs. Quelques observations
 peuvent alors déplacer fortement une modalité rare, voire orienter un axe.
 Une grande distance à l'origine ne signifie toutefois pas automatiquement une
 forte contribution, puisque celle-ci dépend aussi de la masse. Il faut examiner
-les effectifs et la stabilité de l'interprétation ; un regroupement de
+les effectifs et la stabilité de l'interprétation. Un regroupement de
 catégories doit avoir un sens dans le domaine étudié.
 
 *Des zéros à interpréter.* Une cellule nulle n'empêche pas le calcul si ses deux
 marges sont positives. Il faut distinguer une combinaison simplement absente
 de l'échantillon d'une combinaison impossible par construction. Ces zéros
 structurels peuvent organiser la carte et rendre le modèle d'indépendance
-usuel peu pertinent. À l'inverse, une ligne ou une colonne entièrement nulle
+usuel peu pertinent. Cependant, une ligne ou une colonne entièrement nulle
 n'a ni profil ni distance définis.
 
 *Une analyse dépendante du tableau choisi.* Modifier les catégories, filtrer
 une partie de la population ou changer le traitement des valeurs manquantes
 modifie les marges et donc la géométrie. La carte décrit les associations dans
-le tableau analysé ; elle n'établit pas une relation causale et ne permet pas
+le tableau analysé. Elle n'établit pas une relation causale et ne permet pas
 de déduire le parcours d'un étudiant particulier. Enfin, les propriétés du
 cercle des corrélations de l'ACP ne s'appliquent pas aux angles entre modalités
 sur une carte d'AFC.
