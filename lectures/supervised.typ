@@ -812,12 +812,38 @@ classe, puis en déduit la probabilité d'appartenance d'une observation à chaq
 classe. Son objectif est de construire une règle de classification, et non
 de maximiser directement un rapport de dispersions.
 
-On note $f_g(x)$ la densité de $X$ conditionnellement à $Y=g$, et
+On dispose de $n$ couples d'entraînement $(x_i,y_i)$, avec $x_i in RR^p$ et
+$y_i in {1,dots,K}$. On note $cal(I)_g={i:y_i=g}$ l'ensemble des indices de la
+classe $g$ et $n_g=abs(cal(I)_g)$ son effectif. Les paramètres sont estimés
+sur ces données étiquetées ; pour une nouvelle observation, seule la mesure
+$x$ est disponible.
+
+On note $f_g (x)$ la densité de $X$ conditionnellement à $Y=g$, et
 $pi_g=prob(Y=g)$ la probabilité a priori de la classe $g$. La formule de Bayes
 donne la probabilité *a posteriori*
 
 $ eta_g (x) = prob(Y=g bar.v X=x)
   = (pi_g f_g (x)) / (sum_(h=1)^K pi_h f_h (x)). $
+
+La probabilité a priori décrit la fréquence d'une classe *avant* d'observer
+$x$. La densité $f_g (x)$ mesure à quel point ces mesures sont compatibles
+avec la distribution de cette classe. La probabilité a posteriori combine
+ces deux informations. Une densité n'est pas une probabilité ponctuelle :
+pour une variable continue, $prob(X=x bar.v Y=g)=0$, même lorsque $f_g (x)>0$.
+
+#example[
+  À une valeur $x$ donnée, supposons $f_1 (x)=0.1$ et $f_2 (x)=0.4$.
+  Avec des probabilités a priori égales, $eta_2 (x)=0.4/(0.1+0.4)=0.8$.
+
+  Si la classe 2 ne représente que 10~% de la population visée, alors
+
+  $ eta_2 (x)=(0.1 times 0.4)/(0.9 times 0.1+0.1 times 0.4)
+    =4/13 approx 0.308. $
+
+  Les mesures sont quatre fois plus compatibles avec la classe 2 qu'avec
+  la classe 1, mais cela ne suffit pas à compenser sa rareté. Avec des coûts
+  d'erreur égaux, on prédit la classe 1.
+]
 
 Sous la perte 0–1, on choisit la classe de plus grande probabilité a posteriori.
 La LDA et la QDA utilisent toutes deux des densités normales multivariées,
@@ -825,6 +851,18 @@ mais diffèrent par leurs hypothèses sur les covariances : une covariance
 commune pour la LDA, une covariance propre à chaque classe pour la QDA.
 Elles peuvent s'appliquer directement aux variables explicatives ; une
 projection préalable sur les axes de Fisher n'est pas nécessaire.
+
+Pour une classe de moyenne $mu_g$ et de covariance définie positive $Sigma_g$,
+la densité normale multivariée est
+
+$ f_g (x)=1/((2 pi)^(p/2) det(Sigma_g)^(1/2))
+  exp(-1/2 (x-mu_g)^top Sigma_g^(-1)(x-mu_g)). $
+
+Le terme quadratique mesure l'éloignement à la moyenne dans la géométrie de
+la classe ; le déterminant intervient dans la normalisation de la densité.
+LDA et QDA sont ainsi des modèles *génératifs* : ils décrivent la loi jointe
+par les probabilités des classes et les lois de $X$ dans chaque classe,
+puis en déduisent la prédiction de $Y$.
 
 === Analyse discriminante linéaire (LDA)
 
@@ -839,11 +877,18 @@ projection préalable sur les axes de Fisher n'est pas nécessaire.
   $pi_g > 0$ somment à $1$ et décrivent les fréquences des classes avant
   d'observer les mesures. La normalité est supposée *dans chaque classe* : la
   distribution globale, mélange de ces classes, n'a pas à être normale.
+  Les variables peuvent être corrélées à l'intérieur des classes : les
+  covariances hors diagonale ne sont pas supposées nulles.
 ]
 
 Le dénominateur de la formule de Bayes étant commun aux classes, maximiser
 la probabilité a posteriori revient à maximiser
-$log pi_g + log f_g (x)$. Avec une covariance commune, le terme quadratique
+$log pi_g + log f_g (x)$. On développe la distance quadratique :
+
+$ (x-mu_g)^top Sigma^(-1)(x-mu_g)
+  = x^top Sigma^(-1)x-2x^top Sigma^(-1)mu_g+mu_g^top Sigma^(-1)mu_g. $
+
+Avec une covariance commune, le terme quadratique
 $-1/2 x^top Sigma^(-1) x$ est identique dans toutes les classes et s'élimine de
 la comparaison. Il reste les *scores discriminants*#footnote[
   Les formulations probabilistes de la LDA et de la QDA sont présentées dans
@@ -866,11 +911,34 @@ estimées se calculent à partir des mêmes scores :
 $ hat(eta)_g (x) = exp(hat(delta)_g (x)) /
   (sum_(h=1)^K exp(hat(delta)_h (x))). $
 
-*Estimer le modèle.* À partir du seul ensemble d'entraînement, on utilise
-habituellement
+Avec plus de deux classes, seules les portions où aucun autre score n'est
+supérieur forment les frontières effectives de décision. Une région de classe
+est une intersection de demi-espaces ; elle est donc convexe, éventuellement
+vide. Dans un cas dégénéré, deux scores peuvent aussi être identiques partout
+ou ne jamais être égaux.
 
-$ hat(mu)_g = overline(x)_g, quad
-  hat(Sigma) = W/(n-K), quad hat(pi)_g = n_g/n. $
+Le score lui-même n'est pas une probabilité : il peut être négatif ou supérieur
+à $1$. L'ajout d'une même quantité à tous les scores ne change ni leur ordre
+ni les probabilités. Pour calculer ces dernières sans débordement numérique,
+on soustrait le score maximal avant d'appliquer les exponentielles.
+
+=== Estimation des paramètres sur l'entraînement
+
+Les moyennes et les proportions empiriques sont
+
+$ hat(mu)_g=overline(x)_g=1/n_g sum_(i in cal(I)_g)x_i,
+  quad hat(pi)_g=n_g/n. $
+
+Pour $n_g>1$, la covariance empirique de la classe $g$ est
+
+$ S_g=1/(n_g-1) sum_(i in cal(I)_g)
+  (x_i-overline(x)_g)(x_i-overline(x)_g)^top. $
+
+En LDA, on regroupe les sommes de produits d'écarts pour estimer la covariance
+commune :
+
+$ hat(Sigma)=W/(n-K)
+  =(sum_(g=1)^K (n_g-1) S_g)/(n-K). $
 
 La matrice $W$ désigne la même somme de produits d'écarts intra-groupes que
 dans la section sur Fisher. Réutiliser cette quantité ne revient pas à
@@ -881,6 +949,42 @@ différences de moyenne. Les proportions empiriques sont adaptées si
 l'échantillon représente les fréquences visées. Si le plan d'échantillonnage
 a surreprésenté certaines classes, les probabilités a priori doivent être
 choisies en tenant compte de la population d'utilisation.
+
+La covariance commune est donc une moyenne des covariances de classe pondérée
+par leurs degrés de liberté, et non leur moyenne arithmétique lorsque les
+effectifs diffèrent. En QDA, on conserve au contraire chaque estimation
+$hat(Sigma)_g=S_g$.
+
+Ces formules utilisent les estimateurs usuels non biaisés des covariances.
+Les estimateurs du maximum de vraisemblance divisent les mêmes sommes par
+$n$ en LDA et par $n_g$ en QDA. Les deux conventions doivent être distinguées :
+elles peuvent modifier les probabilités, et parfois les décisions. Les
+calculs R de cette section utilisent `method = "moment"`, correspondant aux
+diviseurs $n-K$ et $n_g-1$.
+
+#example[
+  *Estimer une LDA à une variable.* Trois observations de classe 1 valent
+  $-1,0,1$ ; trois observations de classe 2 valent $1,2,3$. On a
+  $hat(mu)_1=0$, $hat(mu)_2=2$ et $hat(pi)_1=hat(pi)_2=1/2$.
+  Les deux sommes des carrés intra-classes valent $2$, donc
+
+  $ hat(sigma)^2=(2+2)/(6-2)=1. $
+
+  La différence des scores estimés est alors
+  $hat(delta)_2 (x)-hat(delta)_1 (x)=2x-2$. Pour $x=1.5$, elle vaut $1$ et
+  $hat(eta)_2 (x)=1/(1+exp(-1)) approx 0.731$ : on prédit la classe 2.
+
+  La variance globale des six observations vaut $2$, car elle inclut aussi
+  l'écart entre les moyennes des classes. L'utiliser à la place de la variance
+  intra-classe modifierait les probabilités et ne correspondrait pas au
+  modèle ajusté ci-dessus.
+]
+
+Pour classer de nouvelles observations, on réutilise les mêmes moyennes,
+covariances et probabilités a priori. Les mesures du test ne servent pas
+à réestimer ces paramètres. En pratique, on résout des systèmes linéaires
+et on utilise des factorisations matricielles plutôt que de former
+explicitement les inverses indiquées dans les formules.
 
 === Règle de classification et seuil de décision
 
@@ -911,6 +1015,42 @@ $ z > 1/2 a^top (mu_1+mu_2) - log(pi_2/pi_1). $
 À probabilités a priori égales, le seuil est le milieu des deux moyennes
 projetées. Si la classe $2$ est plus rare, le seuil augmente : il faut des
 mesures plus favorables à cette classe pour la choisir.
+
+Les probabilités et les scores sont reliés par les *log-cotes* :
+
+$ log((eta_2 (x))/(eta_1 (x)))=delta_2 (x)-delta_1 (x), quad
+  eta_2 (x)=1/(1+exp(-(delta_2 (x)-delta_1 (x)))). $
+
+Une différence de scores nulle donne une probabilité de $1/2$ ; une différence
+de $log(9)$ donne $eta_2 (x)=0.9$. Les log-cotes sont affines en $x$, comme en
+régression logistique. Les procédures d'estimation diffèrent cependant :
+la LDA estime les distributions de $X$ dans les classes, tandis que la
+régression logistique modélise directement les probabilités conditionnelles
+de classe sans imposer ces distributions normales.
+
+#example(breakable: true)[
+  *Déplacer le seuil en changeant les probabilités a priori.* Reprenons
+  $mu_1=0$, $mu_2=2$ et $sigma^2=1$, désormais fixés, en faisant varier
+  seulement les proportions de classes. Le seuil sur $x$ est
+
+  $ t=1+1/2 log(pi_1/pi_2), quad "et l'on prédit 2 si" quad x>t. $
+
+  #block(breakable: false)[
+    #table(
+      columns: (0.8fr, 0.8fr, 1fr, 1.4fr, 1fr), align: center,
+      table.header([*$pi_1$*], [*$pi_2$*], [*Seuil $t$*],
+        [*$eta_2 (1.5)$*], [*Classe*]),
+      [0,50], [0,50], [1,000], [0,731], [Classe 2],
+      [0,90], [0,10], [2,099], [0,232], [Classe 1],
+      [0,10], [0,90], [−0,099], [0,961], [Classe 2],
+    )
+  ]
+
+  Le même point peut donc changer de classe prédite sans que les moyennes
+  ni les variances aient changé. Fixer des probabilités a priori égales est
+  un choix de population ou de pondération ; ce n'est pas toujours une façon
+  neutre de traiter un échantillon déséquilibré.
+]
 
 #remark(title: [Un lien avec Fisher, pas une identité de démarches])[
   Dans le cas de deux
@@ -955,6 +1095,24 @@ $0.50$. On détecte alors davantage de défauts, au prix de davantage de fausses
 alertes. Les probabilités a priori figurent déjà dans les probabilités
 a posteriori : il ne faut pas les appliquer une seconde fois à ce seuil.
 
+En LDA binaire, le seuil correspondant sur le score $z$ devient
+
+$ z>1/2 a^top (mu_1+mu_2)-log(pi_2/pi_1)+log(C_"FP"/C_"FN"). $
+
+Dans l'exemple précédent avec $pi_2=0.1$, ces coûts déplacent le seuil sur
+$x$ de $2.099$ à $1+1/2 log(9/4) approx 1.405$. Le point $x=1.5$ est alors
+classé positif, bien que $eta_2 (1.5) approx 0.232$ soit inférieur à $0.5$.
+Les probabilités décrivent le modèle ; la décision dépend aussi des coûts.
+
+Avec plusieurs classes, si $L(a,g)$ est le coût de prédire $a$ lorsque la
+vraie classe est $g$, on choisit plus généralement
+
+$ hat(g)(x)=argmin_(a in {1,dots,K}) sum_(g=1)^K L(a,g)hat(eta)_g (x). $
+
+Sous la perte 0–1, ce coût conditionnel vaut $1-hat(eta)_a (x)$ et on retrouve
+le choix de la classe la plus probable. Une règle de départage fixée complète
+la définition lorsque plusieurs décisions ont le même coût.
+
 === Analyse discriminante quadratique (QDA)
 
 #definition(title: [Modèle QDA])[
@@ -962,6 +1120,9 @@ a posteriori : il ne faut pas les appliquer une seconde fois à ce seuil.
   à chaque classe :
 
   $ X bar.v (Y=g) tilde.op cal(N)_p (mu_g, Sigma_g). $
+
+  Chaque matrice $Sigma_g$ est supposée définie positive. Les probabilités
+  a priori $pi_g>0$ somment à $1$, comme en LDA.
 ]
 
 Les classes peuvent donc avoir des dispersions et des orientations différentes.
@@ -970,10 +1131,72 @@ En supprimant seulement les termes communs à toutes les classes, on obtient
 $ delta_g^"QDA" (x) = -1/2 log det(Sigma_g)
   -1/2 (x-mu_g)^top Sigma_g^(-1)(x-mu_g) + log pi_g. $
 
+Les trois termes jouent des rôles distincts. La distance de Mahalanobis
+favorise les points proches du centre dans la géométrie de la classe.
+Le terme $-1/2 log det(Sigma_g)$ tient compte de l'étalement de la densité :
+une classe très dispersée ne peut pas être avantagée uniquement parce que
+ses distances standardisées sont petites. Enfin, $log pi_g$ tient compte
+de sa fréquence dans la population visée.
+
 Le terme en $x$ au carré ne s'annule généralement plus entre deux classes.
 Les frontières peuvent être des courbes quadratiques en dimension deux, ou des
 surfaces quadratiques en dimension supérieure. Si les covariances sont égales,
 on retrouve la règle linéaire.
+
+Plus précisément, en posant
+
+$ b_g=-1/2 mu_g^top Sigma_g^(-1)mu_g
+      -1/2 log det(Sigma_g)+log pi_g, $
+
+la différence de deux scores vaut
+
+$ delta_g^"QDA" (x)-delta_h^"QDA" (x)
+  &= -1/2 x^top (Sigma_g^(-1)-Sigma_h^(-1))x \
+  &quad +(Sigma_g^(-1)mu_g-Sigma_h^(-1)mu_h)^top x+b_g-b_h. $
+
+Les produits $x_j x_ell$ issus des termes hors diagonale permettent notamment
+des frontières inclinées ou courbes. Une région prédite peut être non convexe,
+voire composée de plusieurs morceaux. Les probabilités a posteriori sont
+obtenues par la même normalisation exponentielle qu'en LDA, en utilisant les
+scores QDA estimés.
+
+#example[
+  *Des moyennes identiques, mais des dispersions différentes.* Avec une seule
+  variable, supposons
+
+  $ X bar.v (Y=1) tilde.op cal(N)(0,1), quad
+    X bar.v (Y=2) tilde.op cal(N)(0,4), quad pi_1=pi_2=1/2. $
+
+  Les variances sont $1$ et $4$ ; les deux moyennes valent zéro. La différence
+  des scores est
+
+  $ delta_2^"QDA" (x)-delta_1^"QDA" (x)=-log(2)+3/8 x^2. $
+
+  On prédit donc la classe 2 lorsque
+
+  $ abs(x)>sqrt(8 log(2)/3) approx 1.360. $
+
+  La classe 1 est choisie près de zéro, où sa densité est plus concentrée ;
+  la classe 2 est choisie dans les deux régions extérieures. En $x=0$,
+  $eta_2 (0)=1/3$ ; en $x=2$, $eta_2 (2) approx 0.691$.
+
+  Une LDA ayant ces mêmes moyennes et ces mêmes probabilités a priori
+  attribuerait $1/2$ à chaque classe partout, quelle que soit la variance
+  commune choisie. Les différences de moyennes ne suffisent donc pas toujours
+  pour classer ; QDA peut exploiter ici une différence de dispersion.
+]
+
+#figure(
+  image("../figures/qda_variances.svg", width: 100%,
+    alt: "Deux densités normales centrées en zéro, de variances un et quatre. "
+      + "QDA prédit la classe de variance un au centre et celle de variance "
+      + "quatre au-delà des seuils moins 1,36 et plus 1,36. LDA attribue "
+      + "une probabilité constante de 0,5 à chaque classe."),
+  caption: [Des dispersions différentes suffisent à produire une frontière
+    quadratique, même lorsque les moyennes coïncident. Les fonds colorés
+    représentent les décisions QDA. Les courbes sont celles des modèles
+    théoriques, avec des probabilités a priori égales.],
+)
 
 #figure(
   image("../figures/discriminante_lda_qda.svg", width: 100%,
@@ -986,7 +1209,9 @@ on retrouve la règle linéaire.
     pas sa performance sur de nouvelles observations.],
 )
 
-Cette flexibilité a un coût. Une covariance symétrique contient
+=== Choisir entre LDA et QDA
+
+La flexibilité de QDA a un coût. Une covariance symétrique contient
 $p(p+1)/2$ paramètres : la LDA en estime une seule, la QDA en estime $K$.
 Pour $p=4$ et $K=3$, cela représente $10$ paramètres de covariance pour la LDA
 contre $30$ pour la QDA, en plus des moyennes et des probabilités a priori.
@@ -994,6 +1219,40 @@ Chaque covariance de QDA est calculée à partir de sa propre classe : les
 petites classes peuvent donc poser problème même si l'effectif total est grand.
 Le choix entre LDA et QDA repose sur une validation, pas uniquement sur
 l'ajustement apparent aux données d'apprentissage.
+
+Si les covariances sont proches, les regrouper peut améliorer leur estimation :
+la LDA accepte davantage de biais de modélisation, mais peut avoir une variance
+d'estimation plus faible. Si les covariances diffèrent substantiellement et
+que chaque classe est suffisamment documentée, QDA peut décrire une structure
+que la LDA ne peut pas représenter. Une frontière plus souple n'est donc pas
+automatiquement une meilleure règle sur de nouvelles observations.
+
+La comparaison utilise les mêmes plis de validation pour les deux modèles.
+Dans chaque pli, on réestime les moyennes, les covariances et les probabilités
+a priori sur sa seule partie d'entraînement. Une imputation, une sélection de
+variables ou une transformation choisie à partir des données doit suivre le
+même protocole. On agrège ensuite les prédictions des observations laissées
+de côté. Le jeu de test reste réservé à l'évaluation finale de la procédure
+retenue.
+
+Le critère dépend de l'usage. Le taux d'erreur convient à une classification
+où toutes les erreurs ont le même coût ; avec des classes rares, on examine
+aussi les rappels par classe et les coûts pertinents. Pour évaluer les
+probabilités elles-mêmes, on peut utiliser la *perte logarithmique* :
+
+$ cal(L)_"log"=-1/m sum_(i=1)^m log(hat(eta)_(y_i) (x_i)), $
+
+où les $m$ probabilités ont été prédites sans entraîner le modèle sur les
+observations évaluées. Une petite valeur est préférable. Une erreur très
+confiante est fortement pénalisée : attribuer une probabilité de $0.01$ à la
+vraie classe coûte $-log(0.01) approx 4.605$, contre $0.105$ pour une probabilité
+de $0.9$. Deux règles ayant la même exactitude peuvent ainsi fournir des
+probabilités de qualité différente.
+
+La métrique principale et la règle de départage doivent être fixées avant
+la comparaison. Un résultat sur quelques plis ne prouve pas une supériorité
+générale : si les différences sont faibles, on examine leur stabilité et
+la complexité nécessaire à l'usage prévu.
 
 === Étude de cas : Palmer Penguins
 
@@ -1012,11 +1271,39 @@ sont disponibles ; elle ne fournit pas une méthode de traitement des mesures
 manquantes lors d'une future prédiction.
 
 Le script `codes/analyse_discriminante.R` reproduit l'exemple à partir des
-données locales. On réserve environ 30~% de chaque espèce pour le test, avec
-une graine fixée avant d'observer les résultats. Les $240$ observations
-d'entraînement servent à ajuster une LDA ; les $102$ autres servent uniquement
-à l'évaluer. Le modèle et les quatre variables sont fixés pour cet exemple,
-sans recherche d'hyperparamètres.
+données locales. On conserve le partage du cours : environ 30~% de chaque
+espèce sont réservés au test, avec la graine $2200$. Les $240$ observations
+d'entraînement servent à comparer LDA et QDA ; les $102$ autres restent à
+l'écart de ce choix. Les quatre variables sont fixées et utilisées dans leurs
+unités d'origine.
+
+*Comparer sur l'entraînement.* On construit cinq plis stratifiés, avec la
+graine $2201$, communs aux deux modèles. Chaque observation d'entraînement
+est prédite une fois par un modèle ajusté sur les quatre autres plis. Les
+probabilités a priori sont les proportions estimées dans ces quatre plis.
+On choisit le plus petit nombre d'erreurs ; à égalité, on retient la LDA,
+qui estime moins de paramètres de covariance.
+
+#block(breakable: false)[
+  #table(
+    columns: (0.8fr, 1.2fr, 1.1fr, 1.2fr), align: center,
+    table.header([*Modèle*], [*Erreurs sur 240*], [*Taux d'erreur*],
+      [*Perte logarithmique*]),
+    [*LDA*], [*3*], [*1,25~%*], [*0,03093*],
+    [QDA], [3], [1,25~%], [0,03711],
+  )
+]
+
+Les deux modèles commettent trois erreurs : la règle de départage conduit
+à retenir LDA. La perte logarithmique, donnée comme diagnostic complémentaire,
+est aussi plus faible pour LDA sur ces plis. Ces faibles écarts ne démontrent
+pas que QDA serait moins performante dans toute autre population ou tout
+autre partage.
+
+*Réajuster et évaluer.* On ajuste ensuite la LDA sur les $240$ observations
+d'entraînement, puis on prédit le test. Le code ci-dessous reproduit le partage
+et cet ajustement final ; la boucle de validation croisée complète se trouve
+dans le script.
 
 #block(breakable: true)[
 ```r
@@ -1036,7 +1323,7 @@ idx_train <- unlist(lapply(indices, function(i) {
 train <- d[idx_train, ]
 test <- d[-idx_train, ]
 
-modele <- MASS::lda(species ~ ., data = train)
+modele <- MASS::lda(species ~ ., data = train, method = "moment")
 prediction <- predict(modele, newdata = test)
 table(Reelle = test$species, Predite = prediction$class)
 mean(prediction$class == test$species)
@@ -1044,10 +1331,19 @@ mean(prediction$class == test$species)
 ]
 
 La fonction `lda` du paquet `MASS` utilise ici les proportions de classes de
-l'entraînement comme probabilités a priori.#footnote[
+l'entraînement comme probabilités a priori :
+
+$ hat(pi)=(106/240,48/240,86/240)^top
+  approx (0.4417,0.2000,0.3583)^top. $
+
+Les entrées `method` et `prior` permettent de préciser les conventions
+d'estimation.#footnote[
   Voir la #link("https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/lda.html")[documentation
   de `MASS::lda`], notamment l'argument `prior`.
-] Les prédictions donnent la matrice de confusion suivante :
+]
+
+#block(breakable: false)[
+Les prédictions donnent la matrice de confusion suivante :
 
 #table(
   columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
@@ -1057,6 +1353,7 @@ l'entraînement comme probabilités a priori.#footnote[
   [Chinstrap], [2], [18], [0],
   [Gentoo], [0], [0], [37],
 )
+]
 
 Le modèle classe correctement $100$ manchots sur $102$, soit 98,04~%
 d'exactitude. Les deux erreurs sont des `Chinstrap` prédits `Adelie` : le rappel
@@ -1064,12 +1361,34 @@ de `Chinstrap` vaut 90~%, contre 100~% pour les deux autres espèces dans ce tes
 La règle qui prédit toujours `Adelie`, classe majoritaire de l'entraînement,
 atteint seulement $45/102 approx 44.12$~% d'exactitude sur ce même test.
 
+#example[
+  *Lire une probabilité prédite.* Pour la première observation du test,
+  les mesures, dans l'ordre retenu, sont
+
+  $ x=(40.3,18,195,3250)^top. $
+
+  Les probabilités LDA sont environ $0.99140$ pour `Adelie`, $0.00860$ pour
+  `Chinstrap` et $2.67 times 10^(-13)$ pour `Gentoo`. On prédit donc `Adelie`.
+  L'étiquette observée sert ensuite à vérifier cette prédiction ; elle n'entre
+  pas dans le calcul des scores. La très petite probabilité de `Gentoo` n'est
+  pas exactement nulle, même si un affichage arrondi donne $0$.
+]
+
 Ces résultats décrivent un partage précis d'un petit jeu de données. Ils ne
 garantissent pas 98~% de réussite dans une autre population. Pour comparer
-plusieurs sélections de variables, une LDA régularisée et une QDA, on ajouterait
-une validation croisée sur les $240$ observations d'entraînement, en conservant
-le test à l'écart. Une évaluation par année ou par site répondrait également
-à une autre question que ce partage aléatoire d'individus.
+plusieurs sélections de variables ou des degrés de régularisation, on étendrait
+la comparaison interne aux $240$ observations d'entraînement, en conservant
+le test à l'écart. Une évaluation par année ou par site répondrait à une autre
+question que ce partage aléatoire d'individus.
+
+Le script vérifie aussi que les scores explicites du cours redonnent les
+probabilités produites par `MASS::lda` et, dans chaque pli, par
+`MASS::qda`.#footnote[
+  Voir la #link("https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/qda.html")[documentation
+  de `MASS::qda`] pour les estimateurs et les conditions sur les covariances.
+]
+Cette vérification porte sur le calcul, pas sur la justesse des hypothèses
+gaussiennes ni sur la calibration dans une autre population.
 
 === Régularisation, interprétation et limites
 
@@ -1091,7 +1410,19 @@ matrice plus simple. Le choix de $alpha$ doit être fait sur les données
 d'entraînement, par validation ; la cible $tau I_p$ dépend des unités, ce qui
 rend le choix d'une standardisation pertinent pour cette procédure.
 
-*Échelles et corrélations.* La LDA classique à covariance pleine est invariante,
+Pour QDA, on peut d'abord rapprocher les covariances de classe de la covariance
+commune :
+
+$ tilde(Sigma)_(g,rho)=(1-rho)S_g+rho hat(Sigma), quad 0 <= rho <= 1. $
+
+Avec $rho=0$, on conserve les covariances QDA ; avec $rho=1$, elles deviennent
+toutes égales à la covariance LDA. Si cette dernière est définie positive,
+un $rho>0$ rend aussi les matrices obtenues définies positives. Une seconde
+réduction vers une cible diagonale ou sphérique peut être utile lorsque la
+covariance commune est elle-même instable. Les paramètres de régularisation
+font partie des choix à valider à l'intérieur de l'entraînement.
+
+*Échelles et corrélations.* La LDA et la QDA classiques à covariance pleine sont invariantes,
 en arithmétique exacte, à une transformation affine inversible commune à toutes
 les observations. Changer une variable de grammes en kilogrammes ne change
 donc pas sa règle de décision lorsqu'on réestime tous les paramètres de façon
@@ -1114,87 +1445,519 @@ dans chaque classe. Les méthodes peuvent encore fournir une règle utile si
 les hypothèses ne sont pas exactes ; leur performance et la calibration des
 probabilités doivent alors être vérifiées empiriquement.
 
-== Arbres de classification et de régression
+*Des probabilités conditionnelles au modèle.* Le calcul remplace les paramètres
+inconnus par leurs estimations ; il ne résume pas automatiquement l'incertitude
+sur ces paramètres. Une probabilité proche de $1$ n'est pas une garantie de
+bonne classification. Elle peut aussi apparaître pour un point très éloigné
+de toutes les classes : la normalisation compare leurs densités relatives,
+même lorsqu'elles sont toutes très petites. Le modèle doit être réévalué
+si la population, les proportions de classes ou le protocole de mesure changent.
+
+*Une démarche pratique.* Définir les classes, les coûts et les mesures
+disponibles ; vérifier les effectifs et la géométrie dans chaque classe ;
+comparer les modèles sur l'entraînement ; puis évaluer une seule fois la
+procédure retenue sur le test. Les probabilités, la matrice de confusion et
+les rappels par classe complètent l'exactitude globale. Une différence entre
+modèles doit être interprétée à la lumière de la taille et de la représentativité
+des données évaluées.
+
+== Arbres de classification et de régression <arbres-cart>
 
 === Principe
 
-#definition(title: [Arbre de classification ou de régression])[
-  Les arbres CART partitionnent l'espace des variables explicatives en régions
-  simples. À chaque noeud, l'algorithme choisit une variable et un seuil qui
-  séparent les observations en deux sous-ensembles plus homogènes.
+Un arbre prédit en posant une suite de questions sur les variables explicatives.
+La famille *CART*, pour _Classification and Regression Trees_, utilise des
+questions binaires : chaque réponse conduit vers l'un de deux descendants.
+L'apprentissage consiste à choisir ces questions et le niveau de détail auquel
+on arrête le découpage.
 
-  Pour une tâche de classification, chaque feuille prédit la classe majoritaire.
-  Pour une tâche de régression, chaque feuille prédit souvent la moyenne de la
-  réponse dans la feuille.
+#definition(title: [Arbre de classification ou de régression])[
+  Un arbre partitionne l'espace des variables explicatives en régions disjointes
+  $R_1,dots,R_M$, associées à ses $M$ *feuilles*. Une nouvelle observation
+  appartient à une seule de ces régions et reçoit la prédiction de cette feuille.
+
+  Dans le cadre usuel sans pondération, une feuille prédit la classe la plus
+  fréquente pour la classification à coûts égaux, ou la moyenne des réponses
+  pour la régression avec perte quadratique.
 ]
 
-Un arbre peut être lu comme une suite de questions. Cette forme le rend très
-accessible : chaque chemin depuis la racine jusqu'à une feuille décrit une règle
-de décision.
+La *racine* contient toutes les observations d'entraînement. Un *nœud interne*
+pose une question ; une *feuille* termine le chemin. La *profondeur* d'un nœud
+est son nombre d'arêtes depuis la racine, dont la profondeur est $0$. Un arbre
+à deux feuilles ne pose ainsi qu'une question et a une profondeur maximale de $1$.
+
+Pour une variable quantitative, une question prend la forme $x_j <= s$, où
+$j$ désigne la variable et $s$ le seuil. L'autre branche correspond à $x_j>s$.
+Une variable peut être interrogée plusieurs fois le long d'un chemin. Avec des
+coupures de ce type, les régions sont des rectangles en deux dimensions et des
+produits d'intervalles en dimension supérieure, éventuellement non bornés.
+
+#example[
+  *Lire une règle.* Considérons un arbre à trois feuilles :
+
+  $ R_1=\{x:x_1<=2\}, quad
+    R_2=\{x:x_1>2, x_2<=1\}, quad
+    R_3=\{x:x_1>2, x_2>1\}. $
+
+  Les feuilles $R_1$ et $R_3$ prédisent A, tandis que $R_2$ prédit B. Pour
+  $x=(3,0.6)^top$, la réponse à la première question est « non », puis « oui »
+  à la seconde : on prédit B. La variable $x_2$ intervient uniquement lorsque
+  $x_1>2$. L'arbre représente donc une *interaction* entre les deux variables.
+]
+
+#figure(
+  image("../figures/cart_partition.svg", width: 100%,
+        alt: "Arbre à trois feuilles et partition correspondante : une coupure verticale en x1 égal à 2, puis une coupure horizontale en x2 égal à 1 dans la région de droite."),
+  caption: [Deux représentations du même arbre fictif. La deuxième coupure ne
+    s'applique qu'à la région issue de la branche « non » de la racine.
+    Les couleurs indiquent les classes prédites ; cet arbre est fixé pour
+    illustrer sa lecture.],
+)
+
+Les groupes d'un arbre supervisé sont construits en utilisant la réponse $y$.
+Ils ne jouent donc pas le même rôle que les groupes d'une classification non
+supervisée : on cherche ici à rendre les *réponses* homogènes, plutôt qu'à
+rapprocher les observations selon l'ensemble des variables explicatives.
+
+=== Prédire dans une feuille
+
+Notons $cal(I)_t=\{i:x_i in R_t\}$ les indices des observations d'entraînement
+dans une feuille $t$, et $n_t=|cal(I)_t|$ son effectif. En classification, pour
+$g in \{1,dots,K\}$, la proportion de la classe $g$ et la décision sont
+
+$ hat(p)_(t g)=1/n_t sum_(i in cal(I)_t) ind(y_i=g), quad
+  hat(g)(x)=argmax_g hat(p)_(t g) quad "si" x in R_t. $
+
+On fixe une règle de départage en cas d'égalité. Le terme « classe majoritaire »
+désigne ici la classe la plus fréquente, même si sa proportion est inférieure
+à $1/2$ dans un problème à plusieurs classes. Les proportions de la feuille
+fournissent aussi les probabilités estimées $hat(eta)_g (x)=hat(p)_(t g)$.
+Elles sont constantes sur toute la région $R_t$.
+
+En régression avec perte quadratique, la meilleure constante dans la feuille est
+
+$ overline(y)_t=1/n_t sum_(i in cal(I)_t) y_i
+  =argmin_(c in RR) sum_(i in cal(I)_t) (y_i-c)^2. $
+
+La fonction de prédiction s'écrit donc
+$hat(f)(x)=sum_(t=1)^M overline(y)_t ind(x in R_t)$ : elle est *constante par
+morceaux*. Cette valeur dépend de la perte retenue ; avec une perte absolue,
+une médiane des réponses minimise la somme des écarts absolus.
+
+#example[
+  Une feuille contenant $7$ observations de classe A, $2$ de classe B et $1$
+  de classe C prédit A, avec les probabilités $(0.7,0.2,0.1)$. Si une autre
+  feuille ne contient que deux A, elle prédit une probabilité empirique de $1$
+  pour A, mais cet effectif très faible ne permet pas de conclure à une certitude.
+
+  En régression, une feuille contenant les réponses $8$, $9$ et $10$ prédit $9$
+  pour toute nouvelle observation qui y arrive, quelle que soit sa position
+  à l'intérieur de la région.
+]
+
+Les formules précédentes supposent des observations de même poids et, pour la
+classe prédite, des coûts d'erreur égaux. Des poids, des probabilités a priori
+imposées ou des coûts différents peuvent modifier les proportions utilisées,
+la décision et les coupures apprises.
 
 === Algorithme CART
 
-La construction d'un arbre suit une stratégie gloutonne.
+La construction suit une stratégie *gloutonne et récursive*. Au nœud $t$, une
+coupure candidate $(j,s)$ sépare les observations en
 
-1. Pour chaque variable et chaque seuil possible, calculer le gain
-   d'homogénéité.
-2. Choisir la coupure qui améliore le plus le critère.
-3. Séparer le noeud en deux sous-noeuds.
-4. Répéter jusqu'à atteindre un critère d'arrêt.
+$ cal(I)_L=\{i in cal(I)_t:x_(i j)<=s\}, quad
+  cal(I)_R=\{i in cal(I)_t:x_(i j)>s\}. $
 
-Cette approche est efficace, mais elle ne garantit pas l'arbre globalement
-optimal. Elle choisit à chaque étape la meilleure coupure locale.
+Les indices $L$ et $R$ désignent les descendants gauche et droit. Une coupure
+est admissible si elle respecte notamment l'effectif minimal exigé dans
+chacun des deux descendants.
+
+1. Pour chaque variable quantitative, trier ses valeurs distinctes présentes
+   au nœud. Des seuils situés entre deux valeurs consécutives suffisent pour
+   examiner toutes les partitions possibles sur cette variable.
+2. Calculer le gain d'homogénéité pour chaque coupure admissible.
+3. Retenir la coupure de gain maximal, selon une règle fixée en cas d'égalité.
+4. Appliquer la même procédure séparément aux deux descendants, jusqu'à ce
+   qu'un critère d'arrêt soit atteint.
+
+Avec les valeurs distinctes $1$, $2$, $4$ et $7$, on peut par exemple essayer
+les seuils $1.5$, $3$ et $5.5$. Des observations ayant exactement la même valeur
+ne peuvent pas être séparées par une coupure sur cette seule variable. Pour
+une variable qualitative, une question peut prendre la forme « la modalité
+appartient-elle à l'ensemble $A$ ? ». Le traitement de ces variables dépend du
+logiciel ; leur attribuer arbitrairement les codes $1$, $2$, $3$ comme à une
+variable quantitative impose un ordre qui peut être injustifié.
+
+À chaque étape, CART choisit la meilleure coupure *immédiate*. Il n'examine pas
+tous les arbres que les coupures suivantes pourraient produire. Une première
+coupure légèrement moins bonne peut permettre, plus loin, un meilleur arbre :
+la stratégie gloutonne ne garantit donc pas un optimum global.
 
 === Critères d'homogénéité
 
-Pour la classification, on utilise souvent :
+*Classification.* Au nœud $t$, on définit les proportions $hat(p)_(t g)$ comme
+dans une feuille. Les trois critères usuels sont
 
-- le taux d'erreur de classification, simple mais peu sensible pour construire
-  l'arbre;
-- l'indice de Gini, faible lorsque les feuilles sont pures;
-- l'entropie croisée, issue de la théorie de l'information.
+$ I_"Gini" (t)=1-sum_(g=1)^K hat(p)_(t g)^2, $
+$ I_"ent" (t)=-sum_(g=1)^K hat(p)_(t g) log(hat(p)_(t g)), quad
+  I_"err" (t)=1-max_g hat(p)_(t g). $
 
-Le gain d'une coupure compare l'impureté du noeud avant la coupure à la moyenne
-pondérée des impuretés après la coupure. La meilleure coupure est celle qui
-réduit le plus l'impureté.
+On utilise la convention $0 log(0)=0$. Un nœud *pur* ne contient qu'une seule
+classe : les trois critères y valent $0$. Gini et l'entropie sont maximaux
+lorsque les $K$ classes sont également représentées, avec respectivement
+$1-1/K$ et $log(K)$. L'indice de Gini est aussi la probabilité que deux tirages
+indépendants de classes selon ces proportions donnent des classes différentes.
 
-Pour la régression, l'homogénéité est souvent mesurée par la somme des carrés
-des écarts à la moyenne dans chaque feuille. Une bonne coupure crée des feuilles
-où les valeurs de la réponse sont peu dispersées.
+Pour un critère d'impureté $I$, le gain local est
+
+$ Delta I(t;j,s)=I(t)-n_L/n_t I(L)-n_R/n_t I(R). $
+
+Les pondérations $n_L/n_t$ et $n_R/n_t$ sont essentielles : une petite feuille
+pure ne compense pas nécessairement une grande feuille qui reste très mélangée.
+Pour comparer des gains intervenant à des nœuds différents, leur contribution
+à l'impureté moyenne de l'arbre est $(n_t/n) Delta I(t;j,s)$.
+
+#example[
+  *Calculer un gain de Gini.* Dix observations, ordonnées selon une variable
+  $x=1,dots,10$, ont pour classes
+
+  $ ("A", "A", "A", "A", "B", "A", "B", "B", "A", "B"). $
+
+  La racine contient six A et quatre B, donc
+  $I(t)=1-(6/10)^2-(4/10)^2=0.48$. Pour la coupure $x<=4.5$ :
+
+  - à gauche, les quatre observations sont A, donc $I(L)=0$ ;
+  - à droite, il reste deux A et quatre B, donc
+    $I(R)=1-(2/6)^2-(4/6)^2=4/9$.
+
+  Le gain vaut
+
+  $ Delta I=0.48-4/10 times 0-6/10 times 4/9 approx 0.2133. $
+
+  Pour la coupure $x<=2.5$, le nœud gauche contient deux A et le nœud droit
+  quatre A et quatre B : le gain est seulement
+  $0.48-(2/10 times 0+8/10 times 0.5)=0.08$. La première coupure est donc
+  meilleure que la seconde selon Gini.
+]
+
+L'erreur de classification est moins sensible aux changements de proportions.
+Par exemple, un nœud contenant huit A et deux B commet deux erreurs en prédisant
+A. Le diviser en un nœud de quatre A et un nœud de quatre A et deux B ne change
+pas ce nombre d'erreurs, alors que Gini diminue de $0.32$ à
+$(6/10)(4/9) approx 0.2667$. Gini ou l'entropie peuvent ainsi détecter une
+amélioration utile avant que la classe prédite ne change.
+
+*Régression.* Avec une perte quadratique, on utilise la somme des carrés
+résiduels dans le nœud,
+
+$ "SCE"(t)=sum_(i in cal(I)_t) (y_i-overline(y)_t)^2. $
+
+La meilleure coupure minimise $"SCE"(L)+"SCE"(R)$, ou, de manière équivalente,
+maximise le gain
+
+$ Delta "SCE"="SCE"(t)-"SCE"(L)-"SCE"(R)
+  =(n_L n_R)/n_t (overline(y)_L-overline(y)_R)^2. $
+
+Cette identité résulte de la décomposition de la dispersion autour de la
+moyenne. Une coupure est utile lorsque les deux moyennes diffèrent, en tenant
+compte de leurs effectifs. Si l'on utilise la variance empirique avec diviseur
+$n_t$ comme impureté, le gain pondéré est $Delta "SCE"/n_t$ : les deux critères
+choisissent donc la même coupure dans un nœud donné.
+
+#example[
+  *Choisir une coupure en régression.* Pour $x=(1,2,3,4,5,6)$, les réponses sont
+  $y=(1,2,3,8,9,10)$. Sans coupure, on prédit la moyenne $5.5$ et
+  $"SCE"(t)=77.5$.
+
+  Avec le seuil $s=3.5$, on prédit $2$ à gauche et $9$ à droite. Chaque
+  feuille a une somme des carrés égale à $2$, d'où
+
+  $ Delta "SCE"=77.5-(2+2)=73.5= (3 times 3)/6 (2-9)^2. $
+
+  Le seuil $s=2.5$ donne les moyennes $1.5$ et $7.5$, avec une somme des carrés
+  totale de $29.5$ : il est moins bon. Parmi les cinq seuils candidats, $3.5$
+  minimise la somme des carrés, qui vaut $4$ après coupure.
+]
+
+#figure(
+  image("../figures/cart_regression.svg", width: 100%,
+        alt: "Six observations de régression et prédictions en deux paliers, 2 et 9. La somme des carrés résiduels est minimale au seuil 3,5, où elle vaut 4."),
+  caption: [Une coupure en régression. À gauche, les segments verticaux
+    représentent les résidus autour des deux moyennes. À droite, on compare
+    toutes les coupures possibles entre les valeurs observées de $x$.],
+)
 
 === Complexité et élagage
 
-Un arbre trop profond surajuste les données : il crée des feuilles très
-spécifiques et généralise mal. Un arbre trop petit sous-ajuste : il ne capture
-pas assez de structure.
+Multiplier les feuilles réduit généralement l'erreur d'entraînement, mais
+augmente le risque d'ajuster le bruit. Un arbre trop petit peut, à l'inverse,
+manquer une structure réelle. La profondeur et le nombre de feuilles sont
+deux mesures liées, mais différentes : deux arbres de même profondeur peuvent
+avoir des nombres de feuilles très différents.
 
-L'élagage consiste à faire croître un arbre puis à retirer les branches qui
-apportent peu d'amélioration. On peut utiliser un critère coût-complexité :
+Le *pré-élagage* limite la croissance : profondeur maximale, effectif minimal
+d'un nœud avant de tenter une coupure, effectif minimal dans chaque feuille,
+gain minimal ou nombre maximal de feuilles. Arrêter trop tôt peut empêcher une
+coupure peu utile immédiatement de donner accès à de bonnes coupures suivantes.
 
-$ L(T) = C(T) + alpha |T| $
+Le *post-élagage* part d'un arbre suffisamment développé et remplace certains
+sous-arbres par une feuille. Pour formaliser le compromis, notons $cal(F)(T)$
+l'ensemble des feuilles d'un arbre $T$ et $M(T)=|cal(F)(T)|$. Un critère
+coût-complexité est
 
-où $|T|$ est le nombre de feuilles et $alpha$ pénalise la complexité. Le choix de
-$alpha$ se fait souvent par validation croisée.
+$ C_alpha (T)=C(T)+alpha M(T), quad alpha>=0. $
 
-On peut aussi contrôler la complexité par des critères d'arrêt : profondeur
-maximale, nombre minimal d'observations dans une feuille, gain minimal exigé pour
-une coupure ou nombre maximal de feuilles.
+Par exemple, on peut prendre comme erreur d'entraînement
+
+$ C_"class" (T)=1/n sum_(t in cal(F)(T)) n_t (1-max_g hat(p)_(t g)), $
+$ C_"reg" (T)=1/n sum_(t in cal(F)(T)) "SCE"(t). $
+
+Le critère utilisé pour *élaguer* n'est pas nécessairement celui utilisé pour
+*choisir les coupures*. On peut construire l'arbre avec Gini, puis élaguer
+selon l'erreur de classification. Les conventions de normalisation déterminent
+l'échelle de $alpha$ ; il faut les préciser avant d'en comparer les valeurs.
+
+Pour un arbre développé fixé, l'élagage coût-complexité produit une suite de
+sous-arbres emboîtés. Lorsque $alpha$ augmente, on privilégie moins de feuilles.
+Ce sont les branches de l'arbre existant qui sont supprimées : l'élagage ne
+recherche pas de nouvelles coupures pour remplacer une mauvaise décision à la
+racine.
+
+#example[
+  *Comparer trois sous-arbres.* Supposons que trois sous-arbres emboîtés aient
+  respectivement $1$, $3$ et $5$ feuilles, avec les erreurs d'entraînement
+  $0.40$, $0.15$ et $0.10$. Pour $alpha=0.03$, leurs critères sont
+
+  $ 0.40+0.03 times 1=0.43, quad
+    0.15+0.03 times 3=0.24, quad
+    0.10+0.03 times 5=0.25. $
+
+  Le sous-arbre à trois feuilles est préféré parmi ces candidats. Passer de
+  trois à cinq feuilles réduit l'erreur de $0.05$, mais augmente la pénalité
+  de $2 times 0.03=0.06$. La réduction d'erreur ne suffit donc pas.
+]
+
+=== Choisir la taille par validation
+
+La valeur de $alpha$ ne se choisit pas en minimisant l'erreur sur le test.
+On réserve le test et on compare les degrés d'élagage par validation croisée
+sur l'entraînement. Dans chaque pli, il faut *reconstruire l'arbre* sur les
+observations disponibles : élaguer un arbre déjà ajusté sur toutes les données
+ferait intervenir les réponses du pli de validation dans ses coupures.
+
+#block(breakable: false)[
+  Une première règle consiste à retenir la complexité de plus faible erreur
+  moyenne de validation, puis à privilégier le modèle le plus simple en cas
+  d'égalité. La *règle d'une erreur standard* préfère le plus petit arbre dont
+  l'erreur ne dépasse pas le minimum augmenté de l'erreur standard estimée
+  en ce minimum.
+]
+
+#example[
+  *Un minimum peu marqué.* Voici des résultats fictifs de validation pour
+  quatre tailles candidates ; les valeurs sont des proportions d'erreur.
+
+  #table(
+    columns: (0.7fr, 1fr, 1fr, 1fr), align: center,
+    table.header([*Feuilles*], [*Entraînement*], [*Validation*], [*Erreur standard*]),
+    [2], [0,25], [0,26], [0,03],
+    [4], [0,14], [0,18], [0,03],
+    [8], [0,08], [0,17], [0,03],
+    [16], [0,02], [0,22], [0,04],
+  )
+
+  Le minimum de validation est $0.17$, pour huit feuilles. La règle d'une
+  erreur standard fixe le seuil $0.17+0.03=0.20$ et retient quatre feuilles,
+  le plus petit candidat sous ce seuil. Seize feuilles améliorent encore
+  l'entraînement, tout en dégradant la validation : c'est un signe de surajustement.
+]
+
+L'erreur standard mesure l'incertitude estimée sur l'erreur de validation,
+pas la dispersion des réponses. Par exemple, on utilise parfois l'écart-type
+des erreurs des $V$ plis divisé par $sqrt(V)$. Les apprentissages des plis se
+recouvrant, cette estimation et la règle associée restent des outils pratiques,
+plutôt qu'un test formel d'égalité des performances.
+
+Après la sélection, on réajuste la procédure sur tout l'entraînement et on
+évalue une seule fois le modèle retenu sur le test. La mesure dépend du but :
+exactitude et rappels par classe en classification, RMSE ou MAE en régression,
+ou coût spécifique si certaines erreurs sont plus graves.
+
+=== Pratique : deux tâches sur Palmer Penguins
+
+On reprend les $342$ manchots disposant des quatre mesures quantitatives et de
+`species`, avec le même partage que pour les k-NN et l'analyse discriminante :
+$240$ observations d'entraînement et $102$ de test. Le script
+`codes/arbres_cart.R` reproduit les calculs avec le paquet R `rpart`.
+
+Deux tâches sont traitées séparément :
+
+- *Classification* : prédire `species` avec `bill_length_mm`, `bill_depth_mm`,
+  `flipper_length_mm` et `body_mass_g` ; les coupures utilisent Gini.
+- *Régression* : prédire `body_mass_g` avec les trois autres mesures ;
+  ni `body_mass_g` ni `species` ne figurent parmi les prédicteurs.
+
+Les arbres sont développés avec au moins cinq observations par feuille,
+au moins dix observations pour tenter une coupure et une profondeur maximale
+de dix. On compare ensuite les valeurs de `cp`
+$0$, $0.001$, $0.005$, $0.01$, $0.02$, $0.05$ et $0.10$ sur les cinq mêmes plis
+stratifiés de l'entraînement. Ces contraintes et cette grille sont fixées
+avant l'évaluation. Chaque pli donne lieu à un nouvel apprentissage.
+
+Dans `rpart`, `cp` exprime la pénalité relativement au risque de l'arbre réduit
+à sa racine. Pour une convention de risque identique, cela correspond à
+$alpha="cp" times C(T_0)$, où $T_0$ est cet arbre sans coupure. La fonction
+`prune` retire les branches selon cette pénalité.#footnote[Voir les documentations
+de #link("https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/rpart.control.html")[`rpart.control`]
+et de #link("https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/prune.rpart.html")[`prune.rpart`].
+Le paramètre `cp` peut aussi limiter la croissance ; le script le fixe à zéro
+à cette étape, puis élague les arbres obtenus. La
+#link("https://cran.r-project.org/web/packages/rpart/vignettes/longintro.pdf")[vignette de Therneau et Atkinson],
+section 6.1, précise sa normalisation par le risque à la racine. Pénaliser le
+nombre de coupures ou le nombre de feuilles conduit au même choix : ces nombres
+diffèrent de un dans un arbre binaire.]
+
+*Résultats de validation.* Pour la classification, on minimise le nombre total
+d'erreurs sur les plis ; pour la régression, la moyenne de tous les carrés
+d'erreurs de validation. En cas d'égalité, on retient le plus grand `cp`.
+Il s'agit ici de la règle du minimum, et non de la règle d'une erreur standard.
+
+#block(breakable: false)[
+  #table(
+    columns: (0.7fr, 1.5fr, 1.5fr), align: center,
+    table.header([*`cp`*], [*Classification : erreurs sur 240*], [*Régression : RMSE (g)*]),
+    [0], [14], [378,1],
+    [0,001], [14], [*376,0*],
+    [0,005], [14], [378,4],
+    [0,01], [11], [400,1],
+    [0,02], [*11*], [416,1],
+    [0,05], [12], [446,0],
+    [0,10], [12], [487,7],
+  )
+]
+
+La classification retient `cp = 0.02` : les onze erreurs représentent
+$11/240 approx 4.58$~%. L'arbre réajusté sur les $240$ observations possède
+quatre feuilles. Voici ses règles, avec les effectifs d'entraînement :
+
+1. Si `flipper_length_mm < 207.5` et `bill_length_mm < 44.65`, prédire Adelie
+   ($104$ observations, dont $102$ Adelie).
+2. Si `flipper_length_mm < 207.5` et `bill_length_mm >= 44.65`, prédire Chinstrap
+   ($46$ observations, dont $42$ Chinstrap).
+3. Si `flipper_length_mm >= 207.5` et `bill_depth_mm >= 17.65`, prédire Chinstrap
+   ($5$ observations, dont $4$ Chinstrap).
+4. Si `flipper_length_mm >= 207.5` et `bill_depth_mm < 17.65`, prédire Gentoo
+   ($85$ observations, toutes Gentoo).
+
+On conserve ici les inégalités affichées par `rpart`. La première observation
+du test a notamment `flipper_length_mm = 195` et `bill_length_mm = 40.3` : elle
+arrive dans la première feuille, qui prédit Adelie avec les proportions
+$(102/104,2/104,0) approx (0.9808,0.0192,0)$. Le zéro pour Gentoo signifie qu'aucun
+Gentoo n'est présent dans cette feuille d'entraînement, pas que cette espèce y
+serait impossible dans la population.
+
+#block(breakable: false)[
+  La matrice de confusion sur le test est
+
+  #table(
+    columns: (1.1fr, 1fr, 1.2fr, 1fr), align: center,
+    table.header([*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*], [*Prédit Gentoo*]),
+    [Adelie], [44], [1], [0],
+    [Chinstrap], [4], [16], [0],
+    [Gentoo], [0], [1], [36],
+  )
+]
+
+L'exactitude vaut $96/102 approx 94.12$~%. Le rappel de Chinstrap est de
+$16/20=80$~%, ce que l'exactitude globale ne montre pas à elle seule.
+La feuille de cinq observations est également un point à surveiller : sa
+prédiction repose sur peu de données.
+
+*Régression.* La validation retient `cp = 0.001`, avec une RMSE de validation
+d'environ $376.0$~g. L'arbre final comporte $30$ feuilles et obtient sur le test
+une RMSE de $363.7$~g et une MAE de $278.4$~g. Prédire systématiquement la masse
+moyenne de l'entraînement donne une RMSE de $800.3$~g sur ce même test. Les
+mesures apportent donc ici une amélioration par rapport à cette référence.
+Trente feuilles rendent cependant l'arbre nettement moins facile à lire que
+l'arbre de classification à quatre feuilles.
+
+Le fragment suivant montre l'ajustement final des deux modèles, une fois les
+valeurs de `cp` choisies par la boucle de validation du script :
+
+```r
+controle <- rpart::rpart.control(
+  cp = 0, minsplit = 10, minbucket = 5,
+  maxdepth = 10, xval = 0, maxsurrogate = 0
+)
+grand_class <- rpart::rpart(
+  species ~ bill_length_mm + bill_depth_mm +
+    flipper_length_mm + body_mass_g,
+  data = train, method = "class",
+  parms = list(split = "gini"), control = controle
+)
+arbre_class <- rpart::prune(grand_class, cp = 0.02)
+predict(arbre_class, newdata = test, type = "class")
+predict(arbre_class, newdata = test, type = "prob")
+
+grand_reg <- rpart::rpart(
+  body_mass_g ~ bill_length_mm + bill_depth_mm + flipper_length_mm,
+  data = train, method = "anova", control = controle
+)
+arbre_reg <- rpart::prune(grand_reg, cp = 0.001)
+predict(arbre_reg, newdata = test)
+```
+
+La méthode `class` traite la classification, tandis que `anova` utilise les
+carrés résiduels pour la régression.#footnote[Voir la
+#link("https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/rpart.html")[documentation de `rpart`]
+pour les méthodes, les probabilités a priori et les matrices de coûts.]
+On ne standardise pas les mesures pour ces arbres : les coupures comparent les
+valeurs d'une variable à un seuil dans ses propres unités. Les résultats restent
+ceux d'un partage précis ; ils ne garantissent pas la même performance sur une
+autre année ou une autre population de manchots.
 
 === Forces et limites
 
-Les arbres sont faciles à interpréter, gèrent naturellement les interactions,
-acceptent des variables de types variés et sont peu sensibles aux transformations
-monotones des variables.
+*Des règles locales faciles à examiner.* Un petit arbre fournit des conditions
+explicites, peut utiliser des variables de types différents et représente des
+interactions sans qu'on doive les spécifier à l'avance. Il n'impose ni une
+relation linéaire ni des distributions gaussiennes. La lisibilité diminue
+toutefois rapidement lorsque le nombre de feuilles augmente.
 
-Ils sont aussi instables : une petite modification des données peut produire un
-arbre très différent. Utilisés seuls, ils peuvent être moins performants que des
-méthodes agrégées, surtout lorsque les données sont bruitées.
+*Peu de dépendance aux unités, mais une dépendance aux axes.* Une transformation
+strictement croissante d'une variable préserve l'ordre de ses valeurs et les
+partitions candidates de l'échantillon. En particulier, changer des millimètres
+en centimètres ne change pas les coupures correspondantes en arithmétique
+exacte. Pour une transformation non linéaire, des seuils calculés comme milieux
+peuvent néanmoins placer différemment de nouveaux points entre deux valeurs
+observées. Une rotation des axes change, elle, les coupures accessibles : une
+frontière oblique peut demander beaucoup de rectangles pour être approchée.
 
-#example[
-  Dans un problème de crédit, un arbre peut d'abord séparer les dossiers selon
-  le revenu, puis selon l'historique de remboursement. Cette règle est lisible,
-  mais une petite variation des données peut changer l'ordre des coupures.
-]
+*Instabilité.* Deux coupures peuvent avoir des gains presque égaux. Une légère
+modification des données peut inverser leur ordre, modifier la racine puis
+toutes les branches suivantes. Une variable absente de l'arbre n'est donc pas
+nécessairement inutile : une variable corrélée peut avoir été choisie à sa place.
+Les importances fondées sur les gains d'impureté peuvent aussi favoriser les
+variables offrant beaucoup de coupures candidates ; elles ne mesurent pas un
+effet causal.
+
+*Prédictions par paliers.* Deux points très proches de part et d'autre d'un seuil
+peuvent recevoir des prédictions différentes. En régression avec des moyennes
+de feuilles, les prédictions restent entre les réponses minimale et maximale
+de l'entraînement : l'arbre ne prolonge pas une tendance au-delà des données.
+Des réponses extrêmes peuvent néanmoins déplacer fortement une moyenne de
+feuille et influencer les coupures.
+
+*Effectifs, probabilités et données manquantes.* Une feuille pure sur quelques
+observations ne garantit pas des probabilités fiables. Il faut examiner les
+effectifs, les rappels des classes rares et, si les probabilités sont utilisées,
+leur calibration. Les valeurs manquantes demandent aussi une stratégie explicite :
+imputation apprise sur l'entraînement, branche dédiée ou coupures de remplacement
+selon le logiciel. L'exemple précédent travaille uniquement sur les cas complets.
+
+Ces limites motivent les méthodes ensemblistes : agréger plusieurs arbres peut
+réduire leur instabilité et améliorer les prédictions, au prix d'une règle
+globale moins directement lisible.
 
 == Méthodes ensemblistes
 
