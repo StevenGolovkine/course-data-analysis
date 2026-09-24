@@ -8,7 +8,6 @@
 
 #show: course-slides.with(
   title: [Analyse factorielle des correspondances],
-  footer-title: [Analyse factorielle des correspondances],
 )
 
 #title-slide()
@@ -248,12 +247,12 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
     $ d_i^2 = sum_j (a_(i j) - c_j)^2 / c_j $
 
     $ inertia = sum_i r_i d_i^2 $
-  ], height: 2.05in),
+  ], height: 2.2in),
   card([Dispersion des colonnes], [
     $ delta_j^2 = sum_i (b_(i j) - r_i)^2 / r_i $
 
     $ inertia = sum_j c_j delta_j^2 $
-  ], fill: pale-blue, height: 2.05in),
+  ], fill: pale-blue, height: 2.2in),
 )
 
 #v(0.6em)
@@ -333,6 +332,10 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
     Tableau à 2 lignes : au plus 1 axe.
   ], fill: pale-blue, height: 2.7in),
 )
+
+// Si le tableau est exactement indépendant, la décomposition est dégénérée.
+#v(0.55em)
+#small([Si $inertia = 0$, le tableau est indépendant : aucun axe non trivial à interpréter.])
 
 == Les coordonnées principales donnent la carte
 
@@ -528,14 +531,14 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 
     Lettres et Gestion sont de l'autre côté.
 
-    Sciences : 60 % d'admissions directes, contre 40 % globalement.
+    Sciences : 60~% d'admissions directes, contre 40~% globalement.
   ], height: 3in),
   card([Axe 2 : reprise et passerelle], [
     Gestion et Reprise s'opposent à Lettres et Passerelle.
 
-    Gestion : 50 % de reprises, contre 25 % globalement.
+    Gestion : 50~% de reprises, contre 25~% globalement.
 
-    Lettres : 58,3 % de passerelles, contre 35 %.
+    Lettres : 58,3~% de passerelles, contre 35~%.
   ], fill: pale-blue, height: 3in),
 )
 
@@ -644,11 +647,11 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Qualité sur un axe], [
-    Pour une ligne : $ cos^2_(i k) = F_(i k)^2 / d_i^2 $.
+    Pour une ligne : $cos^2_(i k) = F_(i k)^2 / d_i^2$.
 
-    Pour une colonne : $ cos^2_(j k) = G_(j k)^2 / delta_j^2 $.
+    Pour une colonne : $cos^2_(j k) = G_(j k)^2 / delta_j^2$.
 
-    Part de la distance au centre visible sur cet axe.
+    Part de la distance au carré conservée sur cet axe.
   ], height: 2.95in),
   card([Qualité sur un plan], [
     Additionner les cosinus carrés des axes retenus.
@@ -677,7 +680,7 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
   card([Qualité : 99,3 %], [
     $ 0.40923^2 / 0.16857 approx 0.993 $
 
-    L'axe 1 restitue presque toute la distance de Sciences au centre.
+    L'axe 1 restitue 99,3~% de la distance au carré de Sciences au centre.
   ], fill: pale-blue, height: 2.35in),
 )
 
@@ -697,8 +700,8 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 
 #v(0.75em)
 #takeaway([
-  L'axe 1 porte 71,29 % de l'inertie globale, mais ne représente
-  que 30,3 % de l'écart de Gestion au centre.
+  L'axe 1 porte 71,29~% de l'inertie globale, mais ne représente
+  que 30,3~% de la distance au carré de Gestion au centre.
 ])
 #v(0.4em)
 #small([Les contributions somment à 100 % par colonne ; les qualités somment à 100 % par ligne sur le plan complet.])
