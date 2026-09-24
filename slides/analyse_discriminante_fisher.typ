@@ -13,53 +13,13 @@
 
 = Une représentation supervisée
 
-== Le parcours du cours
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([1 · Décrire les dispersions], [
-    Distinguer la variation dans les classes et les écarts entre leurs moyennes.
-  ], height: 1.5in),
-  card([2 · Construire les axes], [
-    Maximiser le critère de Fisher et calculer les coordonnées discriminantes.
-  ], fill: pale-blue, height: 1.5in),
-  card([3 · Classer], [
-    Associer la projection à une règle de proximité des centres.
-  ], fill: pale-purple, height: 1.5in),
-  card([4 · Évaluer], [
-    Prédire l'espèce des manchots sur des observations laissées de côté.
-  ], fill: pale-orange, height: 1.5in),
-)
-
-== Fisher et les modèles probabilistes LDA/QDA
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Fisher : une projection], [
-    Optimiser un rapport de dispersions.
-
-    Construire des scores à partir des étiquettes connues.
-
-    Aucune loi normale imposée aux classes.
-  ], height: 2.75in),
-  card([LDA/QDA : des modèles], [
-    Modéliser les distributions dans les classes.
-
-    Calculer les probabilités a posteriori par la formule de Bayes.
-
-    Déduire une règle de décision.
-  ], fill: pale-blue, height: 2.75in),
-)
-#v(0.7em)
-#takeaway([Ce cours porte sur Fisher et une règle géométrique de classification.])
-
 == Observations, classes et scores
 
 #course-table(
   columns: (1.1fr, 4fr),
   [*Notation*], [*Signification*],
   [$n$], [Nombre d'observations d'entraînement],
-  [$x_i in RR^p$], [Les $p$ mesures de l'observation $i$],
+  [$x_i in RR^p$], [Les $p$ variables de l'observation $i$],
   [$y_i in {1,dots,K}$], [Sa classe, connue pendant l'entraînement],
   [$C_g$, $n_g$], [Indices et effectif des observations de la classe $g$],
   [$a in RR^p$], [Coefficients d'une combinaison linéaire],
@@ -102,7 +62,7 @@
 #v(0.7em)
 #takeaway([Une classe plus nombreuse pèse davantage dans la moyenne globale.])
 
-== La dispersion intra-groupe
+== L'inertie intra-groupe
 
 #formula([
   $ W=sum_(g=1)^K sum_(i in C_g)
@@ -113,19 +73,16 @@
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Écart mesuré], [
     Chaque observation se compare au centre de *sa propre classe*.
-
     Les différences entre centres n'entrent pas dans $W$.
   ], height: 2.1in),
   card([Une matrice $p times p$], [
     La diagonale décrit les dispersions par variable.
-
     Les autres termes décrivent les variations conjointes internes.
   ], fill: pale-blue, height: 2.1in),
 )
-#v(0.55em)
-#small([Convention du cours : sommes de produits d'écarts, sans division par $n-K$.])
 
-== La dispersion inter-groupe
+
+== L'inertie inter-groupe
 
 #formula([
   $ B=sum_(g=1)^K n_g
@@ -136,7 +93,6 @@
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Écart mesuré], [
     Chaque centre de classe se compare à la moyenne globale.
-
     Les observations d'une classe contribuent par son centre.
   ], height: 2.1in),
   card([Pondération par $n_g$], [
@@ -330,36 +286,6 @@ Notons $d=overline(x)_2-overline(x)_1$, avec $d != 0$ et $W$ définie positive.
   ], fill: pale-blue, height: 1.4in),
 )
 
-== Exemple : calculer un axe de Fisher
-
-#formula([
-  $ n_1=n_2=10, quad overline(x)_1=(0,0)^top,
-    quad overline(x)_2=(2,1)^top $
-  $ W=mat(16,0;0,4), quad B=mat(20,10;10,5) $
-])
-#v(0.65em)
-#formula([
-  $ W^(-1)d=(1/8,1/4)^top prop (1,2)^top $
-])
-#v(0.65em)
-#takeaway([Le score $z=x_1+2x_2$ combine les deux variables.])
-#v(0.35em)
-#small([La dispersion interne de la deuxième variable est quatre fois plus faible.])
-
-== Exemple : comparer les valeurs du critère
-
-#course-table(
-  columns: (1.5fr, 1fr, 1fr, 1fr),
-  [*Direction*], [$a^top B a$], [$a^top W a$], [$J(a)$],
-  [$(1,0)^top$], [20], [16], [1,25],
-  [$(0,1)^top$], [5], [4], [1,25],
-  [$(1,2)^top$], [80], [32], [*2,5*],
-)
-#v(0.7em)
-#formula([$ a_1=(1,2)^top/sqrt(32), quad a_1^top W a_1=1 $])
-#v(0.7em)
-#takeaway([La normalisation change l'échelle du score, tout en conservant $J=2.5$.])
-
 == Le poids relatif des axes
 
 #formula([$ "Poids de l'axe" k = lambda_k/(sum_(ell=1)^r lambda_ell) $])
@@ -414,23 +340,6 @@ Notons $d=overline(x)_2-overline(x)_1$, avec $d != 0$ et $W$ définie positive.
 #v(0.55em)
 #takeaway([Cette règle complète la projection de Fisher par une décision de classe.])
 
-== La normalisation intervient dans les distances
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Multiplier un seul axe par 10], [
-    Sa contribution à la distance au carré se multiplie par 100.
-
-    La classe la plus proche peut changer.
-  ], height: 2.6in),
-  card([Conserver $A^top W A=I_q$], [
-    Chaque score utilise la même échelle de dispersion intra-groupe.
-
-    Changer le signe des axes ne change pas les distances.
-  ], fill: pale-blue, height: 2.6in),
-)
-#v(0.7em)
-#takeaway([La règle utilise les distances normalisées, sans pondération supplémentaire par $lambda_k$.])
 
 == Deux classes : un seuil entre les centres
 
@@ -439,17 +348,6 @@ Notons $d=overline(x)_2-overline(x)_1$, avec $d != 0$ et $W$ définie positive.
     "prédire 2 si" quad z(x)>(m_1+m_2)/2 $
 ])
 #v(0.6em)
-Dans l'exemple numérique, le score non centré vaut $s(x)=x_1+2x_2$.
-Les centres sont 0 et 4, donc le seuil vaut *2*.
-#v(0.55em)
-#course-table(
-  columns: (1.3fr, 0.7fr, 1fr, 1fr, 0.8fr),
-  [*$x$*], [$s(x)$], [*Distance² à 0*], [*Distance² à 4*], [*Classe*],
-  [$(1,1)^top$], [3], [9], [1], [2],
-  [$(0.5,0.5)^top$], [1,5], [2,25], [6,25], [1],
-)
-#v(0.6em)
-#takeaway([La frontière dans le plan initial est la droite $x_1+2x_2=2$.])
 
 == Plusieurs classes : des régions de proximité
 
@@ -491,233 +389,3 @@ Les centres projetés découpent l'espace en régions de décision.
 )
 #v(0.7em)
 #takeaway([Les effectifs interviennent dans $W$ et $B$, sans terme de priorité ajouté aux distances.])
-
-= Exemple : Palmer Penguins
-
-== L'espèce à partir de quatre mesures
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Variables explicatives], [
-    Longueur et profondeur du bec.
-
-    Longueur de la nageoire.
-
-    Masse corporelle.
-  ], height: 2.3in),
-  card([Réponse à prédire], [
-    Adelie, Chinstrap ou Gentoo.
-
-    $K=3$ classes et $p=4$ variables.
-
-    Les mesures restent dans leurs unités d'origine.
-  ], fill: pale-blue, height: 2.3in),
-)
-#v(0.7em)
-#takeaway([344 observations au départ, 342 avec les quatre mesures complètes.])
-#v(0.35em)
-#small([Données locales : assets/penguins.csv. Sexe, île et année restent hors du modèle.])
-
-== Le partage entraînement/test
-
-Le partage stratifié conserve environ 70 % de chaque espèce pour apprendre.
-#v(0.6em)
-#course-table(
-  columns: (1.4fr, 1fr, 1.2fr, 1fr),
-  [*Espèce*], [*Total*], [*Entraînement*], [*Test*],
-  [Adelie], [151], [106], [45],
-  [Chinstrap], [68], [48], [20],
-  [Gentoo], [123], [86], [37],
-  [*Total*], [*342*], [*240*], [*102*],
-)
-#v(0.7em)
-#takeaway([Moyenne globale, axes et centres utilisent seulement les 240 observations d'entraînement.])
-#v(0.35em)
-#small([Graine R 2200. Même partage que les autres exemples du chapitre.])
-
-== Deux axes pour les trois espèces
-
-#formula([$ q=2, quad A^top W A=I_2 $])
-#v(0.6em)
-#course-table(
-  columns: (1fr, 1.3fr, 1.8fr),
-  [*Axe*], [*Valeur propre*], [*Poids relatif*],
-  [1], [13,783], [83,37 %],
-  [2], [2,749], [16,63 %],
-)
-#v(0.7em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Choix fixé à l'avance], [
-    Conserver les deux contrastes disponibles entre les trois centres.
-  ], height: 1.5in),
-  card([Interprétation], [
-    Le poids relatif résume la séparation selon Fisher, sans mesurer l'exactitude.
-  ], fill: pale-blue, height: 1.5in),
-)
-
-== Les centres projetés des espèces
-
-#course-table(
-  columns: (1.5fr, 1fr, 1fr),
-  [*Espèce*], [*Axe 1*], [*Axe 2*],
-  [Adelie], [$0.20829$], [$-0.07633$],
-  [Chinstrap], [$0.10755$], [$0.20857$],
-  [Gentoo], [$-0.31676$], [$-0.02234$],
-)
-#v(0.75em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Premier axe], [
-    Il oppose surtout Gentoo aux deux autres espèces.
-  ], height: 1.6in),
-  card([Deuxième axe], [
-    Il distingue davantage les centres Adelie et Chinstrap.
-  ], fill: pale-blue, height: 1.6in),
-)
-#v(0.4em)
-#small([Le signe de chaque axe est conventionnel. Les calculs utilisent les valeurs non arrondies.])
-
-== Le plan de Fisher et les régions de décision
-
-// Source : calculs de codes/analyse_discriminante_fisher.R, test de 102 individus.
-// Figure générée par figures/fisher_palmerpenguins.py, sans ajustement sur le test.
-#align(center)[
-  #image("../figures/fisher_palmerpenguins.svg", width: 96%, height: 4.3in,
-    fit: "contain", alt: "Les 102 manchots de test dans le plan de Fisher. "
-      + "Le fond indique la classe du centre appris le plus proche. "
-      + "Deux Chinstrap situés dans la région Adelie sont entourés.")
-]
-#small([
-  Symboles : espèces réelles du test. Fonds : classes prédites.
-  Les axes, centres et frontières proviennent de l'entraînement.
-])
-
-== Classer un manchot du jeu de test
-
-#formula([
-  $ x=(40.3,18,195,3250)^top, quad z(x) approx (0.18346,0.01658)^top $
-])
-#v(0.55em)
-#course-table(
-  columns: (1.4fr, 1.7fr),
-  [*Centre*], [*Distance euclidienne au carré*],
-  [*Adelie*], [*0,00925*],
-  [Chinstrap], [0,04263],
-  [Gentoo], [0,25173],
-)
-#v(0.65em)
-#takeaway([Le centre Adelie est le plus proche. La règle prédit Adelie.])
-#v(0.35em)
-#small([
-  Première observation du test, ligne de données 3 du CSV.
-  Son étiquette réelle confirme ensuite la prédiction.
-])
-
-== La matrice de confusion du test
-
-#course-table(
-  columns: (1.3fr, 1fr, 1fr, 1fr),
-  [*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*], [*Prédit Gentoo*],
-  [Adelie], [45], [0], [0],
-  [Chinstrap], [*2*], [18], [0],
-  [Gentoo], [0], [0], [37],
-)
-#v(0.7em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Exactitude globale], [
-    $ 100/102 approx 98.04\% $
-
-    Taux d'erreur : 1,96 %.
-  ], height: 2.1in),
-  card([Rappel de Chinstrap], [
-    $ 18/20=90\% $
-
-    Deux Chinstrap ont reçu l'étiquette Adelie.
-  ], fill: pale-orange, height: 2.1in),
-)
-
-== Reproduire les calculs en R
-
-Le script utilise R de base et les données locales.
-
-#block(fill: pale-gray, inset: 12pt, radius: 5pt)[
-```r
-source("codes/analyse_discriminante_fisher.R")
-
-# train et test reproduisent le partage du cours.
-modele <- ajuster_fisher(train[variables], train$species, q = 2L)
-prediction <- predire_fisher(modele, test[variables])
-
-table(Reelle = test$species, Predite = prediction$classe)
-mean(prediction$classe == test$species)
-```
-]
-#v(0.7em)
-#takeaway([Le calcul ajuste les axes de Fisher, puis applique la distance aux centres.])
-#v(0.35em)
-#small([Le script vérifie notamment $T=W+B$ et $A^top W A=I_2$.])
-
-== L'évaluation reste propre au partage choisi
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Pour comparer des méthodes], [
-    Choisir $q$ et la règle de décision par validation dans l'entraînement.
-
-    Réestimer les axes et les centres dans chaque pli.
-  ], height: 2.55in),
-  card([Pour interpréter les 98,04 %], [
-    Le résultat décrit ces 102 observations de test.
-
-    Un autre partage, une autre année ou une autre population peuvent changer
-    la performance.
-  ], fill: pale-orange, height: 2.55in),
-)
-#v(0.65em)
-#small([
-  Ce test donne ici les mêmes prédictions que l'exemple LDA du cours.
-  Une coïncidence de résultats ne confond pas les démarches.
-])
-
-== Synthèse et questions de compréhension
-
-#takeaway([
-  Fisher construit des axes à partir des classes.
-  Une règle supplémentaire transforme les scores en décisions.
-])
-#v(0.65em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([À expliquer], [
-    Pourquoi une variable très dispersée peut-elle être peu discriminante ?
-
-    Pourquoi trois classes donnent-elles au plus deux axes positifs ?
-  ], height: 2.45in),
-  card([À discuter], [
-    Que change une multiplication d'un seul axe par 10 ?
-
-    Que conclure d'un axe qui porte 100 % du poids des valeurs propres ?
-  ], fill: pale-blue, height: 2.45in),
-)
-
-== Ressources et fichiers du cours
-
-- *Notes* : `lectures/supervised.typ`, section « Analyse discriminante de Fisher ».
-- *Exemple reproductible* : `codes/analyse_discriminante_fisher.R`.
-- *Données* : `assets/penguins.csv` et sa notice `assets/penguins_README.md`.
-- #link("https://rich-d-wilkinson.github.io/MATH3030/8.3-FLDA.html")[
-    Richard D. Wilkinson : Fisher's linear discriminant rule].
-- #link("https://allisonhorst.github.io/palmerpenguins/")[
-    Palmer Penguins : données et documentation].
-
-#v(0.5em)
-#small([
-  Horst, Hill et Gorman (2020), _palmerpenguins_.
-  Données collectées par Kristen Gorman et le programme Palmer Station LTER.
-])
-#v(0.5em)
-#formula([
-  #text(size: 16pt)[`typst compile --root . slides/analyse_discriminante_fisher.typ`]
-])

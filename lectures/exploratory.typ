@@ -1,6 +1,6 @@
 #import "../styles/notes.typ": *
 
-= Analyse exploratoire
+= Généralités
 
 == Introduction
 
