@@ -1,5 +1,34 @@
 #import "@preview/theorion:0.6.0": *
 #import cosmos.fancy: *
+#import "math.typ": *
+
+// Même vocabulaire, même compteur par chapitre et mêmes règles de coupure.
+// Les variantes *-box du package restent disponibles pour les anciens textes.
+#let definition = cosmos.fancy.definition.with(
+  supplement: "Définition", breakable: false,
+)
+#let property = cosmos.fancy.property.with(
+  supplement: "Propriétés", breakable: false,
+)
+#let theorem = cosmos.fancy.theorem.with(
+  supplement: "Théorème", breakable: false,
+)
+#let example = cosmos.fancy.example.with(
+  supplement: "Exemple", breakable: false,
+  get-border-color: loc => rgb("#655080"),
+  get-body-color: loc => rgb("#f6f2f9"),
+)
+#let remark = cosmos.fancy.remark.with(
+  supplement: "Remarque", breakable: false,
+  get-border-color: loc => rgb("#5f6f7a"),
+  get-body-color: loc => rgb("#f2f5f6"),
+)
+#let proof = cosmos.default.proof.with(title: "Preuve")
+
+#let exercises(body) = {
+  heading(level: 2, outlined: false)[Exercices]
+  body
+}
 
 
 #let before-location(a, b) = {
@@ -35,7 +64,7 @@
     it => {
       let loc = it.location()
       (
-        before-location(current, loc) and 
+        before-location(current, loc) and
           (next == none or before-location(loc, next))
       )
     }
@@ -104,12 +133,29 @@
   set par(justify: true, leading: 0.65em)
   set list(indent: 1.2em, body-indent: 0.4em)
   set enum(indent: 1.2em, body-indent: 0.4em)
+  set table(
+    inset: 5pt,
+    stroke: 0.4pt + rgb("#cfd8dc"),
+    fill: (x, y) => if y == 0 { rgb("#eef3f1") },
+  )
+  show figure.caption: set align(left)
 
   show: show-theorion
   set-inherited-levels(1)
   set-zero-fill(true)
   set-leading-zero(true)
   set-theorion-numbering("1.1")
+  set-qed-symbol[$square$]
+  set-primary-border-color(rgb("#527660"))
+  set-primary-body-color(rgb("#f0f6f2"))
+  set-secondary-border-color(rgb("#8a642f"))
+  set-secondary-body-color(rgb("#fbf6ed"))
+  set-tertiary-border-color(rgb("#426680"))
+  set-tertiary-body-color(rgb("#eff4f8"))
+  set-primary-symbol(none)
+  set-secondary-symbol(none)
+  set-tertiary-symbol(none)
+  set-quaternary-symbol(none)
 
   show link: underline
   show raw.where(block: true): block.with(

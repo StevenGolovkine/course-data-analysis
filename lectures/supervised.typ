@@ -1,25 +1,20 @@
-#import "../styles/notes.typ": definition-box, note, example, property-box, proof, set-qed-symbol
-
-#set-qed-symbol[$square$]
-
-#show figure.caption: set align(left)
+#import "../styles/notes.typ": *
 
 = Apprentissage supervisé
 
 == Introduction
 
-En apprentissage supervisé, on dispose d'exemples pour lesquels les variables explicatives et la réponse à prédire ou à expliquer sont connues. On utilise ces exemples pour construire une règle de prédiction, puis on applique cette règle à de nouvelles observations dont la réponse est encore inconnue. Le mot *supervisé* désigne ainsi la présence de cette réponse dans les données d'apprentissage : elle fournit une référence pour apprendre et pour mesurer les erreurs.
+Ce chapitre met en œuvre le cadre supervisé de @def-apprentissage-supervise.
+Il compare plusieurs façons d'apprendre une règle de prédiction à partir
+d'observations étiquetées.
 
 Il faut distinguer la tâche de prédiction et celle de l'explication des données. Un classificateur (_classifier_) cherche les caractéristiques qui permettent de prévoir une étiquette ou un nombre donnés. Une variable très dispersée n'est ainsi pas nécessairement utile pour prédire, alors qu'une variable peu dispersée peut devenir essentielle si elle distingue bien les classes.
 
 === Données, modèle et prédiction
 
-On note l'échantillon d'apprentissage
-
-$ cal(D) = {(x_i, y_i)}_(i=1)^n, quad
-  x_i = (x_(i 1), dots, x_(i p))^top. $
-
-Le vecteur $x_i$ contient les $p$ variables explicatives, qualitatives ou quantitatives, de l'observation $i$, et $y_i$ est sa réponse, qui peut aussi être qualitative ou quantitative. Les lettres majuscules $X$ et $Y$ désignent les variables aléatoires correspondantes. À partir de $cal(D)$, on cherche à construire une fonction $hat(f)$. La prédiction pour une nouvelle observation $x$ est $hat(y) = hat(f)(x)$. Le chapeau rappelle que la règle est estimée à partir d'un échantillon et changerait si l'on changeait les données.
+On conserve les notations de l'introduction et on regroupe les couples observés
+dans $cal(D)={(x_i,y_i)}_(i=1)^n$. La règle apprise est notée $hat(f)$ et sa
+prédiction en $x$ est $hat(y)=hat(f)(x)$.
 
 Avant de choisir une méthode, il faut définir l'unité observée, la population visée et les informations disponibles au moment de la prédiction. Une variable mesurée seulement après la réponse peut être très prédictive dans un fichier historique tout en étant inutilisable dans la situation réelle.
 
@@ -38,11 +33,14 @@ Avant de choisir une méthode, il faut définir l'unité observée, la populatio
 
 === Régression et classification
 
-En *régression*, la réponse est quantitative : une masse, une durée ou une quantité produite par exemple. Le modèle renvoie une valeur numérique. En *classification*, la réponse est qualitative : une espèce, un type de produit ou une catégorie de défaut par exemple. On note les classes $1, dots, K$. Ces nombres sont des étiquettes et ne leur donnent pas un ordre ni des distances numériques.
+La distinction entre régression et classification est donnée dans
+@def-regression-classification. Pour la classification, on note les classes
+$1,dots,K$ : ces nombres sont des étiquettes, sans ordre ni distance numérique
+imposés.
 
 Un classificateur peut produire deux sortes de résultats :
 
-- des probabilités estimées $hat(eta)_g (x) approx P(Y=g bar.v X=x)$ pour chaque classe $g in \{1, dots, K\}$, de somme $1$ ;
+- des probabilités estimées $hat(eta)_g (x) approx prob(Y=g bar.v X=x)$ pour chaque classe $g in \{1, dots, K\}$, de somme $1$ ;
 - une décision $hat(g)(x)$, obtenue en choisissant une classe à partir de ces
   probabilités et d'une règle de décision.
 
@@ -91,12 +89,14 @@ Contrairement à la régression linéaire, la méthode des k-NN n'estime pas une
 
 === Classification par vote des voisins
 
-En faisant l'hypothèse que chaque voisin apporte une voix (donc qu'ils ont le même poids), la proportion locale de la classe $g$ et la décision correspondante sont
+#definition(title: [Classification par les k plus proches voisins])[
+  En faisant l'hypothèse que chaque voisin apporte une voix (donc qu'ils ont le même poids), la proportion locale de la classe $g$ et la décision correspondante sont
 
-$ hat(eta)_g (x) = 1/k sum_(i in cal(N)_k (x)) bold(1)\{y_i=g\}, quad "et" quad
-  hat(g)(x) = op("argmax")_(g in {1, dots, K}) hat(eta)_g (x). $
+  $ hat(eta)_g (x) = 1/k sum_(i in cal(N)_k (x)) ind(y_i=g), quad "et" quad
+    hat(g)(x) = argmax_(g in {1, dots, K}) hat(eta)_g (x). $
+]
 
-L'indicatrice $bold(1)\{y_i=g\}$ vaut $1$ si le voisin $i$ appartient à la classe
+L'indicatrice $ind(y_i=g)$ vaut $1$ si le voisin $i$ appartient à la classe
 $g$, et $0$ sinon. On choisit donc la classe la plus représentée dans le
 voisinage. Avec plus de deux classes, la classe gagnante n'a pas nécessairement
 plus de 50~% des voix. Les proportions locales peuvent servir d'estimations des
@@ -104,34 +104,33 @@ probabilités de classe, mais un vote de $2$ voisins sur $3$ ne garantit pas à
 lui seul une probabilité bien calibrée de $2/3$.
 
 #example[
-  On cherche à classer le point $x=(0,0)^top$ à partir de deux variables
-  exprimées sur des échelles comparables. Ses cinq plus proches voisins,
-  ordonnés selon la distance euclidienne, sont les suivants :
+    On cherche à classer le point $x=(0,0)^top$ à partir de deux variables
+    exprimées sur des échelles comparables. Ses cinq plus proches voisins,
+    ordonnés selon la distance euclidienne, sont les suivants :
 
-  #table(
-    columns: (0.8fr, 1.5fr, 1.1fr, 0.8fr), align: center,
-    inset: 6pt, stroke: 0.4pt + luma(210),
-    table.header([*Voisin*], [*Coordonnées*], [*Distance à $x$*], [*Classe*]),
-    [1], [$(0.2, 0)$], [0,2], [B],
-    [2], [$(0, 0.4)$], [0,4], [A],
-    [3], [$(-0.5, 0)$], [0,5], [A],
-    [4], [$(0, -0.7)$], [0,7], [B],
-    [5], [$(0.8, 0.6)$], [1,0], [B],
+    #table(
+      columns: (0.8fr, 1.5fr, 1.1fr, 0.8fr), align: center,
+      table.header([*Voisin*], [*Coordonnées*], [*Distance à $x$*], [*Classe*]),
+      [1], [$(0.2, 0)$], [0,2], [B],
+      [2], [$(0, 0.4)$], [0,4], [A],
+      [3], [$(-0.5, 0)$], [0,5], [A],
+      [4], [$(0, -0.7)$], [0,7], [B],
+      [5], [$(0.8, 0.6)$], [1,0], [B],
+    )
+
+    Pour $k=1$, on prédit B. Pour $k=3$, A reçoit deux voix contre une : on
+    prédit A, avec une proportion locale de $2/3$. Pour $k=5$, B reçoit trois
+    voix contre deux et redevient la classe prédite. Le choix de $k$ peut donc
+    modifier la décision pour une même observation.
+
+    #figure(
+    image("../figures/knn_voisinage.svg", width: 100%,
+      alt: "Un point à l'origine est classé A avec trois voisins, dont deux A, "
+        + "puis B avec cinq voisins, dont trois B. Chaque cercle contient le "
+        + "nombre de voisins choisi ; les numéros renvoient au tableau."),
+    caption: [Deux voisinages autour du même point. Le cercle passe par le
+      $k$-ième voisin ; seuls les points retenus participent au vote. Les deux points les plus éloignés ne figurent pas parmi les cinq premiers voisins du tableau.],
   )
-
-  Pour $k=1$, on prédit B. Pour $k=3$, A reçoit deux voix contre une : on
-  prédit A, avec une proportion locale de $2/3$. Pour $k=5$, B reçoit trois
-  voix contre deux et redevient la classe prédite. Le choix de $k$ peut donc
-  modifier la décision pour une même observation.
-
-  #figure(
-  image("../figures/knn_voisinage.svg", width: 100%,
-    alt: "Un point à l'origine est classé A avec trois voisins, dont deux A, "
-      + "puis B avec cinq voisins, dont trois B. Chaque cercle contient le "
-      + "nombre de voisins choisi ; les numéros renvoient au tableau."),
-  caption: [Deux voisinages autour du même point. Le cercle passe par le
-    $k$-ième voisin ; seuls les points retenus participent au vote. Les deux points les plus éloignés ne figurent pas parmi les cinq premiers voisins du tableau.],
-)
 ]
 
 *Départager les égalités.* Deux situations sont à distinguer. D'abord,
@@ -149,10 +148,12 @@ méthode et doit être fixée avant l'évaluation.
 
 === Régression par pondération des voisins
 
-Lorsque la réponse est quantitative, on remplace le vote par la moyenne des
-réponses du voisinage :
+#definition(title: [Régression par les k plus proches voisins])[
+  Lorsque la réponse est quantitative, on remplace le vote par la moyenne des
+  réponses du voisinage :
 
-$ hat(f)_k (x) = 1/k sum_(i in cal(N)_k (x)) y_i. $
+  $ hat(f)_k (x) = 1/k sum_(i in cal(N)_k (x)) y_i. $
+]
 
 Cette moyenne minimise la somme des erreurs quadratiques sur les réponses des voisins. Si les trois voisins ont pour réponses $10$, $12$ et $14$, la prédiction pour $k=3$ est $12$. Une variante utilisant leur médiane répondrait plutôt à un critère d'erreur absolue et serait moins sensible aux réponses extrêmes.
 
@@ -195,7 +196,7 @@ Ce compromis correspond au compromis entre biais et variance. À l'extrême, $k=
 
 On choisit donc $k$ par jeu de validation ou par validation croisée, par exemple en comparant $k = 1,3,5,7,9,15,21,31$ sur les mêmes plis. Chaque valeur doit être inférieure ou égale à l'effectif d'entraînement dans chaque pli. Il n'existe pas de valeur universelle. Le résultat dépend de la taille de l'échantillon, du bruit, des variables et de la distance.
 
-#note[
+#remark[
   Pour $k=1$, si les observations d'entraînement ont des vecteurs explicatifs
   distincts, chacune est son propre voisin le plus proche. L'erreur calculée
   sur ces mêmes observations est alors nulle, même avec des étiquettes bruitées.
@@ -209,7 +210,7 @@ transforme la partie de validation avec ces paramètres. Il en va de même pour
 une imputation, une sélection de variables ou une réduction de dimension.
 Le jeu de test ne sert ni à choisir $k$, ni à choisir la distance ou les poids.
 
-=== Exemple pratique : Palmer Penguins
+=== Étude de cas : Palmer Penguins
 
 On cherche à prédire `species` à partir de `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g`. On conserve les $342$ observations complètes pour ces quatre mesures. Le partage stratifié donne $240$ observations d'entraînement et $102$ de test. Les noms des espèces sont les réponses à prédire ; ils n'entrent donc pas dans le calcul des distances.
 
@@ -217,7 +218,6 @@ On peut utiliser la distance euclidienne sur les variables centrées et réduite
 
 #table(
   columns: (0.8fr, 1.3fr, 1.3fr), align: center,
-  inset: 4pt, stroke: 0.4pt + luma(210),
   table.header([*$k$*], [*Erreurs sur 240*], [*Taux d'erreur*]),
   [1], [4], [1,67~%],
   [3], [3], [1,25~%],
@@ -235,7 +235,6 @@ On recalcule ensuite les moyennes et écarts-types sur les $240$ observations d'
 
 #table(
   columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
-  inset: 6pt, stroke: 0.4pt + luma(210),
   table.header([*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*],
     [*Prédit Gentoo*]),
   [Adelie], [45], [0], [0],
@@ -297,47 +296,47 @@ associer une règle de décision supplémentaire.
 Contrairement à l'ACP, le choix de l'axe utilise les classes. L'ACP recherche une forte variance totale, alors que l'analyse discriminante de Fisher recherche un contraste entre groupes relativement à leur variabilité interne.
 
 #example[
-  Considérons deux classes équiprobables de moyennes $(0,-1)^top$ et $(0,1)^top$, avec la même covariance $op("diag")(9, 0.25)$. Dans chaque classe, la variable $X_1$ varie beaucoup, mais sa distribution est la même pour les deux classes. La variable $X_2$ varie moins à l'intérieur de chaque classe et sépare leurs moyennes.
+    Considérons deux classes équiprobables de moyennes $(0,-1)^top$ et $(0,1)^top$, avec la même covariance $diag(9, 0.25)$. Dans chaque classe, la variable $X_1$ varie beaucoup, mais sa distribution est la même pour les deux classes. La variable $X_2$ varie moins à l'intérieur de chaque classe et sépare leurs moyennes.
 
-  La covariance totale est $op("diag")(9, 1.25)$ : l'ACP sur les variables centrées, sans réduction, retient d'abord la direction donnée par $X_1$. La direction donnée par le critère de Fisher est $X_2$. Une direction qui conserve beaucoup de variance n'est donc pas nécessairement celle qui permet de distinguer les classes.
+    La covariance totale est $diag(9, 1.25)$ : l'ACP sur les variables centrées, sans réduction, retient d'abord la direction donnée par $X_1$. La direction donnée par le critère de Fisher est $X_2$. Une direction qui conserve beaucoup de variance n'est donc pas nécessairement celle qui permet de distinguer les classes.
 
-  #figure(
-  image("../figures/discriminante_fisher.svg", width: 100%,
-    alt: "Deux classes simulées présentent une grande dispersion horizontale "
-      + "commune et des moyennes verticales différentes. La projection "
-      + "horizontale de l'ACP superpose les classes ; la projection verticale "
-      + "de Fisher les sépare."),
-  caption: [Variance totale et séparation des classes. À gauche, un échantillon
-    simulé ; à droite, les densités des projections sous les lois normales de
-    l'exemple. Les directions indiquées sont celles du modèle théorique.],
-)
+    #figure(
+    image("../figures/discriminante_fisher.svg", width: 100%,
+      alt: "Deux classes simulées présentent une grande dispersion horizontale "
+        + "commune et des moyennes verticales différentes. La projection "
+        + "horizontale de l'ACP superpose les classes ; la projection verticale "
+        + "de Fisher les sépare."),
+    caption: [Variance totale et séparation des classes. À gauche, un échantillon
+      simulé ; à droite, les densités des projections sous les lois normales de
+      l'exemple. Les directions indiquées sont celles du modèle théorique.],
+  )
 ]
 
 
 === Variabilités intra-groupe et inter-groupe
 
-#definition-box(supplement: "Définition")[
-Notons $C_g = {i : y_i=g}$ l'ensemble des indices de la classe $g$, d'effectif
-$n_g$, pour $g = 1, dots, K$. Les moyennes de classe et la moyenne globale sont données par
+#definition[
+  Notons $C_g = {i : y_i=g}$ l'ensemble des indices de la classe $g$, d'effectif
+  $n_g$, pour $g = 1, dots, K$. Les moyennes de classe et la moyenne globale sont données par
 
-$ overline(x)_g = 1/n_g sum_(i in C_g) x_i, quad
-  overline(x) = 1/n sum_(i=1)^n x_i = sum_(g=1)^K n_g/n overline(x)_g. $
+  $ overline(x)_g = 1/n_g sum_(i in C_g) x_i, quad
+    overline(x) = 1/n sum_(i=1)^n x_i = sum_(g=1)^K n_g/n overline(x)_g. $
 ]
 
-#definition-box(supplement: "Définition")[
-On définit les matrices de dispersion *intra-groupe* $W$, *inter-groupe* $B$
-et *totale* $T$ par, respectivement :
+#definition[
+  On définit les matrices de dispersion *intra-groupe* $W$, *inter-groupe* $B$
+  et *totale* $T$ par, respectivement :
 
-$
-  W = sum_(g=1)^K sum_(i in C_g)
-      (x_i-overline(x)_g)(x_i-overline(x)_g)^top,
-$
-$
-  B = sum_(g=1)^K n_g (overline(x)_g-overline(x))(overline(x)_g-overline(x))^top,
-$
-$
-  T = sum_(i=1)^n (x_i-overline(x))(x_i-overline(x))^top.
-$
+  $
+    W = sum_(g=1)^K sum_(i in C_g)
+        (x_i-overline(x)_g)(x_i-overline(x)_g)^top,
+  $
+  $
+    B = sum_(g=1)^K n_g (overline(x)_g-overline(x))(overline(x)_g-overline(x))^top,
+  $
+  $
+    T = sum_(i=1)^n (x_i-overline(x))(x_i-overline(x))^top.
+  $
 ]
 
 #figure(
@@ -354,12 +353,20 @@ $
     globale est donc plus proche du centre du groupe le plus nombreux.],
 )
 
-La quantité $W$ mesure les écarts de chaque observation à la moyenne de sa classe et la quantité $B$ mesure les écarts des moyennes de classe à la moyenne globale, pondérés par les effectifs. Ce sont ici des sommes de produits d'écarts, sans division par des degrés de liberté. La dispersion totale se décompose exactement en
+La quantité $W$ mesure les écarts de chaque observation à la moyenne de sa classe et la quantité $B$ mesure les écarts des moyennes de classe à la moyenne globale, pondérés par les effectifs. Ce sont ici des sommes de produits d'écarts, sans division par des degrés de liberté.
 
-$ T = W+B. $
+#property(title: [Décomposition de la dispersion])[
+  La dispersion totale se décompose exactement en
 
-Les termes croisés disparaissent parce que les écarts à la moyenne somment à
-zéro dans chaque classe.
+  $ T = W+B. $
+]
+
+#proof[
+  En écrivant $x_i-overline(x)=(x_i-overline(x)_g)+(overline(x)_g-overline(x))$
+  dans chaque produit d'écarts, puis en sommant, on retrouve $W+B$.
+  Les termes croisés disparaissent parce que les écarts à la moyenne somment
+  à zéro dans chaque classe.
+]
 
 === Critère de Fisher et axes discriminants
 
@@ -375,7 +382,7 @@ définies précédemment, sans normalisation par des degrés de liberté.
 $ a^top W a = sum_(g=1)^K sum_(i in C_g) (z_i-overline(z)_g)^2 quad "et" quad
 a^top B a = sum_(g=1)^K n_g (overline(z)_g-overline(z))^2. $
 
-#definition-box(supplement: "Définition")[
+#definition[
   Le critère de Fisher d'une direction $a$ telle que $a^top W a>0$ est
 
   $ J(a) = (a^top B a) / (a^top W a). $
@@ -426,7 +433,7 @@ le rapport.#footnote[
   linear discriminant rule »].
 ]
 
-#property-box(supplement: "Propriétés")[
+#property[
   Si $W$ est définie positive, les valeurs propres généralisées de $(B,W)$
   sont réelles et positives ou nulles. En les ordonnant
   $lambda_1 >= lambda_2 >= dots >= lambda_p >= 0$, on a
@@ -437,7 +444,7 @@ le rapport.#footnote[
   axe discriminant.
 ]
 
-#proof(title: "Preuve")[
+#proof[
   La décomposition spectrale de $W$ définit sa racine carrée symétrique
   $W^(1/2)$ et son inverse $W^(-1/2)$. Posons $u=W^(1/2)a$ et
   $M=W^(-1/2)B W^(-1/2)$. Alors
@@ -541,7 +548,7 @@ Ces $K$ vecteurs sont donc linéairement dépendants et engendrent un espace
 de dimension au plus $K-1$. Puisque $W$ est définie positive, le nombre $r$
 de valeurs propres généralisées strictement positives est
 
-$ r=op("rang")(B) <= min(p,K-1). $
+$ r=rang(B) <= min(p,K-1). $
 
 Pour trois classes et quatre variables, il existe au plus deux axes
 discriminants de valeur propre positive. Il peut n'y en avoir qu'un si
@@ -562,7 +569,7 @@ l'origine des scores sans changer les écarts
 entre observations ni le critère. Les dispersions dans cet espace vérifient
 
 $ A^top W A=I_q, quad "et" quad
-  A^top B A=op("diag")(lambda_1,dots,lambda_q). $
+  A^top B A=diag(lambda_1,dots,lambda_q). $
 
 Les dispersions intra-groupes sont ainsi mises sur la même échelle, tandis
 que les dispersions inter-groupes décroissent d'un axe au suivant. Les
@@ -582,7 +589,7 @@ Par exemple, si $lambda_1=9$ et $lambda_2=1$, ces valeurs propres attribuent 90~
 classes de moyennes distinctes, l'unique axe représente toujours 100~% de
 cette somme, même si les distributions projetées se recouvrent fortement.
 
-#note[
+#remark[
   Le critère de Fisher se définit sans hypothèse de normalité, mais privilégie les différences de moyennes. Si deux classes ont la même moyenne et des dispersions différentes, $B=0$ alors qu'une autre règle pourrait peut-être les distinguer. De plus, un axe est une règle de calcul de score, pas encore une règle d'affectation : un seuil, ou un classificateur utilisant les coordonnées projetées, reste à définir. Cette étape ne découle pas du seul critère de Fisher et n'impose pas de choisir un modèle LDA ou QDA.
 ]
 
@@ -609,7 +616,7 @@ Une règle simple consiste à choisir la classe dont le centre projeté est
 le plus proche de l'observation à classer. On compare donc une observation
 aux moyennes des classes, et non à ses plus proches voisins individuels.
 
-#definition-box(supplement: "Définition")[
+#definition[
   Soit $A=(a_1,dots,a_q)$ la matrice des axes retenus, normalisés de sorte que
   $A^top W A=I_q$. Pour une nouvelle observation $x$, on définit son score
   vectoriel et les centres projetés des classes par
@@ -625,7 +632,7 @@ aux moyennes des classes, et non à ses plus proches voisins individuels.
 
   La règle de classification est
 
-  $ hat(g)_F (x)=op("argmin")_(g in {1,dots,K}) D_g (x). $
+  $ hat(g)_F (x)=argmin_(g in {1,dots,K}) D_g (x). $
 ]
 
 Ici, le $F$ rappelle que les distances sont calculées dans l'espace de
@@ -689,7 +696,7 @@ Il s'agit d'une droite dans un plan discriminant, ou d'un hyperplan en
 dimension supérieure. Seules les portions où aucune autre classe n'est
 plus proche constituent les frontières effectives des régions de décision.
 
-#note[
+#remark[
   Cette règle est géométrique : elle ne suppose pas de lois normales et ne
   produit pas de probabilités a posteriori. Les effectifs interviennent
   dans l'estimation de $W$, de $B$ et des axes, mais la comparaison des
@@ -705,7 +712,7 @@ la décision. Le nombre d'axes $q$ et le choix de la règle d'affectation font
 partie de la méthode ; si on les compare, on utilise une validation interne
 à l'entraînement, en réestimant les axes et les centres dans chaque pli.
 
-=== Exemple de classification : Palmer Penguins
+=== Étude de cas : Palmer Penguins
 
 On cherche à prédire l'espèce, `Adelie`, `Chinstrap` ou `Gentoo`, à partir
 de quatre mesures : `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`
@@ -716,7 +723,6 @@ laisse $342$ individus. Ni `sex`, ni `island`, ni `year` ne sont utilisés.
 
 #table(
   columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
-  inset: 5pt, stroke: 0.4pt + luma(210),
   table.header([*Espèce*], [*Total*], [*Entraînement*], [*Test*]),
   [Adelie], [151], [106], [45],
   [Chinstrap], [68], [48], [20],
@@ -741,7 +747,6 @@ Avec l'orientation des axes fixée, les centres projetés sont :
 
 #table(
   columns: (1.4fr, 1fr, 1fr), align: center,
-  inset: 5pt, stroke: 0.4pt + luma(210),
   table.header([*Espèce*], [*Axe 1*], [*Axe 2*]),
   [Adelie], [$0.20829$], [$-0.07633$],
   [Chinstrap], [$0.10755$], [$0.20857$],
@@ -779,7 +784,6 @@ Les prédictions des $102$ observations de test donnent la matrice de confusion 
 
 #table(
   columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
-  inset: 6pt, stroke: 0.4pt + luma(210),
   table.header([*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*],
     [*Prédit Gentoo*]),
   [Adelie], [45], [0], [0],
@@ -809,10 +813,10 @@ classe. Son objectif est de construire une règle de classification, et non
 de maximiser directement un rapport de dispersions.
 
 On note $f_g(x)$ la densité de $X$ conditionnellement à $Y=g$, et
-$pi_g=P(Y=g)$ la probabilité a priori de la classe $g$. La formule de Bayes
+$pi_g=prob(Y=g)$ la probabilité a priori de la classe $g$. La formule de Bayes
 donne la probabilité *a posteriori*
 
-$ eta_g (x) = P(Y=g bar.v X=x)
+$ eta_g (x) = prob(Y=g bar.v X=x)
   = (pi_g f_g (x)) / (sum_(h=1)^K pi_h f_h (x)). $
 
 Sous la perte 0–1, on choisit la classe de plus grande probabilité a posteriori.
@@ -824,16 +828,18 @@ projection préalable sur les axes de Fisher n'est pas nécessaire.
 
 === Analyse discriminante linéaire (LDA)
 
-L'analyse discriminante linéaire, ou *LDA* (_Linear Discriminant Analysis_),
-modélise les variables explicatives conditionnellement à la classe :
+#definition(title: [Modèle LDA])[
+  L'analyse discriminante linéaire, ou *LDA* (_Linear Discriminant Analysis_),
+  modélise les variables explicatives conditionnellement à la classe :
 
-$ X bar.v (Y=g) tilde.op cal(N)_p (mu_g, Sigma), quad P(Y=g) = pi_g. $
+  $ X bar.v (Y=g) tilde.op cal(N)_p (mu_g, Sigma), quad prob(Y=g) = pi_g. $
 
-Chaque classe a sa propre moyenne $mu_g$, mais toutes partagent la même matrice
-de covariance $Sigma$, supposée définie positive. Les probabilités *a priori*
-$pi_g > 0$ somment à $1$ et décrivent les fréquences des classes avant
-d'observer les mesures. La normalité est supposée *dans chaque classe* : la
-distribution globale, mélange de ces classes, n'a pas à être normale.
+  Chaque classe a sa propre moyenne $mu_g$, mais toutes partagent la même matrice
+  de covariance $Sigma$, supposée définie positive. Les probabilités *a priori*
+  $pi_g > 0$ somment à $1$ et décrivent les fréquences des classes avant
+  d'observer les mesures. La normalité est supposée *dans chaque classe* : la
+  distribution globale, mélange de ces classes, n'a pas à être normale.
+]
 
 Le dénominateur de la formule de Bayes étant commun aux classes, maximiser
 la probabilité a posteriori revient à maximiser
@@ -850,7 +856,7 @@ $ delta_g (x) = x^top Sigma^(-1) mu_g
 
 Chaque score est affine en $x$, d'où la règle
 
-$ hat(g)(x) = op("argmax")_(g in {1, dots, K}) hat(delta)_g (x). $
+$ hat(g)(x) = argmax_(g in {1, dots, K}) hat(delta)_g (x). $
 
 La frontière entre les classes $g$ et $h$ est définie par
 $hat(delta)_g (x) = hat(delta)_h (x)$ : c'est une droite en dimension deux,
@@ -906,8 +912,8 @@ $ z > 1/2 a^top (mu_1+mu_2) - log(pi_2/pi_1). $
 projetées. Si la classe $2$ est plus rare, le seuil augmente : il faut des
 mesures plus favorables à cette classe pour la choisir.
 
-#note[
-  *Un lien avec Fisher, pas une identité de démarches.* Dans le cas de deux
+#remark(title: [Un lien avec Fisher, pas une identité de démarches])[
+  Dans le cas de deux
   classes de moyennes empiriques distinctes, si l'on estime les moyennes par
   ces moyennes empiriques et la covariance commune par $W/(n-2)$ avec $W$
   inversible, la direction estimée
@@ -920,7 +926,7 @@ mesures plus favorables à cette classe pour la choisir.
 
 #example[
   Supposons $mu_1=(0,0)^top$, $mu_2=(2,1)^top$,
-  $Sigma=op("diag")(1,4)$ et $pi_1=pi_2=0.5$. Alors
+  $Sigma=diag(1,4)$ et $pi_1=pi_2=0.5$. Alors
 
   $ a=(2,0.25)^top, quad
     delta_2 (x)-delta_1 (x)=2x_1+0.25x_2-2.125. $
@@ -951,10 +957,12 @@ a posteriori : il ne faut pas les appliquer une seconde fois à ce seuil.
 
 === Analyse discriminante quadratique (QDA)
 
-La *QDA* (_Quadratic Discriminant Analysis_) autorise une covariance propre
-à chaque classe :
+#definition(title: [Modèle QDA])[
+  La *QDA* (_Quadratic Discriminant Analysis_) autorise une covariance propre
+  à chaque classe :
 
-$ X bar.v (Y=g) tilde.op cal(N)_p (mu_g, Sigma_g). $
+  $ X bar.v (Y=g) tilde.op cal(N)_p (mu_g, Sigma_g). $
+]
 
 Les classes peuvent donc avoir des dispersions et des orientations différentes.
 En supprimant seulement les termes communs à toutes les classes, on obtient
@@ -987,7 +995,7 @@ petites classes peuvent donc poser problème même si l'effectif total est grand
 Le choix entre LDA et QDA repose sur une validation, pas uniquement sur
 l'ajustement apparent aux données d'apprentissage.
 
-=== Exemple pratique : Palmer Penguins
+=== Étude de cas : Palmer Penguins
 
 Reprenons les quatre mesures utilisées dans le chapitre sur l'ACP, mais
 utilisons cette fois `species` comme réponse. On cherche à distinguer `Adelie`,
@@ -1008,7 +1016,7 @@ données locales. On réserve environ 30~% de chaque espèce pour le test, avec
 une graine fixée avant d'observer les résultats. Les $240$ observations
 d'entraînement servent à ajuster une LDA ; les $102$ autres servent uniquement
 à l'évaluer. Le modèle et les quatre variables sont fixés pour cet exemple,
-sans recherche d'hyper-paramètres.
+sans recherche d'hyperparamètres.
 
 #block(breakable: true)[
 ```r
@@ -1043,7 +1051,6 @@ l'entraînement comme probabilités a priori.#footnote[
 
 #table(
   columns: (1.3fr, 1fr, 1fr, 1fr), align: center,
-  inset: 6pt, stroke: 0.4pt + luma(210),
   table.header([*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*],
     [*Prédit Gentoo*]),
   [Adelie], [45], [0], [0],
@@ -1067,7 +1074,7 @@ le test à l'écart. Une évaluation par année ou par site répondrait égaleme
 === Régularisation, interprétation et limites
 
 *Des covariances qui doivent être estimables.* La LDA usuelle exige une
-covariance intra-groupe inversible. Comme $op("rang")(W) <= n-K$, elle est
+covariance intra-groupe inversible. Comme $rang(W) <= n-K$, elle est
 singulière si $p > n-K$, et peut l'être aussi à cause de dépendances exactes
 entre variables. En QDA, la covariance de la classe $g$ a un rang au plus
 $n_g-1$ : il faut notamment $n_g > p$ pour espérer l'inverser. Même lorsque
@@ -1076,7 +1083,7 @@ l'inverse existe, une estimation sur peu de données peut être très instable.
 Une solution est de régulariser la covariance, par exemple
 
 $ hat(Sigma)_alpha = (1-alpha) hat(Sigma) + alpha tau I_p,
-  quad tau = (op("tr")(hat(Sigma)))/p, quad 0 <= alpha <= 1. $
+  quad tau = tr(hat(Sigma))/p, quad 0 <= alpha <= 1. $
 
 Si $tau>0$, un $alpha>0$ rend cette matrice définie positive. La régularisation
 stabilise les petites valeurs propres en rapprochant la covariance d'une
@@ -1111,16 +1118,18 @@ probabilités doivent alors être vérifiées empiriquement.
 
 === Principe
 
-Les arbres CART partitionnent l'espace des variables explicatives en régions
-simples. À chaque noeud, l'algorithme choisit une variable et un seuil qui
-séparent les observations en deux sous-ensembles plus homogènes.
+#definition(title: [Arbre de classification ou de régression])[
+  Les arbres CART partitionnent l'espace des variables explicatives en régions
+  simples. À chaque noeud, l'algorithme choisit une variable et un seuil qui
+  séparent les observations en deux sous-ensembles plus homogènes.
 
-Pour une tâche de classification, chaque feuille prédit la classe majoritaire.
-Pour une tâche de régression, chaque feuille prédit souvent la moyenne de la
-réponse dans la feuille.
+  Pour une tâche de classification, chaque feuille prédit la classe majoritaire.
+  Pour une tâche de régression, chaque feuille prédit souvent la moyenne de la
+  réponse dans la feuille.
+]
 
 Un arbre peut être lu comme une suite de questions. Cette forme le rend très
-accessible: chaque chemin depuis la racine jusqu'à une feuille décrit une règle
+accessible : chaque chemin depuis la racine jusqu'à une feuille décrit une règle
 de décision.
 
 === Algorithme CART
@@ -1138,7 +1147,7 @@ optimal. Elle choisit à chaque étape la meilleure coupure locale.
 
 === Critères d'homogénéité
 
-Pour la classification, on utilise souvent:
+Pour la classification, on utilise souvent :
 
 - le taux d'erreur de classification, simple mais peu sensible pour construire
   l'arbre;
@@ -1155,19 +1164,19 @@ où les valeurs de la réponse sont peu dispersées.
 
 === Complexité et élagage
 
-Un arbre trop profond surajuste les données: il crée des feuilles très
-spécifiques et généralise mal. Un arbre trop petit sous-ajuste: il ne capture
+Un arbre trop profond surajuste les données : il crée des feuilles très
+spécifiques et généralise mal. Un arbre trop petit sous-ajuste : il ne capture
 pas assez de structure.
 
 L'élagage consiste à faire croître un arbre puis à retirer les branches qui
-apportent peu d'amélioration. On peut utiliser un critère coût-complexité:
+apportent peu d'amélioration. On peut utiliser un critère coût-complexité :
 
 $ L(T) = C(T) + alpha |T| $
 
 où $|T|$ est le nombre de feuilles et $alpha$ pénalise la complexité. Le choix de
 $alpha$ se fait souvent par validation croisée.
 
-On peut aussi contrôler la complexité par des critères d'arrêt: profondeur
+On peut aussi contrôler la complexité par des critères d'arrêt : profondeur
 maximale, nombre minimal d'observations dans une feuille, gain minimal exigé pour
 une coupure ou nombre maximal de feuilles.
 
@@ -1177,7 +1186,7 @@ Les arbres sont faciles à interpréter, gèrent naturellement les interactions,
 acceptent des variables de types variés et sont peu sensibles aux transformations
 monotones des variables.
 
-Ils sont aussi instables: une petite modification des données peut produire un
+Ils sont aussi instables : une petite modification des données peut produire un
 arbre très différent. Utilisés seuls, ils peuvent être moins performants que des
 méthodes agrégées, surtout lorsque les données sont bruitées.
 
@@ -1195,7 +1204,7 @@ Les méthodes ensemblistes combinent plusieurs modèles simples pour produire un
 prédiction plus robuste. Elles améliorent souvent la performance au prix d'une
 interprétation moins directe.
 
-Trois grandes familles apparaissent dans le cours:
+Trois grandes familles apparaissent dans le cours :
 
 - le bagging;
 - les forêts aléatoires;
@@ -1206,10 +1215,12 @@ qu'un seul modèle, à condition que leurs erreurs ne soient pas toutes les mêm
 
 === Bagging
 
-Le bagging, ou *bootstrap aggregating*, construit plusieurs modèles sur des
-échantillons bootstrap des données d'entraînement. Pour la classification, on
-combine ensuite les prédictions par vote majoritaire ou par moyenne des
-probabilités.
+#definition(title: [Bagging])[
+  Le bagging, ou *bootstrap aggregating*, construit plusieurs modèles sur des
+  échantillons bootstrap des données d'entraînement. Pour la classification, on
+  combine ensuite les prédictions par vote majoritaire ou par moyenne des
+  probabilités.
+]
 
 Le bagging réduit la variance et stabilise les prédictions, en particulier pour
 des modèles instables comme les arbres.
@@ -1220,9 +1231,11 @@ la variabilité globale.
 
 === Forêts aléatoires
 
-Les forêts aléatoires ajoutent une source d'aléa au bagging. À chaque coupure
-d'un arbre, l'algorithme ne considère qu'un sous-ensemble aléatoire de variables.
-Cette contrainte décorrèle les arbres et améliore l'agrégation.
+#definition(title: [Forêt aléatoire])[
+  Les forêts aléatoires ajoutent une source d'aléa au bagging. À chaque coupure
+  d'un arbre, l'algorithme ne considère qu'un sous-ensemble aléatoire de variables.
+  Cette contrainte décorrèle les arbres et améliore l'agrégation.
+]
 
 Un choix courant consiste à considérer environ $sqrt(p)$ variables candidates à
 chaque coupure en classification, où $p$ est le nombre total de variables.
@@ -1234,10 +1247,12 @@ permutées.
 
 === Boosting
 
-Le boosting construit les modèles de manière séquentielle. Chaque nouveau modèle
-se concentre davantage sur les erreurs des modèles précédents. L'objectif est de
-combiner plusieurs classificateurs faibles pour obtenir un modèle global très
-performant.
+#definition(title: [Boosting])[
+  Le boosting construit les modèles de manière séquentielle. Chaque nouveau modèle
+  se concentre davantage sur les erreurs des modèles précédents. L'objectif est de
+  combiner plusieurs classificateurs faibles pour obtenir un modèle global très
+  performant.
+]
 
 AdaBoost ajuste des poids sur les observations. Le gradient boosting formule
 l'apprentissage comme une minimisation itérative d'une fonction de perte.
@@ -1251,10 +1266,10 @@ boosting peut réduire le biais en ajoutant progressivement des corrections. En
 contrepartie, il peut surajuster si l'on ajoute trop d'itérations ou si les
 arbres de base sont trop complexes.
 
-=== Hyper-paramètres et validation
+=== Hyperparamètres et validation
 
 Les méthodes supervisées comportent souvent des paramètres qui ne sont pas appris
-directement par le modèle:
+directement par le modèle :
 
 - profondeur maximale d'un arbre;
 - nombre minimal d'observations dans une feuille;
@@ -1263,19 +1278,19 @@ directement par le modèle:
 - taux d'apprentissage en boosting;
 - pénalité de complexité.
 
-Ces hyper-paramètres doivent être choisis à l'aide d'un protocole de validation
+Ces hyperparamètres doivent être choisis à l'aide d'un protocole de validation
 qui évite de réutiliser le jeu de test pour prendre des décisions.
 
 === Comparaison rapide
 
-- Bagging: plusieurs modèles indépendants ajustés sur des échantillons bootstrap.
-- Forêts aléatoires: bagging d'arbres avec sélection aléatoire de variables à
+- Bagging : plusieurs modèles indépendants ajustés sur des échantillons bootstrap.
+- Forêts aléatoires : bagging d'arbres avec sélection aléatoire de variables à
   chaque coupure.
-- Boosting: modèles ajoutés séquentiellement pour corriger les erreurs
+- Boosting : modèles ajoutés séquentiellement pour corriger les erreurs
   précédentes.
 
 En pratique, les méthodes ensemblistes sont souvent très performantes, mais leur
-interprétation doit passer par des outils complémentaires: importance des
+interprétation doit passer par des outils complémentaires : importance des
 variables, profils de dépendance partielle, validation croisée et analyse des
 erreurs.
 
@@ -1285,7 +1300,7 @@ erreurs.
 
 Les implémentations modernes du gradient boosting ont rendu les ensembles
 d'arbres particulièrement importants pour les données tabulaires. XGBoost,
-LightGBM et CatBoost reposent sur la même idée générale: construire des arbres
+LightGBM et CatBoost reposent sur la même idée générale : construire des arbres
 séquentiellement pour corriger les erreurs des arbres précédents, tout en
 ajoutant des régularisations et des optimisations de calcul.
 
@@ -1296,10 +1311,10 @@ CatBoost est conçu pour bien traiter les variables catégorielles et limiter le
 fuites d'information liées à leur encodage.
 
 Ces méthodes sont souvent de très bons points de comparaison. Elles exigent
-toutefois un réglage attentif: nombre d'arbres, profondeur, taux d'apprentissage,
+toutefois un réglage attentif : nombre d'arbres, profondeur, taux d'apprentissage,
 sous-échantillonnage, pénalités et arrêt précoce.
 
-#note[
+#remark[
   Pour des données tabulaires classiques, un gradient boosting bien validé est
   souvent un adversaire sérieux pour des modèles plus complexes. Il faut donc le
   considérer comme une référence pratique, pas comme une simple amélioration
@@ -1310,7 +1325,7 @@ sous-échantillonnage, pénalités et arrêt précoce.
 
 Une prédiction supervisée n'est pas seulement une valeur ou une classe. Dans de
 nombreux contextes, on veut aussi savoir à quel point la prédiction est fiable.
-Pour une classification, cela conduit à étudier la calibration des probabilités:
+Pour une classification, cela conduit à étudier la calibration des probabilités :
 parmi les observations prédites avec une probabilité de 0.8, environ 80 pour cent
 devraient appartenir à la classe prédite.
 
@@ -1319,7 +1334,7 @@ seule valeur. Les méthodes de prédiction conforme construisent des ensembles o
 des intervalles qui ont une garantie de couverture sous des hypothèses faibles,
 notamment l'échangeabilité des observations.
 
-NGBoost fournit une autre approche: au lieu de prédire seulement une moyenne, le
+NGBoost fournit une autre approche : au lieu de prédire seulement une moyenne, le
 modèle prédit les paramètres d'une distribution conditionnelle. On obtient alors
 une prédiction probabiliste, utile lorsque l'incertitude fait partie de la
 décision.
@@ -1342,8 +1357,8 @@ avec prudence lorsque les variables sont corrélées, lorsque le modèle extrapo
 ou lorsque les données contiennent des biais de collecte. Une explication locale
 décrit le comportement du modèle, pas nécessairement un mécanisme causal.
 
-L'AutoML automatise une partie du travail: choix d'algorithmes, encodage de
-variables, recherche d'hyper-paramètres, empilement de modèles et validation.
+L'AutoML automatise une partie du travail : choix d'algorithmes, encodage de
+variables, recherche d'hyperparamètres, empilement de modèles et validation.
 Auto-sklearn et AutoGluon illustrent cette famille. Ils sont utiles pour établir
 un point de comparaison robuste, mais ils ne dispensent pas de définir la bonne
 mesure d'erreur, de contrôler les fuites d'information et d'interpréter les
@@ -1357,27 +1372,28 @@ données structurées. Ils peuvent être intéressants lorsque l'on dispose de t
 grands volumes de données, de variables hétérogènes ou d'une étape
 d'apprentissage auto-supervisé.
 
-TabPFN représente une direction plus récente: un modèle pré-entraîné sur de
+TabPFN représente une direction plus récente : un modèle pré-entraîné sur de
 nombreux problèmes tabulaires synthétiques qui peut produire rapidement des
 prédictions sur de petits jeux de données. C'est une ouverture importante, mais
 pour un cours général d'analyse des données, ces modèles doivent surtout servir
 à discuter des références, des hypothèses et des limites des méthodes
 automatisées.
 
-#heading(level: 2, outlined: false)[Exercices]
+#exercises[
 
-1. Expliquez le rapport entre variabilité inter-groupe et intra-groupe dans
-   l'analyse discriminante de Fisher.
-2. Pourquoi un arbre non élagué risque-t-il de surajuster ?
-3. Comparez bagging et boosting en une phrase.
-4. Proposez un protocole de validation pour choisir la profondeur maximale d'un
-   arbre.
-5. Dans quel cas préféreriez-vous une forêt aléatoire à un arbre unique ?
-6. Pourquoi le choix de la mesure d'erreur dépend-il du problème étudié ?
-7. Pourquoi XGBoost, LightGBM et CatBoost sont-ils des références utiles pour
-   les données tabulaires ?
-8. Que signifie une probabilité de classification bien calibrée ?
-9. Quelle différence y a-t-il entre prédire une valeur moyenne et prédire un
-   intervalle de prédiction ?
-10. Pourquoi une explication SHAP ne suffit-elle pas à établir une relation
-    causale ?
+  1. Expliquez le rapport entre variabilité inter-groupe et intra-groupe dans
+     l'analyse discriminante de Fisher.
+  2. Pourquoi un arbre non élagué risque-t-il de surajuster ?
+  3. Comparez bagging et boosting en une phrase.
+  4. Proposez un protocole de validation pour choisir la profondeur maximale d'un
+     arbre.
+  5. Dans quel cas préféreriez-vous une forêt aléatoire à un arbre unique ?
+  6. Pourquoi le choix de la mesure d'erreur dépend-il du problème étudié ?
+  7. Pourquoi XGBoost, LightGBM et CatBoost sont-ils des références utiles pour
+     les données tabulaires ?
+  8. Que signifie une probabilité de classification bien calibrée ?
+  9. Quelle différence y a-t-il entre prédire une valeur moyenne et prédire un
+     intervalle de prédiction ?
+  10. Pourquoi une explication SHAP ne suffit-elle pas à établir une relation
+      causale ?
+]

@@ -7,6 +7,8 @@ Typst source for lecture notes for a data analysis course.
 - `main.typ` is the document entry point.
 - `config/course.typ` stores course metadata.
 - `styles/notes.typ` stores shared formatting and helper blocks.
+- `styles/math.typ` stores shared mathematical shortcuts; see the
+  [notation and presentation conventions](styles/README.md).
 - `lectures/` contains one Typst file per lecture.
 - `figures/` and `assets/` are placeholders for images, datasets, or other supporting files.
 
@@ -44,4 +46,3 @@ typst watch main.typ
     * [ ] k-means (~~notes~~, slides, code, exercices)
 
 - [ ] Données manquantes 
-

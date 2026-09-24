@@ -1,6 +1,4 @@
-#import "../styles/notes.typ": note, example
-
-#show figure.caption: set align(left)
+#import "../styles/notes.typ": *
 
 = Réduction de dimension
 
@@ -10,7 +8,7 @@ Un grand nombre de variables complique la visualisation, augmente le coût de ca
 
 Réduire la dimension ne signifie pas seulement supprimer des variables. Une méthode peut-étre plus intéressante consiste à construire de nouveaux axes de représentation, souvent comme des combinaisons des variables initiales, puis à travailler dans cet espace réduit. On passe alors d'une représentation où chaque variable a son propre axe, et donc son propre rôle, à une représentation où quelques dimensions (axes) résument les principales structures du jeu de données.
 
-#note[
+#remark[
   La réduction de dimension est une étape exploratoire. Elle aide à voir une
   structure, à compresser l'information ou à préparer une méthode prédictive,
   mais elle ne remplace pas l'interprétation statistique.
@@ -67,17 +65,20 @@ Le choix de la méthode de réduction de dimension dépend d'abord du type de va
 - Les autoencodeurs apprennent une représentation latente par un modèle prédictif, souvent non linéaire.
 
 Dans tous les cas, l'objectif est de construire un espace de faible dimension.
-Cette espace doit être interprété avec prudence: une projection simplifie les données, donc elle conserve certaines structures et en efface d'autres.
+Cette espace doit être interprété avec prudence : une projection simplifie les données, donc elle conserve certaines structures et en efface d'autres.
 
 == L'analyse en composantes principales
 
 === Principe
 
-L'analyse en composantes principales (ACP) s'applique à un tableau de $n$
-observations décrites par $p$ variables quantitatives. Chaque observation est
-un point dans un espace à $p$ dimensions. L'ACP cherche de nouveaux axes pour
-résumer ce nuage de points avec moins de dimensions, tout en conservant le plus
-possible de sa dispersion. Ces axes sont appelés *composantes principales*, *facteurs* ou *axes factoriels*.
+#definition(title: [Analyse en composantes principales])[
+  L'analyse en composantes principales (ACP) s'applique à un tableau de $n$
+  observations décrites par $p$ variables quantitatives. Chaque observation est
+  un point dans un espace à $p$ dimensions. L'ACP cherche de nouveaux axes pour
+  résumer ce nuage de points avec moins de dimensions, tout en conservant le plus
+  possible de sa dispersion. Les directions sont les *axes principaux* ; les
+  coordonnées sur ces axes sont les *composantes principales* ou scores.
+]
 
 Lorsque deux variables sont fortement corrélées, leur nuage de points est
 allongé dans une direction. On peut alors résumer une grande partie de leur
@@ -104,13 +105,17 @@ Le choix de l'échelle des variables détermine le nuage de points analysé. On 
 
 $ z_(i j) = x_(i j) - overline(x)_j quad "où" quad overline(x)_j = frac(1, n) sum_(i=1)^n x_(i j). $
 
-Une *ACP centrée* travaille sur les valeurs centrées $z_(i j)$ et analyse la matrice de covariance des variables originales. Elle donne davantage de poids aux variables dont la variance est élevée. Ce choix est pertinent lorsque les échelles sont comparables et que les différences de dispersion ont un sens pour l'analyse.
+#definition(title: [ACP centrée et ACP centrée réduite])[
+  Une *ACP centrée* travaille sur les valeurs centrées $z_(i j)$ et analyse la matrice de covariance des variables originales. Elle donne davantage de poids aux variables dont la variance est élevée. Ce choix est pertinent lorsque les échelles sont comparables et que les différences de dispersion ont un sens pour l'analyse.
 
-Une *ACP centrée réduite*, aussi appelée ACP normée, divise également chaque variable par son écart-type empirique $s_j$ :
+  Une *ACP centrée réduite*, aussi appelée ACP normée, divise également chaque variable par son écart-type empirique $s_j$ :
 
-$ z_(i j) = (x_(i j) - overline(x)_j) / s_j quad "où" quad overline(x)_j = frac(1, n) sum_(i=1)^n x_(i j) quad "et" quad s_j = sqrt(frac(1, n - 1) sum_(i=1)^n (x_(i j) - overline(x)_j)^2). $
+  $ z_(i j) = (x_(i j) - overline(x)_j) / s_j, $
+  $ s_j = sqrt(Var(X_j))
+    = sqrt(1/(n-1) sum_(i=1)^n (x_(i j)-overline(x)_j)^2). $
 
-Les variables transformées ont alors une moyenne nulle et une variance égale à 1. Leur matrice de covariance est la matrice de corrélation des variables originales. Cette approche est généralement adaptée lorsque les unités ou les ordres de grandeur diffèrent.
+  Les variables transformées ont alors une moyenne nulle et une variance égale à 1. Leur matrice de covariance est la matrice de corrélation des variables originales. Cette approche est généralement adaptée lorsque les unités ou les ordres de grandeur diffèrent.
+]
 
 #example[
   Pour décrire des logements par leur superficie et leur prix, une ACP centrée peut être dominée par le prix, dont les valeurs sont plus dispersées. De plus, exprimer le prix en dollars plutôt qu'en euros ou exprimer la superficie en pieds carrés plutôt qu'en mètres carrés modifie le résultat. La standardisation supprime cet effet d'unité et donne à chaque variable la même variance initiale.
@@ -120,104 +125,118 @@ La standardisation reste un *choix* d'analyse : elle peut aussi donner beaucoup
 de poids à une variable peu informative. Avant le calcul, il faut examiner les
 valeurs extrêmes et traiter les données manquantes.
 
-#note[
+#remark[
   Les variables constantes n'apportent aucune dispersion et doivent être retirées avant une division par leur écart-type, qui est nul.
 ]
 
 === Construction des composantes
 
-Notons $Z = (z_(i j)) in RR^(n times p)$ la matrice des données, avec $n >= 2$ observations en lignes et $p$ variables en colonnes. On suppose que chaque colonne est centrée, donc 
-$ sum_(i=1)^n z_(i j) = 0 quad "pour tout" quad j. $
-Les observations ont le même poids et l'on suppose qu'au moins une variable a une variance non nulle. La matrice de covariance empirique est donnée par 
+#definition(title: [Matrice de covariance empirique])[
+  Notons $Zmat = (z_(i j)) in RR^(n times p)$ la matrice des données, avec $n >= 2$ observations en lignes et $p$ variables en colonnes. On suppose que chaque colonne est centrée, donc
+  $ sum_(i=1)^n z_(i j) = 0 quad "pour tout" quad j. $
+  Les observations ont le même poids et l'on suppose qu'au moins une variable a une variance non nulle. La matrice de covariance empirique est donnée par
 
-$ hat(Sigma) = 1 / (n - 1) Z^top Z in RR^(p times p). $
-
-#note[
-  Si les colonnes de $Z$ ont été réduites, $hat(Sigma)$ est la matrice de corrélation empirique des variables originales.
+  $ hat(Sigma) = 1 / (n - 1) Zmat^top Zmat in RR^(p times p). $
 ]
 
-Ainsi, la matrice $hat(Sigma)$ est symétrique et semi-définie positive, car pour tout $alpha in RR^p, alpha != 0$, en utilisant la norme euclidienne, on trouve que 
+Cette écriture matricielle applique aux données centrées la définition générale
+de @annexe-statistiques.
 
-$ alpha^top hat(Sigma) alpha = 1 / (n - 1) norm(Z alpha)^2 >= 0. $
+#remark[
+  Si les colonnes de $Zmat$ ont été réduites, $hat(Sigma)$ est la matrice de corrélation empirique des variables originales.
+]
 
-*Variance d'une projection.* Une direction (axe) est représentée par un vecteur unitaire $alpha in RR^p$, c'est-à-dire $norm(alpha)^2 = alpha^top alpha = 1$. Si $z_i$ désigne le vecteur colonne correspondant à la ligne $i$ de $Z$, la coordonnée de cette observation sur la direction $alpha$ est donnée par $y_i = alpha^top z_i = chevron.l alpha, z_i chevron.r$. Le vecteur des coordonnées des $n$ observations dans la direction donnée par $alpha$ est donc $y = Z alpha in RR^n$. Il est centré car les colonnes de $Z$ le sont. Sa variance empirique vaut
+Ainsi, la matrice $hat(Sigma)$ est symétrique et semi-définie positive, car pour tout $alpha in RR^p, alpha != 0$, en utilisant la norme euclidienne, on trouve que
 
-$ s^2(y) = 1 / (n - 1) sum_(i=1)^n y_i^2
-  = 1 / (n - 1) y^top y = alpha^top hat(Sigma) alpha $
+$ alpha^top hat(Sigma) alpha = 1 / (n - 1) norm(Zmat alpha)^2 >= 0. $
 
-L'ACP cherche ainsi des directions unitaires qui maximisent cette forme quadratique. 
+#definition(title: [Score et variance d'une projection])[
+  Une direction (axe) est représentée par un vecteur unitaire $alpha in RR^p$, c'est-à-dire $norm(alpha)^2 = alpha^top alpha = 1$. Si $z_i$ désigne le vecteur colonne correspondant à la ligne $i$ de $Zmat$, la coordonnée de cette observation sur la direction $alpha$ est donnée par $y_i = alpha^top z_i = chevron.l alpha, z_i chevron.r$. Le vecteur des coordonnées des $n$ observations dans la direction donnée par $alpha$ est donc $y = Zmat alpha in RR^n$. Il est centré car les colonnes de $Zmat$ le sont. Sa variance empirique vaut
 
-#note[
+  $ Var(y) = 1 / (n - 1) sum_(i=1)^n y_i^2
+    = 1 / (n - 1) y^top y = alpha^top hat(Sigma) alpha. $
+]
+
+L'ACP cherche ainsi des directions unitaires qui maximisent cette forme quadratique.
+
+#remark[
   La contrainte de norme fixe l'échelle des coefficients. En effet, multiplier $alpha$ par $c != 0$ multiplierait la variance par $c^2$, sans changer la direction géométrique.
 ]
 
-*Première composante.* Le premier axe résout le problème :
+#definition(title: [Premier axe principal])[
+  Le premier axe résout le problème :
 
-$ alpha_1 = op("arg max", limits: #true)_(alpha^top alpha = 1)
-  alpha^top hat(Sigma) alpha. $
+  $ alpha_1 = argmax_(alpha^top alpha = 1)
+    alpha^top hat(Sigma) alpha. $
+]
 
-Pour obtenir les directions candidates, on introduit le lagrangien :
+#property(title: [Variance maximale])[
+  Si $lambda_1$ est la plus grande valeur propre de $hat(Sigma)$, alors
+  $max_(alpha^top alpha=1) alpha^top hat(Sigma) alpha=lambda_1$.
+  Un vecteur propre unitaire associé à $lambda_1$ fournit un premier axe principal.
+]
 
-$ cal(L)(alpha, lambda) = alpha^top hat(Sigma) alpha - lambda (alpha^top alpha - 1). $
-
-Comme $hat(Sigma)$ est symétrique, la condition de stationnarité par rapport à $alpha$
-donne :
-
-$ nabla_alpha cal(L) = 2 hat(Sigma) alpha - 2 lambda alpha = 0
-  quad arrow.r.double quad hat(Sigma) alpha = lambda alpha. $
-
-Une direction candidate est donc un vecteur propre unitaire de $hat(Sigma)$. En multipliant cette égalité à gauche par $alpha^top$, on obtient $alpha^top hat(Sigma) alpha = lambda$. La variance sur cette direction est la valeur propre associée au vecteur propre $alpha$. Cette condition ne suffit cependant pas à identifier le maximum, puisqu'elle est vérifiée par tous les vecteurs propres unitaires.
-
-Le théorème spectral permet de conclure. Il existe une base orthonormée $(u_1, dots, u_p)$ de vecteurs propres de $hat(Sigma)$, avec les valeurs propres ordonnées $lambda_1 >= lambda_2 >= dots >= lambda_p >= 0$. Tout vecteur unitaire $alpha$ s'écrit comme combinaison linéaire des vecteurs propres :
-
-$ alpha = sum_(j=1)^p c_j u_j, quad "où" quad sum_(j=1)^p c_j^2 = 1. $
-
-Par conséquent,
-
-$ alpha^top hat(Sigma) alpha = sum_(j=1)^p lambda_j c_j^2
-  <= lambda_1 sum_(j=1)^p c_j^2 = lambda_1. $
-
-La borne est atteinte pour $alpha_1 = u_1$. La première composante principale est donc $Y_1 = Z alpha_1$ et sa variance est $s^2(Y_1) = lambda_1$.
+#proof[
+  On applique à la matrice symétrique $hat(Sigma)$ le résultat sur le quotient
+  de Rayleigh énoncé dans @prop-projections-rayleigh.
+  En notant $u_1,dots,u_p$ ses vecteurs propres orthonormés, associés à
+  $lambda_1 >= dots >= lambda_p >= 0$, le maximum est atteint pour
+  $alpha_1=u_1$. Ainsi, $Y_1=Zmat alpha_1$ et $Var(Y_1)=lambda_1$.
+]
 
 *Composantes suivantes.* Pour $2 <= k <= p$, on maximise la même variance en imposant en plus l'orthogonalité aux directions déjà retenues. Si $cal(A)_k$ est l'ensemble des vecteurs $alpha$ tels que $alpha^top alpha = 1$ et $alpha^top alpha_j = 0$ pour tout $j < k$, alors :
 
-$ alpha_k = op("arg max", limits: #true)_(alpha in cal(A)_k)
+$ alpha_k = argmax_(alpha in cal(A)_k)
   alpha^top hat(Sigma) alpha. $
 
-En choisissant successivement $alpha_j = u_j$, ces contraintes imposent $c_1 = dots = c_(k-1) = 0$ dans la décomposition précédente. La variance ne peut donc pas dépasser $lambda_k$, et cette borne est atteinte pour $alpha_k = u_k$. On obtient ainsi des directions orthonormées vérifiant :
+Les contraintes excluent les $k-1$ premières directions propres. Le même
+résultat, appliqué au sous-espace orthogonal restant, donne la variance maximale
+$lambda_k$, atteinte pour $alpha_k=u_k$. On obtient des directions orthonormées
+vérifiant :
 
-$ hat(Sigma) alpha_k = lambda_k alpha_k, quad "et" quad Y_k = Z alpha_k. $
+$ hat(Sigma) alpha_k = lambda_k alpha_k, quad "et" quad Y_k = Zmat alpha_k. $
 
 Le coefficient $alpha_(j k)$ est le poids de la variable $j$ dans la composante $k$. Il est commun à toutes les observations. Le *score* de l'observation $i$ sur cette composante, i.e. la coordonnée de l'observation $i$ sur la direction $k$, est donnée par
 
 $ y_(i k) = alpha_k^top z_i = sum_(j=1)^p alpha_(j k) z_(i j). $
 
-*Variance et covariance des composantes.* Les vecteurs de scores étant centrés,
-leur covariance empirique s'écrit :
+#property(title: [Variance et covariance des composantes])[
+  Chaque composante a pour variance la valeur propre correspondante,
+  $Var(Y_k)=lambda_k$, et deux composantes distinctes ont une covariance nulle,
+  $Cov(Y_k,Y_l)=0$ pour $k != l$.
+]
 
-$ s(Y_k, Y_l) = 1 / (n - 1) Y_k^top Y_l
-  = alpha_k^top hat(Sigma) alpha_l = lambda_l alpha_k^top alpha_l. $
+#proof[
+  Les vecteurs de scores étant centrés, leur covariance empirique s'écrit :
 
-Pour $k = l$, on retrouve $s^2(Y_k) = lambda_k$. Pour $k != l$, l'orthogonalité
-des directions donne $s(Y_k, Y_l) = 0$. Les composantes de variance non nulle
-ont donc une corrélation empirique nulle deux à deux. Cette propriété ne
-démontre toujours pas une indépendance probabiliste.
+  $ Cov(Y_k, Y_l) = 1 / (n - 1) Y_k^top Y_l
+    = alpha_k^top hat(Sigma) alpha_l = lambda_l alpha_k^top alpha_l. $
+
+  Pour $k = l$, on retrouve $Var(Y_k) = lambda_k$. Pour $k != l$, l'orthogonalité
+  des directions donne $Cov(Y_k, Y_l) = 0$.
+]
+
+#remark(title: [Décorrélation et indépendance])[
+  Les composantes de variance non nulle
+  ont donc une corrélation empirique nulle deux à deux. Cette propriété ne
+  démontre pas une indépendance probabiliste.
+]
 
 *Représentation réduite.* Pour conserver $q$ composantes, avec $1 <= q <= p$, on rassemble les composantes principales dans une matrice $A_q = (alpha_1, dots, alpha_q) in RR^(p times q)$. La matrice des données réduites $T_q = (Y_1, dots, Y_q)$ est donnée par
 
-$ T_q = Z A_q in RR^(n times q), quad "avec" quad A_q^top A_q = I_q. $
+$ T_q = Zmat A_q in RR^(n times q), quad "avec" quad A_q^top A_q = I_q. $
 
 La matrice de covariance de $T_q$ est donc
 $ 1 / (n - 1) T_q^top T_q = A_q^top hat(Sigma) A_q
-  = op("diag")(lambda_1, dots, lambda_q). $
+  = diag(lambda_1, dots, lambda_q). $
 
-Ici, $I_q$ est la matrice identité de taille $q$ et $op("diag")$ désigne une
+Ici, $I_q$ est la matrice identité de taille $q$ et $diag$ désigne une
 matrice diagonale. Chaque ligne de $T_q$ contient les $q$ scores d'une observation.
-Le rang $r = op("rang")(Z)$ est au plus $min(n - 1, p)$, à cause du centrage.
+Le rang $r = rang(Zmat)$ est au plus $min(n - 1, p)$, à cause du centrage.
 Il y a donc exactement $r$ composantes de variance strictement positive; les
 autres ont des scores tous nuls.
 
-#note[
+#remark[
   Pour une valeur propre simple, le vecteur propre unitaire est défini au signe
   près. Si une valeur propre est multiple, toute base orthonormée de son
   sous-espace propre convient :
@@ -227,13 +246,19 @@ autres ont des scores tous nuls.
   dans ce sous-espace peut varier.
 ]
 
-En pratique, on peut calculer les composantes avec une décomposition en valeurs singulières $Z = U D V^top$, où $U in RR^(n times q)$ et $V in RR^(p times q)$ sont des matrices dont les colonnes sont orthonormées, et $D = op("diag")(d_1, dots, d_q)$ avec $d_1 >= dots >= d_q > 0$. En notant $U_k$ et $V_k$ leurs $k$-ièmes colonnes, on obtient, pour $1 <= k <= q$ :
+En pratique, on peut calculer les composantes avec une décomposition en valeurs
+singulières réduite $Zmat = U D V^top$, où $r=rang(Zmat)$,
+$U in RR^(n times r)$ et $V in RR^(p times r)$ ont des colonnes orthonormées.
+On a $D=diag(d_1,dots,d_r)$, avec $d_1 >= dots >= d_r > 0$.
+En notant $U_k$ et $V_k$ leurs $k$-ièmes colonnes, on obtient, pour
+$1 <= k <= r$ :
 
 $ alpha_k = V_k, quad lambda_k = d_k^2 / (n - 1), quad "et" quad Y_k = d_k U_k. $
 
-Cette formulation réalise la même ACP sans former explicitement $Z^top Z$,
+Cette formulation réalise la même ACP sans former explicitement $Zmat^top Zmat$,
 avec les mêmes possibilités de choix du signe et des bases des sous-espaces
-propres.
+propres. Conserver seulement $q<r$ termes donne une approximation de rang $q$,
+et non une égalité avec la matrice initiale.
 
 === Inertie et variance expliquée
 
@@ -249,16 +274,18 @@ L'*inertie* mesure la dispersion globale d'un nuage de points autour de son cent
     les carrés de ces distances, avec la normalisation retenue.],
 ) <fig-acp-inertie>
 
-Pour les observations $z_1, dots, z_n in RR^p$, le centre de gravité est $g = 1 / n sum_(i=1)^n z_i$. Dans le cadre de l'ACP, $g = 0$, puisque les variables ont été centrées. En utilisant la normalisation par $n - 1$ de la variance empirique, on définit l'inertie totale par
+#definition(title: [Inertie totale en ACP])[
+  Pour les observations $z_1, dots, z_n in RR^p$, le centre de gravité est $g = 1 / n sum_(i=1)^n z_i$. Dans le cadre de l'ACP, $g = 0$, puisque les variables ont été centrées. En utilisant la normalisation par $n - 1$ de la variance empirique, on définit l'inertie totale par
 
-$ I_("total") = 1 / (n - 1) sum_(i=1)^n norm(z_i - g)^2
-  = 1 / (n - 1) sum_(i=1)^n norm(z_i)^2. $
+  $ inertia = 1 / (n - 1) sum_(i=1)^n norm(z_i - g)^2
+    = 1 / (n - 1) sum_(i=1)^n norm(z_i)^2. $
+]
 
 Le centrage ne change pas les distances au centre : il déplace simplement le centre de gravité à l'origine de l'espace. En revanche, réduire les variables change les distances et donc l'inertie analysée.
 
-#note[
+#remark[
   L'inertie géométrique est souvent définie comme la moyenne des distances au
-  carré, avec le diviseur $n$. Elle vaut alors $(n - 1) / n I$. Le choix entre
+  carré, avec le diviseur $n$. Elle vaut alors $(n - 1) / n inertia$. Le choix entre
   ces deux normalisations ne change ni les axes de l'ACP ni les proportions
   d'inertie expliquée, à condition de l'appliquer de manière cohérente.
 ]
@@ -266,10 +293,10 @@ Le centrage ne change pas les distances au centre : il déplace simplement le ce
 *Lien avec la variance.* Le carré de la distance à l'origine est la somme des
 carrés des coordonnées. En échangeant les deux sommes, on obtient :
 
-$ I = sum_(j=1)^p (1 / (n - 1) sum_(i=1)^n z_(i j)^2)
-  = sum_(j=1)^p s^2(Z_j) = op("tr")(hat(Sigma)). $
+$ inertia = sum_(j=1)^p (1 / (n - 1) sum_(i=1)^n z_(i j)^2)
+  = sum_(j=1)^p Var(Z_j) = tr(hat(Sigma)). $
 
-Ici, $Z_j$ est la $j$-ième colonne de $Z$ et la trace $op("tr")$ d'une matrice
+Ici, $Z_j$ est la $j$-ième colonne de $Zmat$ et la trace $tr$ d'une matrice
 est la somme de ses éléments diagonaux. L'inertie totale est donc la somme des
 variances des variables préparées. Dans une ACP centrée réduite, elle vaut $p$,
 puisque chacune des $p$ variables a une variance égale à 1.
@@ -278,17 +305,19 @@ puisque chacune des $p$ variables a une variance égale à 1.
 
 $ norm(z_i)^2 = sum_(k=1)^p y_(i k)^2. $
 
-Un changement de repère orthonormé conserve ainsi les distances au centre, et donc l'inertie totale. En sommant sur les observations et en utilisant $s^2(Y_k) = lambda_k$, on trouve 
+Un changement de repère orthonormé conserve ainsi les distances au centre, et donc l'inertie totale. En sommant sur les observations et en utilisant $Var(Y_k) = lambda_k$, on trouve
 
-$ I = sum_(k=1)^p (1 / (n - 1) sum_(i=1)^n y_(i k)^2)
+$ inertia = sum_(k=1)^p (1 / (n - 1) sum_(i=1)^n y_(i k)^2)
   = sum_(k=1)^p lambda_k. $
 
 Chaque valeur propre $lambda_k$ mesure donc l'inertie portée par l'axe $k$. L'ACP répartit la dispersion du nuage entre des directions orthogonales, ordonnées de la plus dispersée à la moins dispersée.
 
-*Variance expliquée.* La proportion de variance expliquée par la composante $k$ et la proportion de variance expliquée cumulée sur les $q$ premières composantes sont respectivement :
+#definition(title: [Proportions de variance expliquée])[
+  La proportion de variance expliquée par la composante $k$ et la proportion de variance expliquée cumulée sur les $q$ premières composantes sont respectivement :
 
-$ r_k = lambda_k / (sum_(j=1)^p lambda_j)
-  quad "et" quad R_q = (sum_(k=1)^q lambda_k) / (sum_(j=1)^p lambda_j). $
+  $ r_k = lambda_k / (sum_(j=1)^p lambda_j)
+    quad "et" quad R_q = (sum_(k=1)^q lambda_k) / (sum_(j=1)^p lambda_j). $
+]
 
 La quantité $1 - R_q$ mesure donc la part de variance perdue dans la représentation réduite. Dans ce cas, « expliquée » signifie « conservée par la projection ». Il ne s'agit pas d'une explication causale des données.
 
@@ -304,7 +333,7 @@ L'inertie perdue correspond exactement à l'erreur de reconstruction, avec la
 même normalisation :
 
 $ 1 / (n - 1) sum_(i=1)^n norm(z_i - hat(z)_i)^2
-  = sum_(k=q+1)^p lambda_k = I (1 - R_q). $
+  = sum_(k=q+1)^p lambda_k = inertia (1 - R_q). $
 
 Parmi les projections orthogonales sur des sous-espaces de dimension $q$,
 l'ACP minimise la somme des carrés des erreurs de reconstruction. Conserver
@@ -313,7 +342,7 @@ quadratique sont donc deux formulations du même problème. Pour retrouver les
 unités originales, on multiplie chaque valeur reconstruite par l'écart-type
 correspondant si les variables ont été réduites, puis on ajoute leur moyenne.
 
-=== Exemple à deux variables
+=== Étude de cas : deux variables
 
 Imaginons une classe dans laquelle chaque étudiant a passé deux évaluations : un examen intermédiaire et un examen final, tous deux notés sur 20. Chaque étudiant est une observation, et les deux variables initiales sont ses notes aux deux examens. Pour comparer sa position dans la classe d'un examen à l'autre, on centre et réduit séparément chaque série de notes. On appelle $Z_1$ et $Z_2$ les deux variables ainsi obtenues.
 
@@ -379,18 +408,16 @@ car la dispersion est plus forte sur $Y_1$ que sur $Y_2$. Les deux composantes
 *Variance conservée.* On peut vérifier directement les variances des deux
 composantes à partir de celles des notes et de leur covariance :
 
-$ s^2(Y_1) = 1 / 2 (1 + 1 + 2 times 0.8) = 1.8, $
-$ s^2(Y_2) = 1 / 2 (1 + 1 - 2 times 0.8) = 0.2. $
+$ Var(Y_1) = 1 / 2 (1 + 1 + 2 times 0.8) = 1.8, $
+$ Var(Y_2) = 1 / 2 (1 + 1 - 2 times 0.8) = 0.2. $
 
-Leur covariance est nulle, car $s(Y_1, Y_2) = (s^2(Z_1) - s^2(Z_2)) / 2 = 0$. L'inertie totale vaut $1.8 + 0.2 = 2$, comme la somme des variances des deux notes centrées réduites. La première composante en conserve $1.8 / 2 = 90%$, et la seconde $0.2 / 2 = 10%$.
+Leur covariance est nulle, car $Cov(Y_1, Y_2) = (Var(Z_1) - Var(Z_2)) / 2 = 0$. L'inertie totale vaut $1.8 + 0.2 = 2$, comme la somme des variances des deux notes centrées réduites. La première composante en conserve $1.8 / 2 = 90%$, et la seconde $0.2 / 2 = 10%$.
 
 *Lecture de trois profils.* Le calcul des scores donne :
 
 #table(
   columns: (1fr, 1fr, 1fr, 1fr, 1fr),
   align: center,
-  inset: 6pt,
-  stroke: 0.4pt + luma(210),
   table.header([*Profil*], [$z_1$], [$z_2$], [$y_1$], [$y_2$]),
   [A], [$1$], [$1$], [$sqrt(2)$], [$0$],
   [B], [$1$], [$-1$], [$0$], [$sqrt(2)$],
@@ -465,8 +492,6 @@ le cumul des trois premières composantes vaut $R_3$.
   table(
     columns: (1fr, 1fr, 1.5fr, 1.5fr),
     align: center,
-    inset: 6pt,
-    stroke: 0.4pt + luma(210),
     table.header([*Rang* $k$], [$lambda_k$], [*Variance expliquée*], [*Cumul* $R_q$ ($q = k$)]),
     [1], [$3.0$], [$50%$], [$50%$],
     [2], [$1.5$], [$25%$], [$75%$],
@@ -557,7 +582,7 @@ Cela ne suffit pas pour conclure que le profil est moyen dans l'espace complet.
   ne traduit donc pas une ressemblance de leurs profils complets.
 ]
 
-*Lire le cercle des corrélations.* Chaque variable $Z_j$ peut être représentée par une flèche partant de l'origine. Dans le premier plan factoriel, son extrémité a pour coordonnées $(rho_(j 1), rho_(j 2))$, où $rho_(j k) = "corr"(Z_j, Y_k)$. Pour une ACP centrée réduite et un axe de variance non nulle, ces coordonnées se calculent à partir des coefficients de l'axe :
+*Lire le cercle des corrélations.* Chaque variable $Z_j$ peut être représentée par une flèche partant de l'origine. Dans le premier plan factoriel, son extrémité a pour coordonnées $(rho_(j 1), rho_(j 2))$, où $rho_(j k) = Corr(Z_j, Y_k)$. Pour une ACP centrée réduite et un axe de variance non nulle, ces coordonnées se calculent à partir des coefficients de l'axe :
 
 $ rho_(j k) = sqrt(lambda_k) alpha_(j k). $
 
@@ -627,7 +652,7 @@ individus. Les contributions et les qualités de représentation, détaillées
 ci-dessous, permettent de vérifier les interprétations et de choisir les
 autres plans à consulter.
 
-#note[
+#remark[
   Le signe d'un axe d'ACP est arbitraire. Multiplier ses coefficients et ses
   scores par $-1$ inverse l'orientation du graphique sans changer l'analyse.
   Les termes « positif » et « négatif » décrivent une orientation, pas un jugement
@@ -644,12 +669,14 @@ l'élément représenté. On considère les observations ayant servi à calculer
 l'ACP, de même poids. Les contributions aux axes sont définies pour
 $lambda_k > 0$.
 
-*Contribution d'un individu.* Puisque les scores sont centrés,
-$sum_(l=1)^n y_(l k)^2 = (n - 1) lambda_k$. La contribution de l'individu $i$
-à l'axe $k$ est donc la fraction de cette somme des carrés qui lui revient :
+#definition(title: [Contribution d'un individu])[
+  Puisque les scores sont centrés,
+  $sum_(l=1)^n y_(l k)^2 = (n - 1) lambda_k$. La contribution de l'individu $i$
+  à l'axe $k$ est donc la fraction de cette somme des carrés qui lui revient :
 
-$ "ctr"_(i k) = y_(i k)^2 / (sum_(l=1)^n y_(l k)^2)
-  = y_(i k)^2 / ((n - 1) lambda_k). $
+  $ ctr_(i k) = y_(i k)^2 / (sum_(l=1)^n y_(l k)^2)
+    = y_(i k)^2 / ((n - 1) lambda_k). $
+]
 
 Pour un axe fixé, les contributions des $n$ individus totalisent $1$, soit
 $100%$. Leur moyenne vaut donc $1 / n$. Un individu dont la contribution
@@ -663,8 +690,8 @@ peuvent fortement influencer l'orientation de l'axe.
   $lambda_2 = 0.2$. Le profil A a pour scores $(sqrt(2), 0)$ et le profil B
   $(0, sqrt(2))$. Leurs contributions non nulles sont :
 
-  $ "ctr"_(A 1) = 2 / (44 times 1.8) approx 2.53%, quad
-    "ctr"_(B 2) = 2 / (44 times 0.2) approx 22.73%. $
+  $ ctr_(A 1) = 2 / (44 times 1.8) approx 2.53%, quad
+    ctr_(B 2) = 2 / (44 times 0.2) approx 22.73%. $
 
   Le repère moyen vaut $1 / 45 approx 2.22%$. A contribue légèrement plus que
   la moyenne au premier axe, tandis que B porte près du quart de l'inertie
@@ -674,10 +701,12 @@ peuvent fortement influencer l'orientation de l'axe.
   B à $Y_1$ sont nulles.
 ]
 
-*Qualité de représentation d'un individu.* Notons $d_i^2 = norm(z_i)^2$ le carré de la distance de l'individu au centre, dans les données utilisées pour l'ACP. L'orthonormalité du repère principal donne $d_i^2 = sum_(k=1)^p y_(i k)^2$. Si $d_i > 0$, la qualité sur l'axe $k$ est :
+#definition(title: [Qualité de représentation d'un individu])[
+  Notons $d_i^2 = norm(z_i)^2$ le carré de la distance de l'individu au centre, dans les données utilisées pour l'ACP. L'orthonormalité du repère principal donne $d_i^2 = sum_(k=1)^p y_(i k)^2$. Si $d_i > 0$, la qualité sur l'axe $k$ est :
 
-$ cos^2_(i k) = y_(i k)^2 / d_i^2
-  = y_(i k)^2 / (sum_(k=1)^p y_(i k)^2). $
+  $ cos^2_(i k) = y_(i k)^2 / d_i^2
+    = y_(i k)^2 / (sum_(ell=1)^p y_(i ell)^2). $
+]
 
 Ce rapport est le cosinus carré de l'angle entre le vecteur $z_i$ et l'axe
 $k$ : sa projection sur cet axe a pour longueur $abs(y_(i k))$. Il est compris
@@ -705,8 +734,6 @@ définis, même si sa reconstruction est exacte.
   #table(
     columns: (1fr, 1fr, 1fr, 1.5fr),
     align: center,
-    inset: 6pt,
-    stroke: 0.4pt + luma(210),
     table.header([*Profil*], [*Sur $Y_1$*], [*Sur $Y_2$*], [*Plan $(Y_1, Y_2)$*]),
     [A], [$100%$], [$0%$], [$100%$],
     [B], [$0%$], [$100%$], [$100%$],
@@ -723,7 +750,7 @@ définis, même si sa reconstruction est exacte.
 *Pourquoi les deux indicateurs peuvent différer ?* Pour un individu non situé
 au centre, les deux formules sont reliées par :
 
-$ "ctr"_(i k) = d_i^2 / ((n - 1) lambda_k) cos^2_(i k). $
+$ ctr_(i k) = d_i^2 / ((n - 1) lambda_k) cos^2_(i k). $
 
 À qualité égale sur un même axe, un individu plus éloigné du centre contribue
 donc davantage. Un point proche du centre peut être très bien représenté
@@ -746,7 +773,7 @@ profil dans d'autres directions.
 
 *Contribution et qualité de représentation d'une variable.* Dans une ACP
 centrée réduite, chaque variable $Z_j$ a une variance égale à $1$. En notant
-$rho_(j k) = "corr"(Z_j, Y_k)$, sa qualité de représentation sur l'axe $k$
+$rho_(j k) = Corr(Z_j, Y_k)$, sa qualité de représentation sur l'axe $k$
 est $rho_(j k)^2$. Sur le plan $(Y_1, Y_2)$, elle vaut
 $rho_(j 1)^2 + rho_(j 2)^2$, le carré de la longueur de sa flèche dans le cercle
 des corrélations.
@@ -754,9 +781,9 @@ des corrélations.
 La relation $rho_(j k) = sqrt(lambda_k) alpha_(j k)$ donne
 $sum_(j=1)^p rho_(j k)^2 = lambda_k$, puisque le vecteur $alpha_k$ est unitaire.
 La contribution de la variable $j$ à cet axe, notée ici
-$"ctr"^("var")_(j k)$ pour la distinguer de celle d'un individu, est donc :
+$ctr^("var")_(j k)$ pour la distinguer de celle d'un individu, est donc :
 
-$ "ctr"^("var")_(j k) = rho_(j k)^2 / lambda_k = alpha_(j k)^2. $
+$ ctr^("var")_(j k) = rho_(j k)^2 / lambda_k = alpha_(j k)^2. $
 
 Sur un axe fixé, les contributions des $p$ variables totalisent $1$ et donc le repère
 moyen est $1 / p$. La qualité indique quelle part de la variation de la
@@ -771,8 +798,6 @@ des autres variables dans cet axe.
   #table(
     columns: (2fr, 1fr, 1fr),
     align: (left, center, center),
-    inset: 6pt,
-    stroke: 0.4pt + luma(210),
     table.header([*Indicateur*], [*Axe $Y_1$*], [*Axe $Y_2$*]),
     [Contribution], [$50%$], [$50%$],
     [Qualité de représentation], [$90%$], [$10%$],
@@ -806,7 +831,9 @@ Une ACP demande de préciser la question étudiée, de justifier la préparation
    préparation, le choix de $q$, la variance conservée et les principales
    interprétations, avec leurs limites.
 
-*Exemple réel : Palmer Penguins.* Le jeu `penguins` du projet `palmerpenguins` #footnote("https://allisonhorst.github.io/palmerpenguins/") contient $344$ observations de manchots des espèces `Adelie`, `Chinstrap` et `Gentoo`, collectées dans l'archipel Palmer, en Antarctique, entre 2007 et 2009. Les données proviennent de Kristen Gorman et du programme Palmer Station LTER.
+==== Étude de cas : Palmer Penguins
+
+Le jeu `penguins` du projet `palmerpenguins` #footnote("https://allisonhorst.github.io/palmerpenguins/") contient $344$ observations de manchots des espèces `Adelie`, `Chinstrap` et `Gentoo`, collectées dans l'archipel Palmer, en Antarctique, entre 2007 et 2009. Les données proviennent de Kristen Gorman et du programme Palmer Station LTER.
 
 On utilise les quatre mesures `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g`, en conservant leurs noms originaux. Les trois premières sont en millimètres et la dernière en grammes. Le dictionnaire des variables #footnote("https://allisonhorst.github.io/palmerpenguins/reference/penguins.html") décrit aussi `species`, `island`, `sex` et `year`.
 
@@ -826,8 +853,6 @@ résultats suivants :
 #table(
   columns: (1fr, 1.2fr, 1.4fr, 1.4fr),
   align: center,
-  inset: 6pt,
-  stroke: 0.4pt + luma(210),
   table.header([*Rang $k$*], [*$lambda_k$*], [*Variance $r_k$*], [*Cumul $R_k$*]),
   [$1$], [$2.7538$], [$68.84%$], [$68.84%$],
   [$2$], [$0.7725$], [$19.31%$], [$88.16%$],
@@ -854,8 +879,6 @@ leur qualité de représentation dans le plan $(Y_1, Y_2)$ sont :
 #table(
   columns: (2.3fr, 1fr, 1fr, 1.25fr),
   align: (left, center, center, center),
-  inset: 6pt,
-  stroke: 0.4pt + luma(210),
   table.header([*Variable*], [*$rho_(j 1)$*], [*$rho_(j 2)$*], [*Qualité du plan*]),
   [`bill_length_mm`], [$0.755$], [$0.525$], [$84.61%$],
   [`bill_depth_mm`], [$-0.664$], [$0.701$], [$93.30%$],
@@ -913,50 +936,6 @@ Les qualités individuelles peuvent être beaucoup plus faibles.
 
 Le choix de la réduction des données a ici un effet particulièrement marqué. Sans réduction, `body_mass_g` représente environ $99.96%$ de l'inertie initiale avec les unités du fichier. Le premier axe d'une ACP seulement centrée conserve alors environ $99.99%$ de la variance. Ce pourcentage très élevé reflète surtout le poids numérique de la masse exprimée en grammes. Il ne signifie pas que les quatre mesures sont toutes bien résumées. La réduction permet d'accorder la même variance initiale à chaque variable.
 
-*Reproduire les calculs en Python.* Le code ci-dessous utilise NumPy et
-pandas. Il filtre les valeurs manquantes uniquement sur les quatre mesures, puis utilise `ddof=1` pour rester cohérent avec le diviseur $n - 1$ du cours. Le signe de chaque axe est fixé pour retrouver l'orientation des graphiques.
-
-#align(center)[
-#block(breakable: true)[
-  #set text(size: 9pt)
-  ```python
-  import numpy as np
-  import pandas as pd
-
-  variables = ["bill_length_mm", "bill_depth_mm",
-               "flipper_length_mm", "body_mass_g"]
-  penguins = pd.read_csv("assets/penguins.csv")
-  data = penguins.dropna(subset=variables)
-  X = data[variables].to_numpy()
-  n, p = X.shape
-  Z = (X - X.mean(axis=0)) / X.std(axis=0, ddof=1)
-
-  _, d, Vt = np.linalg.svd(Z, full_matrices=False)
-  A = Vt.T.copy()
-  for k in range(p):
-      A[:, k] *= np.sign(A[np.argmax(np.abs(A[:, k])), k])
-  T = Z @ A
-  valeurs = d**2 / (n - 1)
-  r = valeurs / valeurs.sum()
-  R = np.cumsum(r)
-  q = int(np.searchsorted(R, 0.95) + 1)
-
-  rho = A * np.sqrt(valeurs)
-  ctr_ind = T**2 / ((n - 1) * valeurs)
-  cos2_ind = T**2 / np.sum(Z**2, axis=1, keepdims=True)
-  ctr_var = A**2
-  qual_var_plan = np.sum(rho[:, :2]**2, axis=1)
-  i = data.index.get_loc(326)  # Ligne 327 du fichier original.
-
-  print(n, valeurs.round(4))
-  print(q, (100 * R).round(2))
-  print((100 * qual_var_plan).round(2))
-  print(round(100 * cos2_ind[i, :2].sum(), 2))
-  ```
-]
-]
-
-Les colonnes de `A` sont les directions $alpha_k$ et celles de `T` sont les scores $Y_k$. La variable `q` vaut $3$, tandis que les expressions `:2` calculent les qualités dans le premier plan à deux axes. Les contributions et les qualités sont des proportions.
 
 #example[
   Un compte rendu possible est : « Nous réalisons une ACP centrée réduite de `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g` sur les $342$ observations complètes du jeu de données Palmer Penguins. Trois composantes conservent $97.29%$ de la variance. Le premier plan en représente $88.16%$ et distingue notamment les `Gentoo` selon $Y_1$. Le deuxième axe décrit surtout la variation conjointe de `bill_depth_mm` et de `bill_length_mm`. Certains individus, comme celui de la ligne 327, nécessitent l'examen du troisième axe. »
@@ -1092,37 +1071,37 @@ ne garantit donc pas la même qualité sur de nouvelles données.
 
 === Tableau de contingence et profils
 
-L'analyse factorielle des correspondances (AFC) s'applique à un tableau de
-contingence croisant deux variables qualitatives. Elle cherche à résumer les
-associations entre leurs modalités et représente les modalités de ligne et de
-colonne sur des axes communs. Les points d'un plan d'AFC sont donc des
-catégories, et non les individus qui ont servi à construire le tableau.
+L'analyse factorielle des correspondances (AFC) s'applique à un tableau de contingence croisant deux variables qualitatives. Elle cherche à résumer les associations entre leurs modalités et représente les modalités de ligne et de colonne sur des axes communs. Les points d'un plan d'AFC sont donc des catégories (ou modalités), et non les individus qui ont servi à construire le tableau.
 
-Considérons un tableau $N = (n_(i j))$ comportant $I$ lignes et $J$ colonnes.
-La cellule $n_(i j)$ compte les individus qui possèdent simultanément la modalité
-$i$ de la première variable et la modalité $j$ de la seconde. On note les
-effectifs marginaux et l'effectif total
+#definition(title: [Tableau de contingence et marges])[
+  Considérons un tableau $N = (n_(i j))$ comportant $I$ lignes et $J$ colonnes.
+  La cellule $n_(i j)$ compte les individus qui possèdent simultanément la modalité
+  $i$ de la première variable et la modalité $j$ de la seconde. On note les
+  effectifs marginaux et l'effectif total
 
-$
-  n_(i +) = sum_(j=1)^J n_(i j), quad
-  n_(+ j) = sum_(i=1)^I n_(i j), quad
-  n = sum_(i=1)^I sum_(j=1)^J n_(i j).
-$
+  $
+    n_(i +) = sum_(j=1)^J n_(i j), quad
+    n_(+ j) = sum_(i=1)^I n_(i j), quad
+    n = sum_(i=1)^I sum_(j=1)^J n_(i j).
+  $
+]
 
-*Exemple.* Le tableau suivant décrit $200$ étudiants selon leur
-programme et leur type d'admission. Chaque étudiant appartient à un seul
-programme et à une seule catégorie d'admission.
+#example(title: [Programme et type d'admission])[
+  Le tableau suivant décrit $200$ étudiants selon leur
+  programme et leur type d'admission. Chaque étudiant appartient à un seul
+  programme et à une seule catégorie d'admission.
 
-#table(
-  columns: (1.3fr, 1fr, 1.1fr, 1.5fr, 0.8fr),
-  align: center, inset: 6pt, stroke: 0.4pt + luma(210),
-  table.header([*Programme*], [*Directe*], [*Passerelle*],
-    [*Reprise d'études*], [*Total*]),
-  [Sciences], [60], [25], [15], [100],
-  [Lettres], [10], [35], [15], [60],
-  [Gestion], [10], [10], [20], [40],
-  [*Total*], [*80*], [*70*], [*50*], [*200*],
-)
+  #table(
+    columns: (1.3fr, 1fr, 1.1fr, 1.5fr, 0.8fr),
+    align: center,
+    table.header([*Programme*], [*Directe*], [*Passerelle*],
+      [*Reprise d'études*], [*Total*]),
+    [Sciences], [60], [25], [15], [100],
+    [Lettres], [10], [35], [15], [60],
+    [Gestion], [10], [10], [20], [40],
+    [*Total*], [*80*], [*70*], [*50*], [*200*],
+  )
+]
 
 Une comparaison des seuls effectifs serait dominée par les programmes les plus
 nombreux. L'AFC compare plutôt les *profils*, i.e. les distributions
@@ -1142,18 +1121,20 @@ Parmi les $80$ admissions directes, $60$ concernent Sciences. Le profil de Admis
 question : répartition des admissions dans un programme, ou répartition des
 programmes pour un type d'admission donné.
 
-On introduit maintenant les fréquences relatives et les masses des modalités :
+#definition(title: [Fréquences relatives et masses])[
+  On introduit les fréquences relatives et les masses des modalités :
 
-$
-  p_(i j) = n_(i j) / n, quad
-  r_i = n_(i +) / n, quad c_j = n_(+ j) / n, quad i = 1, ..., I, quad j = 1, ..., J.
-$
+  $
+    p_(i j) = n_(i j) / n, quad
+    r_i = n_(i +) / n, quad c_j = n_(+ j) / n, quad i = 1, ..., I, quad j = 1, ..., J.
+  $
+]
 
 Les masses des programmes sont $r = (0.50, 0.30, 0.20)^top$ et celles des
 admissions sont $c = (0.40, 0.35, 0.25)^top$. Elles pondèrent les points dans
 l'analyse : comparer les profils ne revient pas à donner le même poids à
-toutes les catégories. On suppose les masses strictement positives ; une ligne
-ou une colonne entièrement nulle doit être retirée.
+toutes les catégories. On suppose les masses strictement positives. Une ligne
+ou une colonne entièrement nulle doit donc être retirée.
 
 Le profil moyen des lignes est $c$, car $sum_(i=1)^I r_i a_(i j) = c_j$.
 De même, le profil moyen des colonnes est $r$, car $sum_(j=1)^J c_j b_(i j) = r_i$.
@@ -1178,13 +1159,15 @@ $ e_(i j) = n r_i c_j = (n_(i +) n_(+ j)) / n. $
 
 Pour Sciences et l'admission directe, on attendrait $(100 times 80) / 200 = 40$ étudiants, contre $60$ observés. Cette combinaison semble surreprésentée. En effet, son effectif vaut $1.5$ fois l'effectif attendu. À l'inverse, Sciences et la reprise d'études comptent $15$ étudiants, contre $25$ attendus. Une association se juge ainsi par rapport aux marges du tableau, et non à la seule taille d'un effectif.
 
-*La distance entre profils.* L'AFC utilise la distance du $chi^2$ pour comparer des profils. Pour deux profils-lignes $i$ et $ell$, elle est définie par
+#definition(title: [Distance du chi-deux entre profils])[
+  L'AFC utilise la distance du $chi^2$ pour comparer des profils. Pour deux profils-lignes $i$ et $ell$, elle est définie par
 
-$ d_(chi^2)^2(i, ell) = sum_(j=1)^J (a_(i j) - a_(ell j))^2 / c_j. $
+  $ d_(chi^2)^2(i, ell) = sum_(j=1)^J (a_(i j) - a_(ell j))^2 / c_j. $
 
-Pour deux profils-colonnes $j$ et $h$, la définition symétrique est
+  Pour deux profils-colonnes $j$ et $h$, la définition symétrique est
 
-$ d_(chi^2)^2(j, h) = sum_(i=1)^I (b_(i j) - b_(i h))^2 / r_i. $
+  $ d_(chi^2)^2(j, h) = sum_(i=1)^I (b_(i j) - b_(i h))^2 / r_i. $
+]
 
 La pondération tient compte de la fréquence de chaque modalité. Un même écart
 de proportion pèse davantage dans une colonne rare que dans une colonne très
@@ -1193,39 +1176,41 @@ dans la colonne Reprise d'études, contre $0.10^2 / 0.40 = 0.025$ dans la colonn
 Directe. Ce choix de distance donne un sens relatif aux écarts, mais peut aussi
 amplifier les fluctuations de catégories rares.
 
-*L'inertie mesure l'écart à l'indépendance.* Comme en ACP, l'inertie est une
-dispersion autour du centre. Ici, les points sont les profils, la distance est
-celle du chi-deux et les poids sont les masses. En notant
+#definition(title: [Inertie totale en AFC])[
+  Comme en ACP, l'inertie est une
+  dispersion autour du centre. Ici, les points sont les profils, la distance est
+  celle du $chi^2$ et les poids sont les masses. En notant
 
-$
-  d_i^2 = sum_(j=1)^J (a_(i j) - c_j)^2 / c_j, quad
-  delta_j^2 = sum_(i=1)^I (b_(i j) - r_i)^2 / r_i,
-$
+  $
+    d_i^2 = sum_(j=1)^J (a_(i j) - c_j)^2 / c_j, quad
+    delta_j^2 = sum_(i=1)^I (b_(i j) - r_i)^2 / r_i,
+  $
 
-l'inertie totale s'écrit
+  l'inertie totale s'écrit
 
-$
-  cal(I) = sum_(i=1)^I r_i d_i^2
-         = sum_(j=1)^J c_j delta_j^2
-         = sum_(i=1)^I sum_(j=1)^J
-           (p_(i j) - r_i c_j)^2 / (r_i c_j).
-$
+  $
+    inertia = sum_(i=1)^I r_i d_i^2
+           = sum_(j=1)^J c_j delta_j^2
+           = sum_(i=1)^I sum_(j=1)^J
+             (p_(i j) - r_i c_j)^2 / (r_i c_j).
+  $
+]
 
-Les nuages de lignes et de colonnes ont la *même inertie* : il s'agit de deux
+Les nuages de lignes et de colonnes ont la même inertie : il s'agit de deux
 descriptions de la même association, et non de deux inerties à additionner.
 On retrouve la statistique de Pearson du test d'indépendance :
 
 $
   chi^2 = sum_(i=1)^I sum_(j=1)^J (n_(i j) - e_(i j))^2 / e_(i j),
-  quad cal(I) = chi^2 / n.
+  quad "et" quad inertia = chi^2 / n.
 $
 
-Dans l'exemple, $chi^2 = 47.75$ et $cal(I) = 47.75 / 200 = 0.23875$.
+Dans l'exemple, $chi^2 = 47.75$ et $inertia = 47.75 / 200 = 0.23875$.
 Une inertie nulle correspond à une indépendance exacte dans le tableau observé :
 tous les profils de chaque nuage coïncident avec leur centre. Plus l'inertie
 est grande, plus les profils s'en écartent, pour cette géométrie.
 
-#note[
+#remark[
   L'AFC décrit la structure du tableau ; elle ne constitue pas à elle seule un
   test d'indépendance. Multiplier tous les effectifs par deux ne change ni les
   profils, ni l'inertie, ni la carte, mais double $chi^2$. L'interprétation d'une
@@ -1237,8 +1222,8 @@ est grande, plus les profils s'en écartent, pour cette géométrie.
 L'AFC peut se comprendre comme une analyse en composantes principales des
 profils, avec leurs masses et la distance du chi-deux. Sa construction repose
 sur la décomposition en valeurs singulières des écarts à l'indépendance.
-On pose $P = N/n$, $D_r = op("diag")(r_1, dots, r_I)$ et
-$D_c = op("diag")(c_1, dots, c_J)$, puis
+On pose $P = N/n$, $D_r = diag(r_1, dots, r_I)$ et
+$D_c = diag(c_1, dots, c_J)$, puis
 
 $
   S = D_r^(-1/2) (P - r c^top) D_c^(-1/2), quad
@@ -1247,18 +1232,18 @@ $
 
 La soustraction de $r c^top$ retire la situation d'indépendance. Les facteurs
 diagonaux appliquent les pondérations liées aux marges. La somme des carrés des
-éléments de $S$ est précisément l'inertie $cal(I)$.
+éléments de $S$ est précisément l'inertie $inertia$.
 
 Pour un tableau qui n'est pas exactement indépendant, la décomposition réduite
 de $S$ est
 
 $
-  S = U D V^top, quad D = op("diag")(sigma_1, dots, sigma_K),
-  quad sigma_1 >= dots >= sigma_K > 0,
+  S = U D V^top, quad D = diag(sigma_1, dots, sigma_(r_S)),
+  quad sigma_1 >= dots >= sigma_(r_S) > 0,
 $
 
-où $U^top U = V^top V = I_K$ et $I_K$ est la matrice identité d'ordre $K$.
-Le nombre d'axes non triviaux vérifie $K = op("rang")(S) <= min(I-1, J-1)$.
+où $U^top U = V^top V = I_(r_S)$ et $I_(r_S)$ est la matrice identité d'ordre $r_S$.
+Le nombre d'axes non triviaux vérifie $r_S = rang(S) <= min(I-1, J-1)$.
 Les contraintes sur les marges expliquent la perte d'une dimension de chaque
 côté. Un tableau à deux lignes ne peut donc fournir qu'un seul axe non trivial,
 même s'il possède beaucoup de colonnes.
@@ -1267,14 +1252,14 @@ Les *coordonnées principales* des lignes et des colonnes sont respectivement
 les lignes des matrices#footnote[
   Pour les conventions de coordonnées et leur calcul, voir
   #link("https://doi.org/10.18637/jss.v020.i03")[Nenadić et Greenacre (2007),
-  _Correspondence Analysis in R, with Two- and Three-dimensional Graphics:
+  _Correspondence Analysis in R, with Two- and Three-dimensional Graphics :
   The ca Package_].
 ] :
 
 $ F = D_r^(-1/2) U D, quad G = D_c^(-1/2) V D. $
 
 Ainsi, $F_(i k)$ est la coordonnée du programme $i$ sur l'axe $k$, et
-$G_(j k)$ celle de l'admission $j$. Dans l'espace complet des $K$ axes, les
+$G_(j k)$ celle de l'admission $j$. Dans l'espace complet des $r_S$ axes, les
 distances euclidiennes entre lignes de $F$ reproduisent exactement les distances
 du chi-deux entre profils-lignes. Il en va de même pour $G$ et les
 profils-colonnes. En ne conservant que $q$ axes, on projette les points : les
@@ -1287,14 +1272,14 @@ $
   sum_(i=1)^I r_i F_(i k)^2
   = sum_(j=1)^J c_j G_(j k)^2
   = lambda_k, quad
-  sum_(k=1)^K lambda_k = cal(I).
+  sum_(k=1)^(r_S) lambda_k = inertia.
 $
 
 Le premier axe conserve le plus d'inertie possible ; les suivants résument
 successivement l'inertie restante dans des directions orthogonales. Pour $q$
 axes retenus, la proportion cumulée est
 
-$ R_q = (sum_(k=1)^q lambda_k) / cal(I), quad 1 <= q <= K. $
+$ R_q = (sum_(k=1)^q lambda_k) / inertia, quad 1 <= q <= r_S. $
 
 Le choix de $q$ repose sur la décroissance des valeurs propres, l'inertie cumulée
 et l'interprétation des axes. La règle de Kaiser de l'ACP normée ne se transpose
@@ -1306,7 +1291,6 @@ l'AFC.
 
   #table(
     columns: (1fr, 1.5fr, 1.5fr, 1.5fr), align: center,
-    inset: 6pt, stroke: 0.4pt + luma(210),
     table.header([*Axe $k$*], [*Valeur propre*], [*Inertie expliquée*],
       [*Inertie cumulée*]),
     [1], [0,17021], [71,29~%], [71,29~%],
@@ -1412,7 +1396,7 @@ revient aux écarts à l'indépendance. Avec tous les axes, l'identité suivante
 exprime ce lien de façon précise :
 
 $ p_(i j) / (r_i c_j) - 1
-  = sum_(k=1)^K (F_(i k) G_(j k)) / sigma_k. $
+  = sum_(k=1)^(r_S) (F_(i k) G_(j k)) / sigma_k. $
 
 Des coordonnées de même signe contribuent à une surreprésentation sur un axe ;
 des signes opposés contribuent à une sous-représentation. C'est la somme sur
@@ -1433,8 +1417,8 @@ La *contribution* indique quelles modalités construisent un axe. Pour les
 lignes et les colonnes, elle vaut respectivement
 
 $
-  op("ctr")_(i k)^r = (r_i F_(i k)^2) / lambda_k, quad
-  op("ctr")_(j k)^c = (c_j G_(j k)^2) / lambda_k.
+  ctr_(i k)^r = (r_i F_(i k)^2) / lambda_k, quad
+  ctr_(j k)^c = (c_j G_(j k)^2) / lambda_k.
 $
 
 Sur chaque axe, les contributions des lignes somment à $1$, et celles des
@@ -1448,22 +1432,22 @@ La *qualité de représentation* mesure la part de la distance d'une modalité
 carrés
 
 $
-  op("cos")^2_(i k) = F_(i k)^2 / d_i^2, quad
-  op("cos")^2_(j k) = G_(j k)^2 / delta_j^2.
+  cos^2_(i k) = F_(i k)^2 / d_i^2, quad
+  cos^2_(j k) = G_(j k)^2 / delta_j^2.
 $
 
 Pour un plan ou un espace de $q$ axes, on somme ces cosinus carrés sur les axes
 retenus. La qualité est comprise entre $0$ et $1$ ; elle vaut $1$ dans l'espace
-complet des $K$ axes. Pour un profil exactement moyen, la distance au centre est
+complet des $r_S$ axes. Pour un profil exactement moyen, la distance au centre est
 nulle et ce rapport n'est pas défini.
 
 #example[
   Pour Sciences, $r_i = 0.50$, $F_(i 1) approx 0.40923$ et
   $d_i^2 approx 0.16857$. On obtient
 
-  $ op("ctr")_(i 1)^r
+  $ ctr_(i 1)^r
     approx (0.50 times 0.40923^2) / 0.17021 approx 0.492, quad
-    op("cos")^2_(i 1) approx 0.40923^2 / 0.16857 approx 0.993. $
+    cos^2_(i 1) approx 0.40923^2 / 0.16857 approx 0.993. $
 
   Sciences apporte ainsi 49,2~% de l'inertie du premier axe, tandis que cet
   axe représente 99,3~% de l'écart de Sciences au profil moyen. Le premier
@@ -1475,7 +1459,6 @@ Les résultats pour les trois programmes précisent la lecture du plan :
 
 #table(
   columns: (1.2fr, 1fr, 1fr, 1fr, 1fr), align: center,
-  inset: 6pt, stroke: 0.4pt + luma(210),
   table.header([*Programme*], [*Contribution axe 1*], [*Contribution axe 2*],
     [*Qualité axe 1*], [*Qualité axe 2*]),
   [Sciences], [49,2~%], [0,8~%], [99,3~%], [0,7~%],
@@ -1557,9 +1540,12 @@ Chaque variable est transformée en modalités binaires par codage disjonctif
 complet. Si une question possède trois modalités, elle devient trois colonnes
 binaires. Un individu reçoit un 1 pour la modalité choisie et 0 pour les autres.
 
-Le tableau de Burt, obtenu comme produit du tableau disjonctif transposé par le
-tableau disjonctif, croise toutes les modalités entre elles. L'ACM peut être vue
-comme une AFC appliquée au tableau disjonctif complet ou au tableau de Burt.
+#definition(title: [Tableau de Burt])[
+  Le tableau de Burt, obtenu comme produit du tableau disjonctif transposé par le
+  tableau disjonctif, croise toutes les modalités entre elles.
+]
+
+L'ACM peut être vue comme une AFC appliquée au tableau disjonctif complet ou au tableau de Burt.
 
 === Individus et modalités
 
@@ -1615,7 +1601,7 @@ qu'elle révèle une structure générale.
 
 t-SNE, pour *t-distributed stochastic neighbor embedding*, est une méthode non
 linéaire principalement utilisée pour produire des cartes en deux ou trois
-dimensions. Elle transforme les proximités entre observations en probabilités:
+dimensions. Elle transforme les proximités entre observations en probabilités :
 deux observations proches dans l'espace initial doivent avoir une forte
 probabilité d'être voisines dans la représentation réduite.
 
@@ -1631,7 +1617,7 @@ des données de grande dimension comme des images, des textes vectorisés ou des
 données biologiques. En revanche, les distances entre groupes, la taille des
 groupes et leur densité apparente peuvent être trompeuses.
 
-#note[
+#remark[
   Une carte t-SNE ne doit pas être lue comme une carte géographique. Deux points
   voisins sont souvent réellement semblables, mais deux groupes éloignés ne sont
   pas nécessairement très différents au sens statistique.
@@ -1677,7 +1663,7 @@ pertinentes.
 === Usages
 
 UMAP est utile pour explorer des données complexes avant une analyse plus
-formelle. On l'utilise souvent après une étape de prétraitement: standardisation,
+formelle. On l'utilise souvent après une étape de prétraitement : standardisation,
 filtrage de variables, ACP préalable ou choix d'une distance adaptée.
 
 Certaines implémentations permettent aussi de projeter de nouvelles observations
@@ -1689,10 +1675,12 @@ validation.
 
 === Représentation latente
 
-Un autoencodeur est un réseau de neurones entraîné à reconstruire ses entrées.
-Il est composé de deux parties: un encodeur qui transforme l'observation initiale
-en représentation latente de plus faible dimension, puis un décodeur qui tente de
-reconstruire l'observation à partir de cette représentation.
+#definition(title: [Autoencodeur])[
+  Un autoencodeur est un réseau de neurones entraîné à reconstruire ses entrées.
+  Il est composé de deux parties : un encodeur qui transforme l'observation initiale
+  en représentation latente de plus faible dimension, puis un décodeur qui tente de
+  reconstruire l'observation à partir de cette représentation.
+]
 
 Si la dimension latente est petite, le modèle doit apprendre un résumé utile des
 données. Contrairement à l'ACP, ce résumé peut être non linéaire. Cela permet de
@@ -1729,7 +1717,7 @@ une validation plus soigneuse que les méthodes factorielles classiques.
 Les méthodes suivantes peuvent être présentées comme prolongements, selon le
 temps disponible et le type de données étudié.
 
-- TriMap construit la carte à partir de triplets: une observation doit rester
+- TriMap construit la carte à partir de triplets : une observation doit rester
   plus proche d'une deuxième observation que d'une troisième. Cette idée est
   utile pour discuter de la préservation de la structure globale.
 - PaCMAP utilise des paires proches, moyennement proches et éloignées afin de
@@ -1749,21 +1737,22 @@ de la distance, du graphe de voisins, des paramètres et parfois de
 l'initialisation.
 
 Une bonne pratique consiste à comparer plusieurs méthodes, à revenir aux
-variables initiales et à vérifier les conclusions par des mesures simples:
+variables initiales et à vérifier les conclusions par des mesures simples :
 profils moyens, distances, contributions, stabilité des groupes ou performance
 sur un jeu de validation.
 
-#heading(level: 2, outlined: false)[Questions rapides]
+#exercises[
 
-1. Expliquez pourquoi une ACP sur des variables non standardisées peut être
-   trompeuse.
-2. Dans une ACP, que signifie une valeur propre élevée ?
-3. Donnez un exemple de tableau de contingence adapté à une AFC.
-4. Décrivez comment construire un tableau disjonctif complet pour trois
-   questions à choix multiples.
-5. Pourquoi faut-il être prudent avec les modalités rares en ACM ?
-6. Pourquoi une carte t-SNE ne suffit-elle pas à prouver l'existence de groupes
-   statistiques ?
-7. Quel paramètre d'UMAP contrôle l'équilibre entre structure locale et globale ?
-8. Dans un autoencodeur, quelle partie du modèle fournit la représentation
-   réduite ?
+  1. Expliquez pourquoi une ACP sur des variables non standardisées peut être
+     trompeuse.
+  2. Dans une ACP, que signifie une valeur propre élevée ?
+  3. Donnez un exemple de tableau de contingence adapté à une AFC.
+  4. Décrivez comment construire un tableau disjonctif complet pour trois
+     questions à choix multiples.
+  5. Pourquoi faut-il être prudent avec les modalités rares en ACM ?
+  6. Pourquoi une carte t-SNE ne suffit-elle pas à prouver l'existence de groupes
+     statistiques ?
+  7. Quel paramètre d'UMAP contrôle l'équilibre entre structure locale et globale ?
+  8. Dans un autoencodeur, quelle partie du modèle fournit la représentation
+     réduite ?
+]

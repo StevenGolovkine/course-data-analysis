@@ -1,35 +1,60 @@
-#import "../styles/notes.typ": definition-box, example, remark
+#import "../styles/notes.typ": *
 
 = Introduction
 
 == Qu'est-ce que l'analyse de données ?
 
-L'analyse de données regroupe les méthodes qui permettent d'extraire de l'information d'un jeu de données. Elle est proche de ce que l'on appelle apprentissage statistique ou apprentissage automatique (_machine learning_): on observe des variables, on cherche des structures dans ces observations, puis on produit une interprétation, une visualisation, une prédiction ou une décision.
+L'analyse de données regroupe les méthodes qui permettent d'extraire de l'information d'un jeu de données. Elle est proche de ce que l'on appelle apprentissage statistique ou apprentissage automatique (_machine learning_) : on observe des variables, on cherche des structures dans ces observations, puis on produit une interprétation, une visualisation, une prédiction ou une décision.
 
 Le point de départ n'est donc pas un algorithme, mais une question. Un même jeu de données peut servir à décrire une population, à comparer des groupes, à prévoir une quantité future, à détecter des observations atypiques ou à construire une typologie. La méthode pertinente dépend de cette question, du type des variables et de la qualité des données.
 
 #remark[
-  Une analyse de données est une démarche itérative: formuler une question,
+  Une analyse de données est une démarche itérative : formuler une question,
   comprendre les données, choisir une représentation, ajuster ou appliquer une
   méthode, évaluer le résultat, puis revenir aux étapes précédentes si les
   diagnostics l'exigent.
 ]
 
 
-#definition-box(supplement: "Définition")[
+#definition[
   L'*unité statistique* est l'objet élémentaire étudié. Cela peut être, par exemple, une personne, un pays, une transaction, une image ou encore une journée. Une *observation* rassemble les valeurs mesurées sur une unité statistique, tandis qu'une *variable* décrit une caractéristique commune à toutes les unités.
-]
+] <def-unite-statistique>
 
 Lorsque $n$ unités sont décrites par $p$ variables, les données numériques
 peuvent être rassemblées dans une matrice
 
-$ X = (x_(i j))_(1 <= i <= n, 1 <= j <= p) in RR^(n times p). $
+$ Xmat = (x_(i j))_(1 <= i <= n, 1 <= j <= p) in RR^(n times p). $
 
-La ligne $i$ représente l'observation $x_i$ et la colonne $j$, la variable
+La ligne $i$ est la transposée du vecteur colonne
+$x_i=(x_(i 1), dots, x_(i p))^top$ et la colonne $j$ représente la variable
 $X_j$. Cette convention n'est pas qu'une notation. En effet, elle détermine ce que
 mesurent une moyenne, une covariance ou une distance. Une mauvaise définition
 de l'unité statistique peut ainsi produire une analyse mathématiquement correcte
 mais scientifiquement dépourvue de sens.
+
+#remark(title: [Conventions de notation])[
+  Dans les chapitres, $n$ désigne le nombre d'observations et $p$ le nombre
+  de variables. Les indices $i$ et $j$ repèrent respectivement une observation
+  et une variable. On note $K$ le nombre de classes ou de groupes et $g$ leur
+  indice ; $k$ désigne un nombre de voisins ou l'indice d'un axe, selon le
+  contexte, et $q$ le nombre d'axes retenus. En validation croisée, $V$ est
+  le nombre de plis et $v$ leur indice. Les dimensions particulières d'un
+  tableau de contingence sont notées $I$ et $J$ dans la section sur l'AFC.
+
+  Les vecteurs sont des vecteurs colonnes ; $A^top$ est la transposée de $A$.
+  Les matrices de données $Xmat$ et $Zmat$ sont en gras, tandis que $X$ et $Y$
+  désignent les variables aléatoires en contexte probabiliste. Les minuscules
+  $x_i$ et $y_i$ désignent leurs valeurs observées et un chapeau indique une
+  quantité estimée, par exemple $hat(f)$ ou $hat(Sigma)$.
+
+  On écrit $expect$, $prob$, $Var$, $Cov$ et $Corr$ pour l'espérance, la
+  probabilité, la variance, la covariance et la corrélation.
+  Pour des colonnes observées, $Var$ et $Cov$ désignent leurs versions
+  empiriques, calculées avec le diviseur $n-1$, sauf indication contraire.
+  La moyenne empirique est notée $overline(x)_j$ et l'écart-type empirique
+  $s_j=sqrt(Var(X_j))$. L'indicatrice $ind(A)$ vaut $1$ si la condition $A$
+  est satisfaite et $0$ sinon.
+]
 
 Les variables peuvent être quantitatives, ordinales, nominales ou binaires.
 Leur nature guide les résumés, les graphiques et les méthodes admissibles. Par
@@ -50,7 +75,7 @@ même échelle, elles ne jouent pas toutes le même rôle, certaines peuvent êt
 fortement corrélées, et l'interprétation causale demande beaucoup plus qu'un bon
 ajustement numérique.
 
-À partir du même jeu de données, on peut donc poser des questions très différentes:
+À partir du même jeu de données, on peut donc poser des questions très différentes :
 
 - quelle est la distribution de l'espérance de vie entre les pays?
 - quels pays présentent des profils socioéconomiques similaires?
@@ -61,7 +86,7 @@ ajustement numérique.
   l'espérance de vie?
 
 Les quatre premières questions relèvent de la description, de l'exploration ou
-de la prédiction. La dernière est causale: des données observationnelles et un
+de la prédiction. La dernière est causale : des données observationnelles et un
 bon modèle prédictif ne suffisent généralement pas à y répondre.
 
 Ainsi, une analyse peut viser plusieurs types de résultats.
@@ -79,36 +104,37 @@ Ces objectifs peuvent coexister, mais il faut savoir lequel guide la méthode. D
 Aussi, une méthode peut être récente, sophistiquée et numériquement performante sans répondre à la question posée. La qualité d'une analyse dépend de la cohérence entre la question, les données, la méthode et le critère d'évaluation.
 
 
-
 == L'apprentissage supervisé
 
 === Principe
 
 Dans un problème supervisé, une variable réponse est observée dans les données d'apprentissage. On veut apprendre une relation entre des variables explicatives et cette variable réponse.
 
-#definition-box(supplement: "Définition")[
+#definition[
   Un problème d'*apprentissage supervisé* est décrit par un échantillon
   d'apprentissage composé de couples $(x_i, y_i)$, pour $i = 1, dots, n$.
   Le vecteur $x_i in RR^p$ contient les variables explicatives de l'observation
   $i$, et $y_i$ sa réponse. L'objectif est de construire une règle $hat(f)$ qui
   prédit la réponse d'une nouvelle observation $x$.
-]
+] <def-apprentissage-supervise>
 
-On peut écrire l'objectif de manière générale:
-
-$ Y = f(X) + epsilon $
-
-La fonction $f$ représente la relation systématique entre les variables explicatives $X$ et la réponse $Y$. Le terme $epsilon$ représente le bruit, les variables absentes et la variabilité qui n'est pas expliquée par le modèle. À partir d'un échantillon fini, on ne connaît pas $f$. On cherche donc à estimer une fonction $hat(f)$ dont il faudra mesurer les performances sur des données nouvelles.
+La distinction entre relation systématique et bruit sera formalisée dans
+@sec-modele-predictif. À ce stade, l'enjeu est de construire une règle à partir
+des observations, puis d'en mesurer les performances sur des données nouvelles.
 
 === Régression et classification
 
-En régression, la réponse est numérique: prix, température, durée, revenu ou encore score. La qualité du modèle se mesure souvent par une erreur de prédiction, comme l'erreur quadratique moyenne ou l'erreur absolue moyenne.
+#definition(title: [Régression et classification])[
+  En *régression*, la réponse est numérique : prix, température, durée, revenu ou encore score. La qualité du modèle se mesure souvent par une erreur de prédiction, comme l'erreur quadratique moyenne ou l'erreur absolue moyenne.
 
-En classification, la réponse est une classe: fraude ou non, réussite ou échec,
-type de document, diagnostic ou catégorie de risque. La qualité du modèle dépend
-de la proportion d'erreurs, mais aussi du type d'erreur commise.
+  En *classification*, la réponse est une classe : fraude ou non, réussite ou échec,
+  type de document, diagnostic ou catégorie de risque. La qualité du modèle dépend
+  de la proportion d'erreurs, mais aussi du type d'erreur commise.
+] <def-regression-classification>
 
-Le choix du critère d'adéquation du modèle dépend donc de l'usage du modèle. En régression, l'erreur quadratique moyenne pénalise fortement les grandes erreurs, tandis que l'erreur absolue moyenne y est moins sensible. En classification, l'exactitude globale peut être trompeuse lorsque les classes sont déséquilibrées. La sensibilité, la spécificité, la précision ou le rappel peuvent alors être plus informatifs.
+Le critère d'évaluation dépend de l'usage du modèle. Les mesures d'erreur en
+régression et en classification seront définies et comparées dans
+@sec-calcul-erreur.
 
 #example[
   Prédire si un courriel est indésirable à partir de son contenu est un problème supervisé de classification : les exemples d'entraînement portent une étiquette (indésirable ou non). Prédire le prix d'un logement à partir de ses caractéristiques est aussi supervisé, mais de régression car la réponse est quantitative.
@@ -118,34 +144,31 @@ Le choix du critère d'adéquation du modèle dépend donc de l'usage du modèle
 
 Un modèle supervisé n'est pas jugé sur sa capacité à mémoriser les données d'apprentissage. Il doit en effet être capable de généraliser à de nouvelles observations. C'est pourquoi on doit séparer les données en ensembles d'entraînement, de validation et de test, ou alors utiliser la validation croisée.
 
-Les rôles de ces ensembles de données doivent rester distincts:
-
-- l'ensemble d'entraînement (_training set_) sert à estimer les paramètres du modèle;
-- l'ensemble de validation (_validation set_) ou la validation croisée (_cross-validation_) sert à choisir la méthode, ses hyperparamètres et les transformations;
-- l'ensemble de test (_test set_) sert une seule fois à estimer la performance finale.
+Les rôles de ces ensembles et le protocole à suivre sont détaillés dans
+@sec-separation-donnees : l'idée essentielle est de ne pas utiliser les mêmes
+observations pour choisir une méthode et pour juger sa performance finale.
 
 Un *sous-ajustement* survient lorsqu'un modèle trop rigide ne capture pas une structure importante. À l'inverse, un *sur-ajustement* survient lorsqu'un modèle trop flexible apprend les particularités de l'échantillon d'entraînement au lieu d'une relation stable. La meilleure performance d'entraînement n'est donc généralement pas un bon critère de sélection.
 
 #remark[
-  Toutes les opérations qui apprennent quelque chose des données —
-  standardisation, sélection de variables, imputation ou réduction de dimension
-  — doivent être ajustées uniquement sur les données d'entraînement. Les
-  effectuer avant la séparation crée une *fuite d'information* (_data leakage_) et donne une évaluation trop optimiste.
+  L'évaluation doit porter sur toute la procédure, prétraitements compris.
+  Les précautions contre les fuites d'information sont regroupées dans
+  @sec-fuites-donnees.
 ]
 
-== L'apprentissage non-supervisé
+== L'apprentissage non supervisé
 
 === Principe
 
 Dans un problème non supervisé, il n'y a pas de variable réponse. On cherche
-plutôt à découvrir une structure dans les observations: axes de variation,
+plutôt à découvrir une structure dans les observations : axes de variation,
 groupes, proximités entre modalités ou représentations de plus faible dimension.
 
-#definition-box(supplement: "Définition")[
+#definition[
   Un problème d'*apprentissage non supervisé* est décrit par des observations
   $x_1, dots, x_n$, sans réponse $y_i$ désignée. L'objectif est de construire une
   représentation qui révèle certaines régularités du jeu de données.
-]
+] <def-apprentissage-non-supervise>
 
 Les méthodes non supervisées servent souvent à explorer les données avant une
 modélisation plus ciblée. Elles peuvent révéler des groupes, des observations
@@ -155,13 +178,13 @@ atypiques, des variables redondantes ou des relations inattendues.
 
 La réduction de dimension a pour but de remplacer un grand nombre de variables par une représentation synthétique. L'objectif est de visualiser, résumer ou préparer les données pour une autre méthode. Les méthodes factorielles sont un exemple de réduction de dimension.
 
-L'analyse en composantes principales (ACP), l'analyse factorielle des correspondances (AFC) et l'analyse des correspondances multiples (ACM) sont des exemples de méthodes factorielles. Elles ne répondent pas à une question prédictive directe. Elles aident plutôt à comprendre la structure des données. La propriété préservée dépend de la méthode: l'ACP privilégie la variabilité des variables quantitatives, l'AFC étudie les profils d'un tableau de contingence et l'ACM décrit les associations entre variables qualitatives.
+L'analyse en composantes principales (ACP), l'analyse factorielle des correspondances (AFC) et l'analyse des correspondances multiples (ACM) sont des exemples de méthodes factorielles. Elles ne répondent pas à une question prédictive directe. Elles aident plutôt à comprendre la structure des données. La propriété préservée dépend de la méthode : l'ACP privilégie la variabilité des variables quantitatives, l'AFC étudie les profils d'un tableau de contingence et l'ACM décrit les associations entre variables qualitatives.
 
 Une représentation en deux dimensions reste une approximation. Il faut examiner la quantité d'information conservée et éviter d'interpréter une proximité ou une séparation qui serait mal représentée sur les axes affichés.
 
 === Regroupement
 
-Le regroupement (_clustering_) cherche à construire des groupes d'observations similaires. La méthode $k$-means, la classification hiérarchique et les mélanges de gaussiennes illustrent différentes manières de définir un groupe: proximité à un centre, hiérarchie de distances ou appartenance probabiliste.
+Le regroupement (_clustering_) cherche à construire des groupes d'observations similaires. La méthode $k$-means, la classification hiérarchique et les mélanges de gaussiennes illustrent différentes manières de définir un groupe : proximité à un centre, hiérarchie de distances ou appartenance probabiliste.
 
 Le résultat dépend de la représentation, de l'échelle des variables, de la
 mesure de dissimilarité et, souvent, du nombre de groupes demandé. Une variable
@@ -183,7 +206,7 @@ Une méthode non supervisée produit une représentation. Cette représentation 
 être reliée à la question initiale, aux variables observées et au contexte de
 collecte.
 
-On peut combiner trois formes de validation:
+On peut combiner trois formes de validation :
 
 - un critère interne, calculé à partir de la géométrie des données;
 - un critère externe, fondé sur une information qui n'a pas servi à construire
@@ -202,7 +225,7 @@ On peut combiner trois formes de validation:
 
 Une analyse ne commence pas par l'ajustement d'un modèle et ne se termine pas
 par l'obtention d'un score. Une démarche complète comporte généralement les
-étapes suivantes:
+étapes suivantes :
 
 1. *Formuler la question.* Définir la population, l'unité statistique, le
    résultat attendu et l'usage qui en sera fait.
@@ -225,9 +248,9 @@ l'évaluation finale demeure honnête.
 
 === Ce qu'il faut préciser
 
-Avant toute méthode, on doit expliciter plusieurs choix. En particulier, on doit se poser les questions suivantes:
+Avant toute méthode, on doit expliciter plusieurs choix. En particulier, on doit se poser les questions suivantes :
 
-- Quelle est l'unité statistique: individu, pays, transaction, texte,
+- Quelle est l'unité statistique : individu, pays, transaction, texte,
   pixel, ... ?
 - Quelles variables décrivent chaque observation ?
 - Les variables sont-elles numériques, ordinales, nominales, binaires, ... ?
@@ -241,7 +264,7 @@ qualité de l'analyse davantage que le choix final de l'algorithme.
 
 === Représentation, méthode et validation
 
-Modéliser consiste à relier trois éléments: une représentation des données, une
+Modéliser consiste à relier trois éléments : une représentation des données, une
 méthode et un critère d'évaluation. Changer l'un de ces éléments peut changer le
 résultat.
 
@@ -250,14 +273,18 @@ modifier un regroupement, et une mesure d'erreur peut favoriser un modèle plut�
 qu'un autre. Un bon protocole documente donc les choix de représentation et pas
 seulement le nom de l'algorithme.
 
-Un *paramètre* est estimé à partir des données d'entraînement, comme un coefficient de régression ou le centre d'un groupe. Un *hyperparamètre* contrôle la méthode avant cet ajustement, comme le nombre de groupes ou la force d'une régularisation. Cette distinction explique pourquoi les hyperparamètres doivent être choisis en utilisant un jeu de validation plutôt qu'en regardant la performance de test.
+#definition(title: [Paramètre et hyperparamètre])[
+  Un *paramètre* est estimé à partir des données d'entraînement, comme un coefficient de régression ou le centre d'un groupe. Un *hyperparamètre* contrôle la méthode avant cet ajustement, comme le nombre de groupes ou la force d'une régularisation.
+] <def-parametre-hyperparametre>
+
+Cette distinction explique pourquoi les hyperparamètres doivent être choisis en utilisant un jeu de validation plutôt qu'en regardant la performance de test.
 
 === Interprétation et limites
 
 L'analyse de données ne consiste pas à appliquer mécaniquement une recette. Les
 données reflètent un contexte de collecte, des choix de mesure, des omissions et
 des biais possibles. Un résultat convaincant doit donc être accompagné de ses
-conditions de validité: quelles hypothèses ont été faites, quelles données ont
+conditions de validité : quelles hypothèses ont été faites, quelles données ont
 été exclues, quelle incertitude demeure, et quelle décision sera prise à partir
 du résultat.
 
@@ -274,7 +301,7 @@ méthode comme une autorité automatique.
 
 === Une analyse responsable
 
-Avant une mise en production, les questions suivantes peuvent aider à repérer un biais  ou plusieurs biais dans l'analyse:
+Avant une mise en production, les questions suivantes peuvent aider à repérer un biais  ou plusieurs biais dans l'analyse :
 
 - *Biais de représentation ou de sélection* — Qui est représenté dans les
   données et qui ne l'est pas?

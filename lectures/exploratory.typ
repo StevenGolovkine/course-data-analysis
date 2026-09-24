@@ -1,6 +1,4 @@
-#import "../styles/notes.typ": definition-box, example, note, property-box, proof, remark, set-qed-symbol
-
-#set-qed-symbol[$square$]
+#import "../styles/notes.typ": *
 
 = Analyse exploratoire
 
@@ -16,21 +14,21 @@ Un projet d'analyse de données suit généralement cinq étapes :
 
 Ces étapes n'ont pas le même poids. La préparation des données prend souvent la majeure partie du temps. En effet, il faut résoudre les problèmes de formats hétérogènes, de valeurs manquantes, de doublons d'observations, d'erreurs de saisie, d'accents, d'unités incohérentes et de modalités rares. À l'inverse, la partie visible du modèle peut parfois représenter peu de lignes de code, même si elle porte une décision importante.
 
-#note[
+#remark[
   Un objectif vague comme "analyser les données clients" n'est pas opérationnel.
-  Une meilleure formulation précise la décision visée: "peut-on prédire quels
+  Une meilleure formulation précise la décision visée : "peut-on prédire quels
   clients sont susceptibles d'acheter un nouveau produit d'épargne ?"
 ]
 
 === Définir une bonne question
 
-Une analyse de données commence par une question bien formulée. Ainsi, une question utile doit préciser la population, l'unité statistique, la variable ou la décision d'intérêt et le type de résultat attendu. On peut viser:
+Une analyse de données commence par une question bien formulée. Ainsi, une question utile doit préciser la population, l'unité statistique, la variable ou la décision d'intérêt et le type de résultat attendu. On peut viser :
 
-- une description: résumer la distribution d'une variable;
-- une comparaison: caractériser les différences entre groupes;
-- une prédiction: estimer une réponse pour une nouvelle observation;
-- une segmentation: regrouper des observations similaires;
-- une validation: mesurer si un modèle généralise à de nouvelles données.
+- une description : résumer la distribution d'une variable;
+- une comparaison : caractériser les différences entre groupes;
+- une prédiction : estimer une réponse pour une nouvelle observation;
+- une segmentation : regrouper des observations similaires;
+- une validation : mesurer si un modèle généralise à de nouvelles données.
 
 Une formulation claire évite les explorations sans direction et limite le risque
 de construire une méthode élégante qui ne répond pas au problème initial.
@@ -45,7 +43,7 @@ de construire une méthode élégante qui ne répond pas au problème initial.
 
 === Les quatre objets d'une méthode
 
-Une fois la question fixée, une méthode d'analyse peut être décrite par quatre objets complémentaires:
+Une fois la question fixée, une méthode d'analyse peut être décrite par quatre objets complémentaires :
 
 1. un *espace d'observation* qui représente les données;
 2. une *distance* (ou une similarité) qui formalise la  dissimilitude (ou ressemblance) entre observations;
@@ -57,7 +55,7 @@ identiques appliqués à deux représentations ou avec deux distances différent
 
 === De la question à la méthode
 
-La question détermine les objets à définir: l'unité statistique, les variables, l'espace d'observation, la distance éventuelle, le modèle, la mesure d'erreur et le protocole de validation. Ces choix doivent être faits avant de comparer des méthodes, car ils déterminent ce qu'une méthode peut apprendre et comment son résultat sera jugé.
+La question détermine les objets à définir : l'unité statistique, les variables, l'espace d'observation, la distance éventuelle, le modèle, la mesure d'erreur et le protocole de validation. Ces choix doivent être faits avant de comparer des méthodes, car ils déterminent ce qu'une méthode peut apprendre et comment son résultat sera jugé.
 
 Une analyse exploratoire n'est donc pas seulement un ensemble de graphiques.
 Elle sert à comprendre les données, à formuler des hypothèses, à repérer les
@@ -84,7 +82,7 @@ et la production des résultats. Cette chaîne de calcul, souvent appelée
 _pipeline_, relève en partie de l'ingénierie des données. Elle doit être testée,
 documentée et reproductible.
 
-Après le déploiement, on doit surveiller à la fois la qualité des données d'entrée et la performance du modèle. La distribution des variables peut évoluer avec le temps: on parle de dérive des données (_data drift_). La relation entre les variables explicatives et la réponse peut elle aussi changer. Il faut alors réévaluer les hypothèses, réentraîner le modèle ou revoir la question initiale.
+Après le déploiement, on doit surveiller à la fois la qualité des données d'entrée et la performance du modèle. La distribution des variables peut évoluer avec le temps : on parle de dérive des données (_data drift_). La relation entre les variables explicatives et la réponse peut elle aussi changer. Il faut alors réévaluer les hypothèses, réentraîner le modèle ou revoir la question initiale.
 
 #remark[
   Un bon modèle n'est pas seulement performant au moment de sa validation. Il
@@ -137,7 +135,7 @@ Cependant, trouver des données ne suffit pas. Il faut documenter
 - les filtres, exclusions et transformations déjà appliqués;
 - les changements de méthode de collecte au cours du temps.
 
-#note[
+#remark[
   La provenance permet de distinguer une valeur réellement observée d'une
   valeur calculée, imputée ou issue d'une autre base. Sans cette information,
   une analyse peut être impossible à reproduire ou à interpréter.
@@ -150,10 +148,7 @@ Les données peuvent arriver sous des formats variés. En R, le package `readr` 
 #align(center)[
   #table(
     columns: (1.1fr, 1.2fr, 1.4fr),
-    inset: 6pt,
-    stroke: 0.5pt + rgb("#cfd8dc"),
-    fill: (x, y) => if y == 0 { rgb("#eef3f1") },
-    [*Format*], [*Extensions*], [*Outils R*],
+    table.header([*Format*], [*Extensions*], [*Outils R*]),
     [Texte], [`.txt`, `.csv`], [`readr`],
     [Excel], [`.xlsx`], [`readxl`],
     [SAS et SPSS], [`.sas7bdat`, `.sav`], [`haven`],
@@ -166,7 +161,7 @@ caractères (par exemple, `encoding = "UTF-8"` pour des données contentant des 
 
 === Données tidy
 
-#definition-box(supplement: "Définition")[
+#definition[
   Un tableau est dit _tidy_ lorsque chaque variable est une colonne, chaque
   observation est une ligne et chaque cellule contient une seule valeur.
 ]
@@ -178,13 +173,9 @@ Le format _tidy_ n'est pas toujours le format de collecte. Il faut parfois pivot
 
 === Unité statistique
 
-#definition-box(supplement: "Définition")[
-  L'*unité statistique* est l'élément de base sur lequel porte une observation.
-  Elle est le porteur de l'information et fixe le niveau d'agrégation de
-  l'analyse.
-]
-
-L'unité statistique peut être un individu, une transaction, une entreprise, un pays, une image, un pixel ou un document. L'unité statistique n'est donc pas imposée par le fichier : elle résulte de la question posée.
+L'unité statistique, introduite dans @def-unite-statistique, fixe le niveau
+d'agrégation de l'analyse. Elle n'est pas imposée par le fichier : elle résulte
+de la question posée.
 
 #example[
   Dans une base d'images médicales, on peut prendre l'image comme unité pour
@@ -202,16 +193,16 @@ L'unité statistique peut être un individu, une transaction, une entreprise, un
 Le type d'une variable détermine l'espace mathématique, les distances possibles
 et les modèles pertinents.
 
-- Une variable numérique (ou quantitative) mesure une quantité: âge, revenu, température, masse.
-- Une variable nominale symétrique (ou qualitative) possède des modalités sans ordre et de statut comparable: nationalité, programme d'étude.
-- Une variable nominale asymétrique possède une modalité de référence ou de défaut: présence ou absence d'un symptôme, transaction frauduleuse ou non.
-- Une variable ordinale possède des modalités ordonnées sans écart mesurable: faible, moyen, élevé ou jamais, parfois, souvent.
+- Une variable numérique (ou quantitative) mesure une quantité : âge, revenu, température, masse.
+- Une variable nominale symétrique (ou qualitative) possède des modalités sans ordre et de statut comparable : nationalité, programme d'étude.
+- Une variable nominale asymétrique possède une modalité de référence ou de défaut : présence ou absence d'un symptôme, transaction frauduleuse ou non.
+- Une variable ordinale possède des modalités ordonnées sans écart mesurable : faible, moyen, élevé ou jamais, parfois, souvent.
 
 Une variable textuelle, une courbe, une image ou un réseau demande une
 représentation plus riche. Le choix de représentation est alors une partie
 centrale de l'analyse.
 
-#note[
+#remark[
   Une variable ordinale peut être codée par des nombres pour conserver son
   ordre, mais ce codage ne rend pas nécessairement les écarts comparables. Le
   passage de « faible » à « moyen » n'a aucune raison d'être équivalent au
@@ -226,8 +217,8 @@ $ cal(X) = cal(X)_1 times cal(X)_2 times dots times cal(X)_p. $
 
 Lorsque les $p$ variables sont numériques, on obtient généralement $cal(X) = RR^p$. Une courbe peut plutôt être vue comme un élément d'un espace de fonctions continues $cal(C)([a,b])$, tandis qu'un texte peut être représenté par une séquence de symboles, un sac de mots (_bag of words_) ou un vecteur numérique construit à partir du corpus.
 
-#example[
-  *Variables numériques et mixtes.* Si une personne est décrite par son âge,
+#example(title: [Variables numériques et mixtes])[
+  Si une personne est décrite par son âge,
   son revenu annuel et sa taille, une représentation naturelle est
   $cal(X)=RR_+^3$. Si l'on ajoute une région appartenant à un ensemble fini
   $cal(R)$ et un niveau de satisfaction ordinal dans
@@ -235,19 +226,19 @@ Lorsque les $p$ variables sont numériques, on obtient généralement $cal(X) = 
 
   $ cal(X)=RR_+^3 times cal(R) times cal(S). $
 
-  L'observation n'est plus un simple vecteur numérique: elle combine plusieurs
+  L'observation n'est plus un simple vecteur numérique : elle combine plusieurs
   types d'espaces.
 ]
 
-#example[
-  *Images.* Pour un pixel couleur dont les intensités sont ramenées entre $0$ et $1$, l'espace d'observation est $[0,1]^3$. Si l'unité statistique est plutôt une image couleur de hauteur $h$ et de largeur $w$, l'espace devient $[0,1]^(h times w times 3)$. Le même fichier conduit donc à deux espaces différents selon la question étudiée.
+#example(title: [Images])[
+  Pour un pixel couleur dont les intensités sont ramenées entre $0$ et $1$, l'espace d'observation est $[0,1]^3$. Si l'unité statistique est plutôt une image couleur de hauteur $h$ et de largeur $w$, l'espace devient $[0,1]^(h times w times 3)$. Le même fichier conduit donc à deux espaces différents selon la question étudiée.
 ]
 
-#example[
-  *Courbes et signaux.* Une trajectoire de température observée en continu pendant une journée peut être modélisée dans $cal(C)([0,24])$. Mesurée à $T$ instants seulement, elle est plutôt représentée dans $RR^T$.
+#example(title: [Courbes et signaux])[
+  Une trajectoire de température observée en continu pendant une journée peut être modélisée dans $cal(C)([0,24])$. Mesurée à $T$ instants seulement, elle est plutôt représentée dans $RR^T$.
 ]
 
-#note[
+#remark[
   Le choix de l'espace n'est pas neutre. En effet, encoder les couleurs rouge, vert et bleu par 1, 2 et 3 impose un ordre qui n'existe pas. Il vaut mieux utiliser une représentation adaptée, par exemple un encodage binaire des modalités.
 ]
 
@@ -257,7 +248,7 @@ Lorsque les $p$ variables sont numériques, on obtient généralement $cal(X) = 
 
 Une grande partie des méthodes d'analys de données reposent sur une comparaison entre observations. Une distance mesure une dissemblance : plus elle est grande, plus les observations sont considérés comme éloignés.
 
-#definition-box(supplement: "Définition")[
+#definition[
   Une fonction $d: cal(X) times cal(X) arrow.r RR$ est une *distance* si, pour
   tout $x,y,z in cal(X)$,
 
@@ -267,16 +258,20 @@ Une grande partie des méthodes d'analys de données reposent sur une comparaiso
   4. Inégalité triangulaire : $d(x,y) <= d(x,z) + d(z,y)$.
 ]
 
-Pour deux vecteurs numériques $x$ et $y$, la *distance euclidienne* s'écrit:
+#definition(title: [Distances euclidienne et de Minkowski])[
+  Pour deux vecteurs numériques $x$ et $y$, la *distance euclidienne* s'écrit :
 
-$ d(x, y) = sqrt(sum_(j=1)^p (x_j - y_j)^2) $
+  $ d(x, y) = sqrt(sum_(j=1)^p (x_j - y_j)^2) $
 
-Plus généralement, la *distance de Minkowski* d'ordre $q >= 1$ est:
+  Plus généralement, la *distance de Minkowski* d'ordre $q >= 1$ est :
 
-$ d_q (x, y) = (sum_(j=1)^p |x_j - y_j|^q)^(1 / q) $
+  $ d_q (x, y) = (sum_(j=1)^p |x_j - y_j|^q)^(1 / q) $
 
-La *distance de Manhattan* correspond à $q = 1$ et la distance euclidienne à
-$q = 2$. Lorsque $0 < q < 1$, la formule définit encore une dissemblance, mais
+  La *distance de Manhattan* correspond à $q = 1$ et la distance euclidienne à
+  $q = 2$.
+]
+
+Lorsque $0 < q < 1$, la formule définit encore une dissemblance, mais
 elle ne vérifie généralement pas l'inégalité triangulaire.
 
 #example[
@@ -297,30 +292,33 @@ distance : l'inégalité triangulaire doit toujours être vérifiée séparémen
 Les distances numériques sont sensibles aux unités. Une variable mesurée en
 dollars peut dominer une variable mesurée entre 0 et 1, même si elle n'est pas
 plus importante. On standardise donc souvent les variables numériques avant de
-calculer une distance:
+calculer une distance :
 
-- centrer: retirer la moyenne;
-- réduire: diviser par l'écart-type.
+- centrer : retirer la moyenne;
+- réduire : diviser par l'écart-type.
 
-Pour la variable $j$, on pose $z_j (x)= frac((x_j-mu_j), sigma_j, style: "horizontal")$. La distance euclidienne entre observations standardisées devient
+Pour la variable $j$, on estime la moyenne $overline(x)_j$ et l'écart-type
+$s_j>0$ sur les données de référence (l'entraînement en contexte prédictif).
+On pose $z_j(x)=(x_j-overline(x)_j)/s_j$. La distance euclidienne entre
+observations standardisées devient
 
-$ d_z (x,y) = sqrt(sum_(j=1)^p ((x_j-y_j)/sigma_j)^2). $
+$ d_z (x,y) = sqrt(sum_(j=1)^p ((x_j-y_j)/s_j)^2). $
 
 Le centrage disparaît dans la différence, tandis que la réduction pondère
 chaque écart par la variabilité de sa variable.
 
-#property-box(supplement: "Propriété")[
+#property[
   La distance euclidienne calculée après standardisation est invariante à un
   changement d'origine et d'échelle effectué séparément sur chaque variable.
 ]
 
-#proof(title: "Preuve")[
+#proof[
   Transformons la variable $j$ par $x'_j=a_j+b_j x_j$, où $b_j != 0$. Son
-  écart-type devient $sigma'_j=|b_j| sigma_j$. Par conséquent,
+  écart-type devient $s'_j=|b_j| s_j$. Par conséquent,
 
-  $ ((x'_j-y'_j)/sigma'_j)^2
-    = ((|b_j| (x_j-y_j))/(|b_j|sigma_j))^2
-    = ((x_j-y_j)/sigma_j)^2. $
+  $ ((x'_j-y'_j)/s'_j)^2
+    = ((b_j (x_j-y_j))/(|b_j|s_j))^2
+    = ((x_j-y_j)/s_j)^2. $
 
   Chaque terme de la somme est inchangé; la distance l'est donc aussi.
 ]
@@ -337,13 +335,13 @@ Pour des variables qualitatives, les distances numériques habituelles n'ont pas
   Pour $cal(X)={"rouge", "vert", "bleu"}$, l'encodage un-parmi-$K$ associe le vecteur $(1,0,0)^top$ au rouge, le vecteur $(0,1,0)^top$ au vert et le vecteur $(0,0,1)^top$ au bleu. Toutes les modalités restent alors à la même distance les unes des autres.
 ]
 
-#definition-box(supplement: "Définition")[
+#definition[
   Pour deux vecteurs qualitatifs $x,y in cal(X)^p$, la *distance de Hamming* est
 
-  $ d_H (x,y) = sum_(j=1)^p 1(x_j != y_j). $
+  $ d_H (x,y) = sum_(j=1)^p ind(x_j != y_j). $
 
   Elle compte le nombre de désaccords. La proportion d'accords
-  $s(x,y)=p^(-1) sum_j 1(x_j=y_j)$ fournit une similarité comprise entre
+  $s(x,y)=p^(-1) sum_j ind(x_j=y_j)$ fournit une similarité comprise entre
   $0$ et $1$.
 ]
 
@@ -353,14 +351,21 @@ Pour des variables qualitatives, les distances numériques habituelles n'ont pas
   leur proportion d'accords vaut $1/3$.
 ]
 
-Pour des variables binaires rares ou asymétriques, les doubles absences sont
-souvent peu informatives. On définit $M_11$ comme le nombre de présences
-communes, $M_10$ et $M_01$ comme les désaccords, et $M_00$ comme le nombre de
-doubles absences. L'*indice de Jaccard* se concentre sur les présences :
+#definition(title: [Indice et distance de Jaccard])[
+  Pour des variables binaires rares ou asymétriques, les doubles absences sont
+  souvent peu informatives. On définit $M_11$ comme le nombre de présences
+  communes, $M_10$ et $M_01$ comme les désaccords, et $M_00$ comme le nombre de
+  doubles absences. L'*indice de Jaccard* se concentre sur les présences :
 
-$ J = M_11 / (M_11 + M_10 + M_01) $
+  $ J = M_11 / (M_11 + M_10 + M_01) $
 
-La distance associée est $d_J=1-J$. Pour deux vecteurs binaires $x=(1,0,1,0,0)^top$ et $y=(1,0,0,1,0)^top$, on a $M_11=1$, $M_10=M_01=1$ et $M_00=2$, donc $J=1/3$ et $d_J=2/3$.
+  La distance associée est $d_J=1-J$. Si les deux vecteurs ne contiennent que
+  des zéros, on pose par convention $J=1$ et $d_J=0$.
+]
+
+#example(title: [Présences communes et désaccords])[
+  Pour deux vecteurs binaires $x=(1,0,1,0,0)^top$ et $y=(1,0,0,1,0)^top$, on a $M_11=1$, $M_10=M_01=1$ et $M_00=2$, donc $J=1/3$ et $d_J=2/3$.
+]
 
 === Choisir une distance
 
@@ -369,83 +374,85 @@ observations peuvent être proches selon leurs valeurs numériques, leurs
 catégories, leurs trajectoires temporelles ou leurs voisins dans un graphe. La
 distance doit donc être reliée à la question d'analyse.
 
-#example[
-  *Profils de clients.* Supposons que les variables soient l'âge, le revenu annuel et le nombre d'achats. Avec la distance euclidienne, les écarts de revenu, exprimés en dollars, dominent presque entièrement le calcul. Si les trois dimensions doivent avoir une importance comparable, une distance euclidienne sur les variables standardisées est plus cohérente. Si le revenu est réellement prioritaire pour la décision, on peut au contraire conserver ou expliciter une pondération plus forte.
+#example(title: [Profils de clients])[
+  Supposons que les variables soient l'âge, le revenu annuel et le nombre d'achats. Avec la distance euclidienne, les écarts de revenu, exprimés en dollars, dominent presque entièrement le calcul. Si les trois dimensions doivent avoir une importance comparable, une distance euclidienne sur les variables standardisées est plus cohérente. Si le revenu est réellement prioritaire pour la décision, on peut au contraire conserver ou expliciter une pondération plus forte.
 ]
 
-#example[
-  *Paniers d'achat.* Deux personnes qui n'ont acheté aucun
+#example(title: [Paniers d'achat])[
+  Deux personnes qui n'ont acheté aucun
   des mêmes milliers de produits obtiennent beaucoup de doubles absences. Une
   distance de Hamming normalisée peut alors les déclarer artificiellement
   proches. La distance de Jaccard est préférable lorsque les présences communes
   et les désaccords sont informatifs, mais que les absences communes le sont peu.
 ]
 
-#example[
-  *Données mixtes.* Pour comparer des logements à partir de leur superficie,
+#example(title: [Données mixtes])[
+  Pour comparer des logements à partir de leur superficie,
   leur quartier et leur type de chauffage, une distance euclidienne unique n'a
   pas de sens. On peut combiner une distance numérique standardisée avec une
   distance de désaccord sur les variables qualitatives, puis choisir les poids
-  selon l'objectif: estimation du prix, recherche de biens comparables ou
+  selon l'objectif : estimation du prix, recherche de biens comparables ou
   segmentation du parc immobilier.
 ]
 
-#note[
+#remark[
   Une distance n'est jamais un détail technique. Elle peut changer les groupes
   obtenus, les voisins les plus proches, les axes de réduction de dimension et
   l'interprétation des résultats. Son choix doit être justifié par le sens des
   variables, leur échelle et le coût réel des différences.
 ]
 
-== Le calcul de l'erreur
+== Le calcul de l'erreur <sec-calcul-erreur>
 
 #remark[
-  Les termes *erreur*, *coût* et *perte* sont employés comme synonymes. Ils désignent une quantité numérique qui évalue l'écart entre le résultat obtenu et le résultat souhaité: plus cette quantité est faible, meilleure est la prédiction ou la décision. On parlera donc indifféremment de fonction d'erreur, de fonction de coût ou de fonction de perte.
+  Les termes *erreur*, *coût* et *perte* sont employés comme synonymes. Ils désignent une quantité numérique qui évalue l'écart entre le résultat obtenu et le résultat souhaité : plus cette quantité est faible, meilleure est la prédiction ou la décision. On parlera donc indifféremment de fonction d'erreur, de fonction de coût ou de fonction de perte.
 ]
 
-=== Modèle prédictif
+=== Modèle prédictif <sec-modele-predictif>
 
-Une écriture générale pour les modèles prédictifs est:
+Une écriture générale pour les modèles prédictifs est :
 
 $ Y = f(X) + epsilon $
 
 La fonction $f$ représente l'information systématique que les variables explicatives apportent sur la réponse $Y$. Le terme $epsilon$ représente la part non expliquée, liée au bruit, aux variables absentes et à la variabilité naturelle. Dans le cadre de la régression, on suppose généralement
 
-$ EE(epsilon)=0, quad "Var"(epsilon)=sigma^2, quad epsilon " indépendant de " X. $
+$ expect(epsilon)=0, quad Var(epsilon)=sigma^2, quad epsilon " indépendant de " X. $
 
 L'objectif est d'estimer $f$ à partir d'un échantillon. La question centrale
-devient alors: comment savoir si l'estimateur est bon ?
+devient alors : comment savoir si l'estimateur est bon ?
 
 #example[
   En régression linéaire simple, on impose $hat(f)(x)=a x+b$. Estimer la fonction $hat(f)$ revient alors à estimer $a$ et $b$. Une méthode plus flexible autorise un plus grand ensemble de fonctions possibles.
 ]
 
 #remark[
-  Exactitude et interprétabilité peuvent entrer en tension. Une règle simple est facile à expliquer, mais peut manquer une relation complexe. À l'inverse, une méthode très flexible peut mieux prédire tout en étant plus difficile à justifier. Il n'existe pas de méthode universellement optimale: le modèle doit être adapté à la question, aux données et au coût des erreurs.
+  Exactitude et interprétabilité peuvent entrer en tension. Une règle simple est facile à expliquer, mais peut manquer une relation complexe. À l'inverse, une méthode très flexible peut mieux prédire tout en étant plus difficile à justifier. Il n'existe pas de méthode universellement optimale : le modèle doit être adapté à la question, aux données et au coût des erreurs.
 ]
 
 === Mesures d'erreur en régression
 
-#definition-box(supplement: "Définition")[
+#definition[
   Pour une réponse quantitative, l'*erreur quadratique moyenne* (_mean squared error_) est
 
-  $ "MSE" = 1 / n sum_(i=1)^n (y_i - hat(y)_i)^2, $
+  $ MSE = 1 / n sum_(i=1)^n (y_i - hat(y)_i)^2, $
 
   où $hat(y)_i=hat(f)(x_i)$ est la prédiction pour l'observation $i$.
 ]
 
-On peut aussi utiliser l'erreur absolue moyenne (_mean absolute error_), moins sensible aux valeurs extrêmes :
+#definition(title: [Erreur absolue moyenne])[
+  On peut aussi utiliser l'*erreur absolue moyenne* (_mean absolute error_), moins sensible aux valeurs extrêmes :
 
-$ "MAE" = 1 / n sum_(i=1)^n |y_i - hat(y)_i| $
+  $ MAE = 1 / n sum_(i=1)^n |y_i - hat(y)_i|. $
+]
 
 Le choix entre MSE et MAE dépend du problème. La MSE pénalise fortement les erreurs importantes, ce qui peut être souhaitable si elles sont coûteuses. La MAE est plus robuste aux valeurs aberrantes et peut mieux refléter l'erreur typique.
 
 === Mesures d'erreur en classification
 
-#definition-box(supplement: "Définition")[
+#definition[
   Pour une réponse qualitative, le *taux d'erreur* (_error rate_) est
 
-  $ "ER" = 1 / n sum_(i=1)^n 1(y_i != hat(y)_i). $
+  $ ER = 1 / n sum_(i=1)^n ind(y_i != hat(y)_i). $
 
   Il mesure la proportion de mauvaises classifications.
 ]
@@ -454,16 +461,14 @@ Lorsque les classes sont déséquilibrées, le taux d'erreur global peut être
 trompeur. En classification binaire, on désigne d'abord une classe comme
 positive, puis on répartit les prédictions dans une matrice de confusion.
 
-#definition-box(supplement: "Définition")[
-  La *matrice de confusion* croise la classe observée et la classe prédite:
+#definition[
+  La *matrice de confusion* croise la classe observée et la classe prédite :
 
   #align(center)[
     #table(
       columns: (1.35fr, 1fr, 1fr),
-      inset: 5pt,
-      stroke: 0.5pt + rgb("#cfd8dc"),
       fill: (x, y) => if y == 0 or x == 0 { rgb("#eef3f1") },
-      [], [*Prédit positif*], [*Prédit négatif*],
+      table.header([], [*Prédit positif*], [*Prédit négatif*]),
       [*Réel positif*], [Vrai positif (VP)], [Faux négatif (FN)],
       [*Réel négatif*], [Faux positif (FP)], [Vrai négatif (VN)],
     )
@@ -474,18 +479,18 @@ positive, puis on répartit les prédictions dans une matrice de confusion.
   négatifs déclarés positifs à tort.
 ]
 
-#definition-box(supplement: "Définition")[
-  La *sensibilité* (_sensitivity_ ou _recall_) est la proportion des cas réellement positifs qui sont détectés:
+#definition[
+  La *sensibilité* (_sensitivity_ ou _recall_) est la proportion des cas réellement positifs qui sont détectés :
 
   $ "Sensibilité" = "VP" / ("VP" + "FN"). $
 
-  La *spécificité* (_specificity_) est la proportion des cas réellement négatifs qui sont correctement écartés:
+  La *spécificité* (_specificity_) est la proportion des cas réellement négatifs qui sont correctement écartés :
 
   $ "Spécificité" = "VN" / ("VN" + "FP"). $
 ]
 
-#definition-box(supplement: "Définition")[
-  La *précision* (_precision_) est la proportion des prédictions positives qui correspondent effectivement à des cas positifs:
+#definition[
+  La *précision* (_precision_) est la proportion des prédictions positives qui correspondent effectivement à des cas positifs :
 
   $ "Précision" = "VP" / ("VP" + "FP"). $
 ]
@@ -497,8 +502,8 @@ de la même façon sur les cas négatifs. Abaisser le seuil de décision augment
 généralement la sensibilité, mais produit davantage de faux positifs et réduit
 donc la spécificité.
 
-#example[
-  *Détection de fraude.* Parmi 1 000 transactions, 20 sont frauduleuses. Un
+#example(title: [Détection de fraude])[
+  Parmi 1 000 transactions, 20 sont frauduleuses. Un
   modèle détecte 16 de ces fraudes et en manque 4. Il signale aussi à tort 30
   transactions légitimes. On a donc $"VP"=16$, $"FN"=4$, $"FP"=30$ et
   $"VN"=950$. Ainsi,
@@ -528,32 +533,32 @@ une erreur de diagnostic et une erreur d'affectation dans un groupe n'ont pas le
 même sens. Il faut donc choisir une erreur compatible avec les conséquences
 pratiques de l'analyse.
 
-Dans certains problèmes, les erreurs sont asymétriques: un faux positif et un
+Dans certains problèmes, les erreurs sont asymétriques : un faux positif et un
 faux négatif n'ont pas le même coût. Dans ce cas, le seuil de décision et la
 mesure de performance doivent être discutés explicitement.
 
-#example[
-  *Dépistage médical.* Un faux négatif laisse repartir une personne malade sans
+#example(title: [Dépistage médical])[
+  Un faux négatif laisse repartir une personne malade sans
   suivi, tandis qu'un faux positif entraîne généralement un examen
   complémentaire. Si la première conséquence est beaucoup plus grave, on donne
   un coût supérieur aux faux négatifs et on choisit un seuil favorisant la
   sensibilité. Ce choix augmente souvent le nombre de faux positifs. Il s'agit cependant d'un compromis explicite, pas d'une erreur de calcul.
 ]
 
-#example[
-  *Détection de fraude.* Bloquer à tort une transaction légitime peut frustrer un client, mais laisser passer une fraude de 100 000 dollars peut coûter bien davantage. Une simple proportion d'erreurs attribue pourtant le même poids à ces deux situations. Une fonction de coût peut, par exemple, intégrer le montant de la transaction, le coût d'une vérification manuelle et la probabilité de perdre le client.
+#example(title: [Détection de fraude])[
+  Bloquer à tort une transaction légitime peut frustrer un client, mais laisser passer une fraude de 100 000 dollars peut coûter bien davantage. Une simple proportion d'erreurs attribue pourtant le même poids à ces deux situations. Une fonction de coût peut, par exemple, intégrer le montant de la transaction, le coût d'une vérification manuelle et la probabilité de perdre le client.
 ]
 
-#example[
-  *Gestion des stocks.* Sous-estimer la demande peut provoquer une rupture de
+#example(title: [Gestion des stocks])[
+  Sous-estimer la demande peut provoquer une rupture de
   stock et des ventes perdues. La surestimer occasionne des frais de stockage et
   parfois du gaspillage. Lorsque ces coûts sont différents, la meilleure
   prévision n'est pas nécessairement la moyenne conditionnelle. La perte doit
   pénaliser différemment les prévisions trop basses et trop élevées.
 ]
 
-#example[
-  *Prévision d'un temps de livraison.* Avec la MSE, une erreur exceptionnelle de deux heures compte beaucoup plus que plusieurs erreurs de quelques minutes. Cette propriété est souhaitable si les retards extrêmes ont de lourdes conséquences. Si l'on veut plutôt mesurer l'écart typique habituel, la MAE peut être plus pertinente.
+#example(title: [Prévision d'un temps de livraison])[
+  Avec la MSE, une erreur exceptionnelle de deux heures compte beaucoup plus que plusieurs erreurs de quelques minutes. Cette propriété est souhaitable si les retards extrêmes ont de lourdes conséquences. Si l'on veut plutôt mesurer l'écart typique habituel, la MAE peut être plus pertinente.
 ]
 
 === Le compromis biais-variance
@@ -570,69 +575,69 @@ Pour une nouvelle observation dont les covariables sont fixées à $x_0$, on
 sur les échantillons d'entraînement possibles et sur le bruit de la nouvelle
 observation.
 
-#definition-box(supplement: "Définition")[
+#definition[
   La *prédiction moyenne* d'une méthode au point $x_0$ est
 
-  $ m(x_0) = EE(hat(f)(x_0)). $
+  $ m(x_0) = expect(hat(f)(x_0)). $
 
   Son *biais* mesure l'écart systématique entre cette prédiction moyenne et la
-  vraie fonction:
+  vraie fonction :
 
-  $ "Biais"(hat(f)(x_0)) = m(x_0) - f(x_0). $
+  $ Biais(hat(f)(x_0)) = m(x_0) - f(x_0). $
 
   Sa *variance* mesure la dispersion des prédictions obtenues à partir de
-  différents échantillons d'entraînement:
+  différents échantillons d'entraînement :
 
-  $ "Var"(hat(f)(x_0)) = EE((hat(f)(x_0) - m(x_0))^2). $
+  $ Var(hat(f)(x_0)) = expect((hat(f)(x_0) - m(x_0))^2). $
 ]
 
 Le biais peut être positif ou négatif, mais c'est son carré qui intervient dans
 l'erreur quadratique. Une méthode peu biaisée n'est donc pas nécessairement une
-bonne méthode: ses prédictions peuvent être centrées sur la bonne valeur tout en
+bonne méthode : ses prédictions peuvent être centrées sur la bonne valeur tout en
 étant extrêmement instables d'un échantillon à l'autre.
 
-#property-box(supplement: "Propriété")[
-  Sous les hypothèses $EE(epsilon_0)=0$, $"Var"(epsilon_0)=sigma^2$ et
+#property[
+  Sous les hypothèses $expect(epsilon_0)=0$, $Var(epsilon_0)=sigma^2$ et
   d'indépendance entre le bruit futur et l'échantillon d'entraînement,
 
-  $ EE((Y_0-hat(f)(x_0))^2)
-    = "Biais"(hat(f)(x_0))^2
-    + "Var"(hat(f)(x_0))
+  $ expect((Y_0-hat(f)(x_0))^2)
+    = Biais(hat(f)(x_0))^2
+    + Var(hat(f)(x_0))
     + sigma^2, $
 
   où
-  $"Biais"(hat(f)(x_0))=EE(hat(f)(x_0))-f(x_0)$.
+  $Biais(hat(f)(x_0))=expect(hat(f)(x_0))-f(x_0)$.
 ]
 
-#proof(title: "Preuve")[
-  Posons $m(x_0)=EE(hat(f)(x_0))$. En ajoutant et retranchant $m(x_0)$,
+#proof[
+  Posons $m(x_0)=expect(hat(f)(x_0))$. En ajoutant et retranchant $m(x_0)$,
 
   $ Y_0-hat(f)(x_0)
     = (f(x_0)-m(x_0))
     + (m(x_0)-hat(f)(x_0))
     + epsilon_0. $
 
-  Après élévation au carré et prise d'espérance, les termes croisés sont nuls:
-  le deuxième terme est centré, $EE(epsilon_0)=0$, et le bruit futur est
+  Après élévation au carré et prise d'espérance, les termes croisés sont nuls :
+  le deuxième terme est centré, $expect(epsilon_0)=0$, et le bruit futur est
   indépendant de l'estimateur. Il reste
 
   $ (f(x_0)-m(x_0))^2
-    + EE((hat(f)(x_0)-m(x_0))^2)
-    + EE(epsilon_0^2), $
+    + expect((hat(f)(x_0)-m(x_0))^2)
+    + expect(epsilon_0^2), $
 
   soit respectivement le biais au carré, la variance et $sigma^2$.
 ]
 
-Cette identité est ponctuelle: le biais et la variance peuvent changer selon
+Cette identité est ponctuelle : le biais et la variance peuvent changer selon
 $x_0$. En prenant ensuite la moyenne sur la distribution des nouvelles
 covariables $X_0$, on obtient la même décomposition pour l'erreur quadratique
 moyenne de généralisation.
 
-Cette décomposition distingue trois sources d'erreur:
+Cette décomposition distingue trois sources d'erreur :
 
-- le *biais au carré* traduit une erreur systématique d'approximation: la méthode
+- le *biais au carré* traduit une erreur systématique d'approximation : la méthode
   est en moyenne éloignée de la relation réelle;
-- la *variance* traduit une sensibilité à l'échantillon d'entraînement: de
+- la *variance* traduit une sensibilité à l'échantillon d'entraînement : de
   petites modifications des données produisent de grandes modifications de la
   prédiction;
 - la *variance du bruit* $sigma^2$ est l'erreur irréductible avec les variables
@@ -641,7 +646,7 @@ Cette décomposition distingue trois sources d'erreur:
 
 Le biais et la variance constituent la partie sur laquelle le choix de la
 méthode peut agir. Leur combinaison permet de caractériser les situations
-classiques suivantes:
+classiques suivantes :
 
 #align(center)[
   #set text(size: 10.5pt)
@@ -649,24 +654,21 @@ classiques suivantes:
   #table(
     columns: (1.25fr, 0.8fr, 0.8fr, 1.8fr),
     align: (x, y) => if y == 0 or x < 3 { center } else { left },
-    inset: 5pt,
-    stroke: 0.5pt + rgb("#cfd8dc"),
-    fill: (x, y) => if y == 0 { rgb("#eef3f1") },
-    [*Situation*], [*Biais*], [*Variance*], [*Comportement*],
+    table.header([*Situation*], [*Biais*], [*Variance*], [*Comportement*]),
     [Sous-ajustement], [Élevé], [Faible], [Structure réelle non captée],
     [Compromis utile], [Modéré], [Modérée], [Bonne généralisation possible],
     [Sur-ajustement], [Faible], [Élevée], [Fluctuations de l'échantillon],
   )
 ]
 
-#example[
-  *Comparaison de trois méthodes.* Supposons qu'en un point $x_0$, la vraie
+#example(title: [Comparaison de trois méthodes])[
+  Supposons qu'en un point $x_0$, la vraie
   valeur soit $f(x_0)=10$ et que $sigma^2=1$. Trois méthodes ont les
-  caractéristiques suivantes:
+  caractéristiques suivantes :
 
-  - méthode A: biais $=-2$ et variance $=0.25$;
-  - méthode B: biais $=0$ et variance $=4$;
-  - méthode C: biais $=-0.5$ et variance $=0.5$.
+  - méthode A : biais $=-2$ et variance $=0.25$;
+  - méthode B : biais $=0$ et variance $=4$;
+  - méthode C : biais $=-0.5$ et variance $=0.5$.
 
   Leurs erreurs quadratiques attendues valent respectivement
   $(-2)^2+0.25+1=5.25$, $0^2+4+1=5$ et $(-0.5)^2+0.5+1=1.75$. La méthode C est
@@ -692,27 +694,24 @@ généralisation, et non l'erreur d'entraînement.
 
 En pratique, la fonction $f$ est inconnue. On ne peut donc pas calculer directement son biais et sa variance. La validation sur des observations qui n'ont pas servi à l'ajustement, notamment la validation croisée, permet d'estimer l'erreur de généralisation et de choisir indirectement un compromis raisonnable.
 
-== La validation
+== La validation <sec-validation>
 
-=== Séparation des données
+=== Séparation des données <sec-separation-donnees>
 
 Évaluer un modèle sur les données qui ont servi à l'entraîner donne une vision trop optimiste. En effet, le modèle a déjà utilisé ces observations pour réduire son erreur. Pour estimer sa capacité de généralisation, il faut l'évaluer sur des observations qui n'ont participé ni à son ajustement ni aux décisions ayant conduit à sa sélection.
 
-#definition-box(supplement: "Définition")[
-  Une séparation classique produit trois ensembles disjoints:
+#definition[
+  Une séparation classique produit trois ensembles disjoints :
 
   - l'ensemble d'*entraînement* (_training set_) sert à estimer les paramètres du modèle et les transformations nécessaires;
-  - l'ensemble de *validation* (_validation set_) sert à comparer les méthodes, à choisir les hyper-paramètres et, le cas échéant, à régler un seuil de décision;
+  - l'ensemble de *validation* (_validation set_) sert à comparer les méthodes, à choisir les hyperparamètres et, le cas échéant, à régler un seuil de décision;
   - l'ensemble de *test* (_test set_) sert uniquement à estimer la performance finale de la procédure retenue.
 ]
 
-La distinction entre paramètres et hyper-paramètres est importante. Les
-coefficients d'une régression sont estimés automatiquement sur l'ensemble
-d'entraînement. En revanche, le degré d'un polynôme, la profondeur maximale
-d'un arbre ou la valeur d'un paramètre de régularisation sont des
-hyper-paramètres choisis à l'aide de la validation.
+Cette répartition met en pratique la distinction entre paramètre et
+hyperparamètre donnée dans @def-parametre-hyperparametre.
 
-Un protocole rigoureux suit généralement l'ordre suivant:
+Un protocole rigoureux suit généralement l'ordre suivant :
 
 1. mettre de côté l'ensemble de test avant l'exploration guidant le modèle;
 2. ajuster plusieurs procédures sur l'ensemble d'entraînement;
@@ -729,7 +728,7 @@ observations pour obtenir une évaluation finale honnête.
 Une séparation aléatoire observation par observation convient lorsque les
 observations sont indépendantes, issues de la même population et destinées à
 représenter la même situation future. D'autres structures exigent une règle
-adaptée:
+adaptée :
 
 - en classification déséquilibrée, une séparation stratifiée conserve
   approximativement la proportion de chaque classe dans les ensembles;
@@ -739,8 +738,8 @@ adaptée:
 - pour des données temporelles, l'entraînement doit précéder chronologiquement
   la validation et le test.
 
-#example[
-  *Dossiers médicaux répétés.* Une base contient plusieurs consultations par
+#example(title: [Dossiers médicaux répétés])[
+  Une base contient plusieurs consultations par
   patient. Une séparation ligne par ligne peut placer les premières visites
   d'une personne dans l'entraînement et ses visites suivantes dans le test. Le
   modèle reconnaît alors indirectement le patient et la performance paraît trop
@@ -748,8 +747,8 @@ adaptée:
   nouvelles personnes.
 ]
 
-#example[
-  *Prévision de la demande.* Pour prévoir les ventes de 2026, une séparation
+#example(title: [Prévision de la demande])[
+  Pour prévoir les ventes de 2026, une séparation
   aléatoire pourrait utiliser des observations de 2026 pour entraîner un modèle
   évalué sur 2025. Cette information ne serait pas disponible au moment réel de
   la prévision. On entraîne plutôt sur les périodes anciennes, on valide sur une
@@ -764,12 +763,12 @@ Le choix doit porter sur les effectifs réellement informatifs plutôt que sur l
 
 Une séparation unique présente deux limites. D'abord, la performance mesurée dépend des observations tirées pour le jeu de validation ou le jeu de test. Ensuite, réserver des données réduit la taille de l'échantillon disponible pour l'apprentissage. La validation croisée atténue la première difficulté et exploite plus efficacement les données d'entraînement.
 
-==== Prévenir les fuites de données
+==== Prévenir les fuites de données <sec-fuites-donnees>
 
 Les transformations apprises à partir des données font partie du modèle. La standardisation, l'imputation, la sélection de variables, la réduction de dimension et le suréchantillonnage doivent donc être ajustés sur le jeu d'entraînement seulement, puis appliqués sans réajustement au jeu de validation et au jeu de test.
 
-#example[
-  *Standardisation.* Pour centrer une variable, on calcule sa moyenne dans le jeu d'entraînement. Utiliser la moyenne de toute la base de données transmet au modèle une information sur la distribution du jeu de test, même si les valeurs de la réponse n'ont pas été utilisées.
+#example(title: [Standardisation])[
+  Pour centrer une variable, on calcule sa moyenne dans le jeu d'entraînement. Utiliser la moyenne de toute la base de données transmet au modèle une information sur la distribution du jeu de test, même si les valeurs de la réponse n'ont pas été utilisées.
 ]
 
 #remark[
@@ -784,27 +783,27 @@ données d'entraînement plusieurs fois afin que chaque observation serve à la
 validation, tout en étant prédite par un modèle qui ne l'a pas utilisée pour son
 ajustement.
 
-#definition-box(supplement: "Définition")[
-  Dans une *validation croisée à $K$ plis* (_$K$-fold cross-validation_), les indices des observations sont répartis en $K$ ensembles disjoints $I_1, dots, I_K$. Pour le pli $k$, on ajuste un modèle $hat(f)^(-k)$ sur toutes les observations sauf celles de $I_k$, puis on calcule son erreur sur $I_k$.
+#definition[
+  Dans une *validation croisée à $V$ plis* (_$V$-fold cross-validation_), les indices des observations sont répartis en $V$ ensembles disjoints $I_1, dots, I_V$. Pour le pli $v$, on ajuste un modèle $hat(f)^((-v))$ sur toutes les observations sauf celles de $I_v$, puis on calcule son erreur sur $I_v$.
 
-  Si $n_k$ est la taille du pli et $L$ la fonction d'erreur, de coût ou de
+  Si $n_v$ est la taille du pli et $L$ la fonction d'erreur, de coût ou de
   perte, l'erreur du pli est
 
-  $ "Err"_k = 1 / n_k sum_(i in I_k) L(y_i, hat(f)^(-k)(x_i)). $
+  $ Err_v = 1 / n_v sum_(i in I_v) L(y_i, hat(f)^((-v))(x_i)). $
 
-  L'estimation globale pondère chaque pli par son effectif:
+  L'estimation globale pondère chaque pli par son effectif :
 
-  $ hat("Err")_("CV") = 1 / n sum_(k=1)^K n_k "Err"_k. $
+  $ hat(Err)_("CV") = 1 / n sum_(v=1)^V n_v Err_v. $
 
   Lorsque les plis ont la même taille, cette expression devient simplement
 
-  $ hat("Err")_("CV")=1/K sum_(k=1)^K "Err"_k. $
+  $ hat(Err)_("CV")=1/V sum_(v=1)^V Err_v. $
 ]
 
-Le calcul suit quatre étapes:
+Le calcul suit quatre étapes :
 
-1. construire les $K$ plis selon une règle compatible avec les données;
-2. pour chaque pli, ajuster toute la procédure sur les $K-1$ autres plis;
+1. construire les $V$ plis selon une règle compatible avec les données;
+2. pour chaque pli, ajuster toute la procédure sur les $V-1$ autres plis;
 3. prédire les observations du pli laissé de côté et calculer leur erreur;
 4. regrouper les prédictions hors échantillon ou moyenner les erreurs des plis.
 
@@ -813,12 +812,12 @@ observation possède une prédiction issue d'un modèle qui ne l'a pas vue penda
 l'entraînement. Elles permettent de calculer une mesure globale comme la MSE,
 la MAE, le taux d'erreur ou l'aire sous une courbe ROC.
 
-#example[
-  *Validation à cinq plis.* Les taux d'erreur observés sur cinq plis sont 18 %,
+#example(title: [Validation à cinq plis])[
+  Les taux d'erreur observés sur cinq plis sont 18 %,
   22 %, 20 %, 16 % et 24 %. Comme les plis ont la même taille, l'erreur de
   validation croisée vaut
 
-  $ hat("Err")_("CV") = (18% + 22% + 20% + 16% + 24%) / 5 = 20%. $
+  $ hat(Err)_("CV") = (18% + 22% + 20% + 16% + 24%) / 5 = 20%. $
 
   La variation de 16 % à 24 % indique aussi que l'évaluation dépend encore de la
   composition des plis. Rapporter seulement la moyenne masquerait cette
@@ -827,7 +826,7 @@ la MAE, le taux d'erreur ou l'aire sous une courbe ROC.
 
 ==== Choisir le nombre de plis
 
-Le nombre $K$ règle un compromis entre la quantité de données utilisée pour
+Le nombre $V$ règle un compromis entre la quantité de données utilisée pour
 chaque ajustement, la variabilité de l'estimation et le coût de calcul.
 
 #align(center)[
@@ -836,17 +835,14 @@ chaque ajustement, la variabilité de l'estimation et le coût de calcul.
   #table(
     columns: (0.8fr, 1.5fr, 2fr),
     align: (x, y) => if y == 0 or x == 0 { center } else { left },
-    inset: 5pt,
-    stroke: 0.5pt + rgb("#cfd8dc"),
-    fill: (x, y) => if y == 0 { rgb("#eef3f1") },
-    [*$K$*], [*Avantage principal*], [*Limite principale*],
+    table.header([*$V$*], [*Avantage principal*], [*Limite principale*]),
     [5], [Calcul relativement rapide], [Entraînement sur 80 % des données],
     [10], [Bon compromis général], [Deux fois plus d'ajustements qu'à cinq plis],
     [$n$], [Entraînement sur $n-1$ obs], [Calcul coûteux et erreurs corrélées],
   )
 ]
 
-Les choix $K=5$ et $K=10$ sont courants, mais ne sont pas universels. Le cas $K=n$, appelé validation _leave-one-out_, entraîne un modèle pour chaque observation. Son biais d'évaluation est souvent faible puisque presque toutes les données servent à chaque ajustement, mais son coût computationnel est élevé et sa variance peut l'être aussi, car les ensembles d'entraînement se ressemblent fortement.
+Les choix $V=5$ et $V=10$ sont courants, mais ne sont pas universels. Le cas $V=n$, appelé validation _leave-one-out_, entraîne un modèle pour chaque observation. Son biais d'évaluation est souvent faible puisque presque toutes les données servent à chaque ajustement, mais son coût computationnel est élevé et sa variance peut l'être aussi, car les ensembles d'entraînement se ressemblent fortement.
 
 La validation croisée répétée recommence un découpage à cinq ou dix plis avec
 plusieurs graines aléatoires, puis moyenne les résultats. Elle réduit la
@@ -856,12 +852,12 @@ ajustements pour chaque configuration du modèle.
 
 ==== Comparer et régler les modèles
 
-Pour choisir un hyper-paramètre, on applique exactement les mêmes plis à chaque
+Pour choisir un hyperparamètre, on applique exactement les mêmes plis à chaque
 valeur candidate. On compare alors des erreurs obtenues sur les mêmes
 observations, ce qui rend la comparaison moins sensible au hasard du découpage.
 
-#example[
-  *Degré d'un polynôme.* On compare les degrés de 1 à 10 avec les mêmes cinq
+#example(title: [Degré d'un polynôme])[
+  On compare les degrés de 1 à 10 avec les mêmes cinq
   plis. Pour chaque degré, cinq modèles sont ajustés et leurs erreurs sont
   moyennées. On choisit le degré dont l'erreur moyenne est la plus faible, ou un
   degré plus simple dont l'erreur reste très proche du minimum. La procédure
@@ -869,14 +865,14 @@ observations, ce qui rend la comparaison moins sensible au hasard du découpage.
 ]
 
 La standardisation, l'imputation, la sélection de variables et toute autre
-transformation apprise doivent être répétées dans chaque boucle: elles sont
-ajustées sur les $K-1$ plis d'entraînement, puis appliquées au pli de validation.
+transformation apprise doivent être répétées dans chaque boucle : elles sont
+ajustées sur les $V-1$ plis d'entraînement, puis appliquées au pli de validation.
 Effectuer ces transformations une seule fois avant la validation croisée crée
 une fuite de données.
 
 ==== Adapter les plis aux observations
 
-Les plis doivent reproduire la situation dans laquelle le modèle sera utilisé:
+Les plis doivent reproduire la situation dans laquelle le modèle sera utilisé :
 
 - des plis *stratifiés* préservent la proportion des classes;
 - des plis *groupés* gardent ensemble toutes les observations d'une même unité;
