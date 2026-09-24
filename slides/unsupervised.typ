@@ -18,7 +18,7 @@ Une partition $cal(C)=(C_1,dots,C_K)$ répartit les indices des $n$ observations
 #v(0.5em)
 #formula([
   $ C_g != emptyset, quad C_g inter C_h=emptyset quad (g != h) $
-  $ union.big_(g=1)^K C_g={1,dots,n}, quad n_g=abs(C_g), quad sum_(g=1)^K n_g=n $
+  $ union.big_(g=1)^K C_g={1,dots,n}, quad n_g=abs(C_g), quad sum_(g=1)^K n_g=n. $
 ])
 #v(0.6em)
 #takeaway([Chaque observation appartient à un seul groupe non vide.])
@@ -407,25 +407,6 @@ qui restent dans un même groupe.
 #v(0.4em)
 #small([En cas de sous-échantillonnage, comparer les observations communes.])
 
-== Une projection montre une partie de la géométrie
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Ce que le graphique apporte], [
-    Repérer des profils, des chevauchements apparents et des observations isolées.
-
-    Comparer visuellement plusieurs partitions.
-  ], height: 2.5in),
-  card([Ce qu'il peut masquer], [
-    Une projection en deux ou trois dimensions peut perdre des directions
-    qui séparent les groupes.
-
-    Les distances projetées peuvent différer des distances utilisées.
-  ], fill: pale-orange, height: 2.5in),
-)
-#v(0.65em)
-#takeaway([Le graphique complète les diagnostics dans l'espace de l'analyse.])
-
 == La démarche d'analyse
 
 #enum(
@@ -439,77 +420,3 @@ qui restent dans un même groupe.
 #v(0.65em)
 #takeaway([Effectifs, centres et dispersions rendent la partition interprétable.])
 
-== Exploration descriptive et utilisation future
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Décrire les données disponibles], [
-    Toutes les observations peuvent participer à l'exploration descriptive.
-
-    Les conclusions portent sur ce jeu de données et sur les choix de l'analyse.
-  ], height: 2.65in),
-  card([Affecter de nouveaux individus], [
-    Apprendre les transformations et le regroupement sur l'entraînement.
-
-    Définir une règle d'affectation pour les nouvelles observations, sans utiliser
-    leurs réponses.
-  ], fill: pale-blue, height: 2.65in),
-)
-#v(0.65em)
-#small([
-  Cette séparation s'applique aussi lorsque les groupes deviennent des variables
-  d'entrée d'un modèle prédictif.
-])
-
-== La portée des noms attribués aux groupes
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Une description à justifier], [
-    Décrire les caractéristiques qui distinguent les groupes.
-
-    Vérifier les effectifs et la diversité interne avant de leur donner un nom.
-  ], height: 2.45in),
-  card([Des limites à conserver], [
-    Un algorithme peut découper un nuage continu.
-
-    Une partition ne démontre ni l'existence de catégories naturelles
-    ni un mécanisme causal.
-  ], fill: pale-orange, height: 2.45in),
-)
-#v(0.65em)
-#takeaway([L'utilité d'une partition dépend de la question, de sa stabilité et de son interprétation.])
-
-== Questions de compréhension
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Groupes et qualité], [
-    Deux partitions avec des numéros différents peuvent-elles être identiques ?
-
-    Pourquoi ne pas maximiser seulement le pseudo-$R^2$ ?
-  ], height: 2.6in),
-  card([Diagnostic et validation], [
-    Comment calculer $b_i$ pour trois groupes ?
-
-    Une partition stable à l'initialisation est-elle nécessairement stable
-    au rééchantillonnage ?
-  ], fill: pale-blue, height: 2.6in),
-)
-#v(0.65em)
-#takeaway([Un critère résume une propriété géométrique, à confronter au sens des groupes.])
-
-== Ressources et fichiers du cours
-
-- *Notes* : `lectures/unsupervised.typ`, section « Introduction ».
-- *Données de l'exemple morphologique* : `assets/penguins.csv`.
-- *Silhouette* : #link("https://stat.ethz.ch/R-manual/R-devel/library/cluster/html/silhouette.html")[documentation de `cluster::silhouette`].
-- *Figures et calculs de l'exemple numérique* : `figures/unsupervised_introduction.py`.
-
-#v(0.7em)
-#small([
-  Les partitions A, B et C illustrent la comparaison des critères.
-  Elles ne résultent pas ici de l'exécution d'un algorithme.
-])
-#v(0.65em)
-#formula([`typst compile --root . slides/unsupervised.typ`])
