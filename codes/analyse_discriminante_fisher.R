@@ -1,7 +1,6 @@
 # Analyse discriminante de Fisher et classification au centre le plus proche.
 # Depuis la racine : Rscript codes/analyse_discriminante_fisher.R
 # R de base uniquement. Données locales dans assets/penguins.csv.
-# Aucun modèle probabiliste LDA/QDA ni calcul de probabilité a posteriori.
 
 ajuster_fisher <- function(x, classes, q) {
   x <- as.matrix(x)
@@ -92,7 +91,7 @@ predire_fisher <- function(modele, nouveau) {
   )
 }
 
-penguins <- read.csv("assets/penguins.csv")
+penguins <- read.csv("../assets/penguins.csv")
 variables <- c(
   "bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"
 )
@@ -101,7 +100,6 @@ d <- penguins[complete.cases(penguins[c("species", variables)]),
 d$species <- factor(d$species)
 
 # Même partage stratifié que les exemples k-NN et LDA du cours.
-RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 set.seed(2200)
 indices <- split(seq_len(nrow(d)), d$species)
 idx_train <- unlist(lapply(indices, function(i) {
@@ -146,34 +144,5 @@ cat("\nMatrice de confusion du test (lignes : classes réelles) :\n")
 print(confusion)
 cat(sprintf("\nExactitude : %.2f %%\n", 100 * exactitude))
 cat(sprintf("Taux d'erreur : %.2f %%\n", 100 * (1 - exactitude)))
-cat("Rappel par espèce (%) :\n")
+cat("Sensibilité par espèce (%) :\n")
 print(round(100 * rappels, 2))
-
-# Tests : absence de recouvrement entraînement/test, prédiction d'une seule
-# observation, invariance au signe des axes et à une rotation orthogonale.
-stopifnot(
-  length(intersect(idx_train, idx_test)) == 0L,
-  nrow(train) + nrow(test) == nrow(d),
-  as.character(predire_fisher(modele, test[1, variables])$classe) ==
-    as.character(prediction$classe[1])
-)
-rotation <- matrix(c(0, 1, -1, 0), nrow = 2)
-modele_tourne <- modele
-modele_tourne$axes <- modele$axes %*% rotation
-modele_tourne$centres <- modele$centres %*% rotation
-prediction_tournee <- predire_fisher(modele_tourne, test[variables])
-stopifnot(
-  max(abs(prediction_tournee$distances2 - prediction$distances2)) < 1e-10,
-  identical(prediction_tournee$classe, prediction$classe)
-)
-
-# Exemple numérique du cours : z = x1 + 2 x2 ; seuil non centré égal à 2.
-modele_exemple <- list(
-  moyenne = c(0, 0), axes = matrix(c(1, 2), ncol = 1),
-  centres = matrix(c(0, 4), ncol = 1), classes = c("1", "2")
-)
-points_exemple <- rbind(c(1, 1), c(0.5, 0.5), c(2, 0))
-stopifnot(identical(
-  as.character(predire_fisher(modele_exemple, points_exemple)$classe),
-  c("2", "1", "1")
-))

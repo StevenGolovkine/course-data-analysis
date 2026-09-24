@@ -47,7 +47,7 @@ typst compile --root . slides/introduction.typ
 
 - [ ] Apprentissage supervisée
     * [ ] kNN (~~notes~~, ~~slides~~, ~~code~~, exercices)
-    * [ ] Analyse discriminante de Fisher (~~notes~~, slides, code, exercices)
+    * [ ] Analyse discriminante de Fisher (~~notes~~, ~~slides~~, ~~code~~, exercices)
     * [ ] LDA / QDA (notes, slides, code, exercices)
 
 - [ ] Apprentissage non-supervisée
