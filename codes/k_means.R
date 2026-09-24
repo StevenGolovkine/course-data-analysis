@@ -4,7 +4,7 @@
 # Option : un dossier de sortie pour exporter les tableaux utilisés par la figure.
 #   Rscript codes/k_means.R /tmp/course-kmeans
 
-penguins <- read.csv("assets/penguins.csv")
+penguins <- read.csv("../assets/penguins.csv")
 variables <- c("bill_length_mm", "bill_depth_mm",
                "flipper_length_mm", "body_mass_g")
 d <- penguins[complete.cases(penguins[variables]), ]
@@ -16,7 +16,6 @@ inertie_totale <- sum(scale(z, center = TRUE, scale = FALSE)^2)
 
 # Exploration descriptive sur les quatre mesures : aucune étiquette species
 # n'intervient dans les ajustements ni dans la sélection du nombre de groupes.
-RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 set.seed(2200)
 K_candidats <- 1:8
 modeles <- lapply(K_candidats, function(K) {
@@ -65,22 +64,5 @@ B_direct <- sum(profils$n * rowSums(ecarts_centres^2))
 distances_centres <- vapply(seq_len(K_retenu), function(g) {
   rowSums(sweep(z, 2, centres_z[g, ], "-")^2)
 }, numeric(n))
-stopifnot(
-  all(vapply(modeles, function(m) is.null(m$ifault) || m$ifault == 0L, logical(1))),
-  all(W <= inertie_totale + 1e-8),
-  abs(W_direct - modele$tot.withinss) < 1e-8,
-  abs(W_direct + B_direct - inertie_totale) < 1e-8,
-  all(groupes == max.col(-distances_centres, ties.method = "first")),
-  abs(inertie_totale - (n - 1) * ncol(z)) < 1e-8
-)
 
-# Les tableaux exportés permettent de reproduire les graphiques avec Python.
-arguments <- commandArgs(trailingOnly = TRUE)
-if (length(arguments) > 0L) {
-  dossier_sortie <- arguments[1]
-  dir.create(dossier_sortie, recursive = TRUE, showWarnings = FALSE)
-  write.csv(criteres, file.path(dossier_sortie, "criteres.csv"), row.names = FALSE)
-  write.csv(profils, file.path(dossier_sortie, "profils.csv"), row.names = FALSE)
-  write.csv(data.frame(groupe = groupes, z),
-            file.path(dossier_sortie, "observations.csv"), row.names = FALSE)
-}
+

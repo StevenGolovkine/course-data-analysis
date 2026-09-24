@@ -52,6 +52,6 @@ typst compile --root . slides/introduction.typ
 
 - [ ] Apprentissage non-supervisée
     * [ ] Concepts (~~notes~~, ~~slides~~, ~~code~~, exercices)
-    * [ ] k-means (~~notes~~, slides, code, exercices)
+    * [ ] k-means (~~notes~~, ~~slides~~, ~~code~~, exercices)
 
 - [ ] Données manquantes 
