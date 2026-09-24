@@ -533,65 +533,494 @@ aux centres peuvent renseigner sur une ambiguïté, sans devenir pour autant
 des probabilités d'appartenance.
 
 
-== La classification hiérarchique
+== La classification hiérarchique <classification-hierarchique>
 
 === Principe
 
+Les $k$-moyennes produisent une partition pour un nombre de groupes fixé.
+La classification hiérarchique cherche plutôt à organiser les observations
+à *plusieurs niveaux de regroupement*. Des profils très proches peuvent former
+de petits groupes, qui se réunissent ensuite en ensembles plus larges.
+
 #definition(title: [Classification hiérarchique et dendrogramme])[
-  La classification hiérarchique produit une suite de partitions imbriquées. Elle
-  peut être représentée par un dendrogramme, c'est-à-dire un arbre qui montre dans
-  quel ordre les observations ou les groupes sont fusionnés.
+  Une classification hiérarchique construit des partitions *emboîtées* :
+  chaque groupe d'une partition fine est entièrement inclus dans un groupe
+  de toute partition plus grossière.
+
+  Un *dendrogramme* représente cette hiérarchie par un arbre. Ses feuilles
+  correspondent aux observations et ses nœuds internes aux regroupements.
+  La hauteur d'un nœud indique la valeur du critère lors de la fusion.
 ]
 
-Deux familles existent :
+Deux démarches sont possibles :
 
-- les méthodes ascendantes, qui commencent avec une observation par groupe et
-  fusionnent progressivement les groupes les plus proches;
-- les méthodes descendantes, qui commencent avec toutes les observations dans un
-  seul groupe et divisent progressivement les groupes.
+- la *classification ascendante hiérarchique* (*CAH*, ou méthode agglomérative)
+  part de $n$ groupes d'une observation et fusionne deux groupes à chaque étape ;
+- une méthode *descendante* part d'un seul groupe et le subdivise progressivement.
+  Elle exige un critère de division et n'est pas, en général, l'inverse d'une CAH.
 
-Les méthodes ascendantes sont les plus utilisées en pratique.
+On étudie ici la démarche ascendante. Après $r$ fusions, pour
+$r in \{0,dots,n-1\}$, la partition $cal(C)^(r)$ contient $n-r$ groupes.
+La dernière fusion réunit toutes les observations. L'emboîtement impose une
+contrainte forte : *deux observations réunies ne seront plus séparées*.
+
+#example[
+  Une enquête peut faire apparaître quatre profils de pratiques : deux profils
+  surtout orientés vers les activités individuelles et deux vers les activités
+  collectives. Une partition en quatre groupes décrit les différences fines ;
+  une coupe plus haute de la même hiérarchie peut résumer ces profils par deux
+  grandes familles. Les deux descriptions correspondent à des niveaux différents,
+  sans qu'il soit nécessaire d'en déclarer une seule « vraie ».
+]
+
+Le dendrogramme n'est pas un arbre de classification supervisée comme CART.
+Il n'apprend pas des questions successives sur les variables pour prédire une
+réponse : il représente les regroupements des observations déjà analysées.
+
+=== Construire une classification ascendante
+
+On commence par choisir les variables, leur éventuelle transformation et une
+dissimilarité $d_(i ell)=d(x_i,x_ell)$ entre observations. Pour des mesures
+quantitatives, la distance euclidienne est un choix courant. Si les unités ou
+les dispersions diffèrent fortement, on peut travailler sur les variables
+centrées et réduites. Ce choix modifie la pondération des variables et doit
+être justifié, comme pour les $k$-moyennes.
+
+Une fois les dissimilarités fixées, on choisit un *critère de liaison*
+$D(A,B)$ entre deux groupes non vides et disjoints $A$ et $B$. L'algorithme
+suit alors les étapes suivantes :
+
+1. Initialiser les groupes par les singletons $\{1\},dots,\{n\}$.
+2. Parmi les paires de groupes actuels, choisir celle qui minimise $D(A,B)$.
+3. Remplacer $A$ et $B$ par leur réunion $A union B$, et enregistrer la fusion
+   ainsi que sa hauteur.
+4. Recalculer les liaisons entre ce nouveau groupe et les groupes restants.
+5. Répéter jusqu'à ne conserver qu'un seul groupe.
+
+On ne choisit donc pas les $n-1$ plus petites distances du tableau initial :
+les comparaisons portent sur des groupes qui changent après chaque fusion.
+En cas d'égalité du critère, il faut une règle de départage ; l'ordre des
+observations ou le logiciel peut alors modifier certaines branches.
+
+La méthode est *gloutonne*. Elle retient la meilleure fusion immédiate,
+sans examiner toutes les hiérarchies possibles. Elle n'utilise pas
+d'initialisation aléatoire dans sa forme classique, mais ce caractère
+déterministe ne garantit ni l'optimalité globale ni la stabilité statistique.
 
 === Distances entre groupes
 
-Pour fusionner des groupes, il faut définir une distance entre ensembles
-d'observations.
+Notons $n_A=abs(A)$ et $n_B=abs(B)$ les effectifs de deux groupes. Une distance
+entre deux observations ne définit pas à elle seule une distance entre groupes.
+Les principales liaisons répondent à des questions différentes.
 
-- Plus proche voisin : distance minimale entre deux observations des groupes.
-  Cette méthode accepte des formes irrégulières mais peut créer des chaînes.
-- Plus distant voisin : distance maximale entre deux observations des groupes.
-  Elle produit des groupes compacts mais est sensible aux valeurs extrêmes.
-- Moyenne : moyenne de toutes les distances entre paires d'observations.
-- Centroïde : distance entre les moyennes des groupes.
-- Ward : fusion qui minimise l'augmentation d'inertie intra-groupe.
+*Liaison simple, ou plus proche voisin.* Elle utilise la paire la plus proche :
 
-Le choix de liaison influence fortement le dendrogramme. Il doit être cohérent
-avec la nature des groupes attendus et la distance entre observations.
+$ D_"simple" (A,B)=min_(i in A, ell in B) d_(i ell). $
+
+Deux groupes peuvent donc être fusionnés dès qu'un seul de leurs membres les
+rapproche. Cette liaison peut suivre des formes allongées ou irrégulières, mais
+présente un *effet de chaîne* : une succession de points proches peut relier
+des ensembles dont les extrémités sont très éloignées.
+
+*Liaison complète, ou plus distant voisin.* Elle utilise la paire la plus éloignée :
+
+$ D_"complète" (A,B)=max_(i in A, ell in B) d_(i ell). $
+
+Elle évite qu'un unique point de contact suffise à réunir deux groupes et tend
+à produire des groupes de faible diamètre. Une observation extrême peut en
+revanche maintenir un groupe à l'écart ou modifier fortement une fusion.
+
+*Liaison moyenne.* On calcule la moyenne de toutes les distances entre les
+deux groupes :
+
+$ D_"moyenne" (A,B)=1/(n_A n_B) sum_(i in A) sum_(ell in B) d_(i ell). $
+
+Chaque paire d'observations a le même poids. Après la fusion de $A$ et $B$,
+la liaison avec un autre groupe $C$ se met à jour par
+
+$ D_"moyenne" (A union B,C)
+  =n_A/(n_A+n_B) D_"moyenne" (A,C)
+   +n_B/(n_A+n_B) D_"moyenne" (B,C). $
+
+Il ne s'agit donc pas de la moyenne non pondérée de deux anciennes liaisons,
+sauf si $n_A=n_B$. Cette méthode est aussi appelée *UPGMA*.
+
+*Liaison par centroïdes.* Pour des observations dans un espace euclidien,
+elle utilise les moyennes $overline(x)_A$ et $overline(x)_B$ :
+
+$ D_"centroïdes" (A,B)=norm(overline(x)_A-overline(x)_B). $
+
+La distance entre moyennes est différente de la moyenne des distances.
+Des groupes étendus, voire entrelacés, peuvent avoir des centroïdes proches.
+Les conventions de calcul et d'affichage, notamment l'emploi des distances
+ou de leurs carrés, doivent être vérifiées dans le logiciel.
+
+#example[
+  *Quatre résumés des mêmes distances.* En une dimension, prenons
+  $A=\{0,2\}$ et $B=\{3,5\}$, avec $d(x_i,x_ell)=abs(x_i-x_ell)$.
+  Les quatre distances entre les groupes sont $3$, $5$, $1$ et $3$.
+
+  On obtient $D_"simple" (A,B)=1$, $D_"complète" (A,B)=5$ et
+  $D_"moyenne" (A,B)=(3+5+1+3)/4=3$. Les centroïdes sont $1$ et $4$,
+  donc $D_"centroïdes" (A,B)=3$ également. Cette dernière égalité est
+  particulière à cet exemple ; les définitions restent différentes.
+]
+
+Ces liaisons sont des critères de regroupement ; elles ne satisfont pas
+nécessairement tous les axiomes d'une distance sur les ensembles. Les liaisons
+simple, complète et moyenne peuvent utiliser des dissimilarités adaptées à des
+données non quantitatives. La méthode de Ward demande un cadre plus précis.
+
+=== La méthode de Ward et l'inertie
+
+Ward cherche à conserver des groupes dont les observations sont proches
+de leur centroïde. On conserve les inerties sans normalisation introduites
+au début du chapitre. Pour un groupe $A$, notons
+
+$ W(A)=sum_(i in A) norm(x_i-overline(x)_A)^2. $
+
+Si l'on fusionne $A$ et $B$, le nouveau centroïde est
+$overline(x)_(A union B)=(n_A overline(x)_A+n_B overline(x)_B)/(n_A+n_B)$.
+Les autres groupes ne changent pas : la variation de l'inertie intra-groupe
+totale est donc
+
+$ Delta W(A,B)=W(A union B)-W(A)-W(B). $
+
+#property(title: [Coût d'une fusion selon Ward])[
+  Pour la distance euclidienne et des observations de même poids,
+
+  $ Delta W(A,B)=(n_A n_B)/(n_A+n_B)
+      norm(overline(x)_A-overline(x)_B)^2. $
+
+  À chaque étape, Ward fusionne les deux groupes dont ce coût est le plus faible.
+]
+
+Pour retrouver la formule, on décompose chaque écart à la nouvelle moyenne
+en un écart au centroïde du groupe et un déplacement de ce centroïde. Les
+termes croisés s'annulent ; il reste
+$n_A norm(overline(x)_A-overline(x)_(A union B))^2
++n_B norm(overline(x)_B-overline(x)_(A union B))^2$.
+En remplaçant le nouveau centroïde par sa moyenne pondérée, on obtient
+l'expression annoncée.
+
+Ward ne consiste donc pas simplement à fusionner les centroïdes les plus
+proches : *les effectifs interviennent*. Dans l'exemple précédent, les deux
+groupes ont chacun deux points et des moyennes distantes de $3$, d'où
+$Delta W=(2 times 2)/(2+2) times 3^2=9$.
+Pour deux singletons, ce coût serait la moitié du carré de leur distance.
+
+*Quelle hauteur afficher ?* On peut construire le dendrogramme avec
+$Delta W$ comme hauteur, mais ce n'est pas la convention de tous les logiciels.
+Avec des distances euclidiennes ordinaires en entrée, `hclust` de R et
+`method = "ward.D2"` affichent
+
+$ h(A,B)=sqrt(2 Delta W(A,B)). $
+
+Les deux conventions donnent le même ordre de fusion, mais des hauteurs
+numériques différentes. Le script du cours vérifie cette identité à chaque
+fusion. Il faut fournir `dist(x)` à `ward.D2`, et non `dist(x)^2` :
+la méthode effectue elle-même la mise au carré nécessaire.#footnote[
+  Voir la #link("https://stat.ethz.ch/R-manual/R-devel/library/stats/html/hclust.html")[documentation
+  de `stats::hclust`] et la distinction entre `ward.D` et `ward.D2`.
+  La convention euclidienne de Ward est également décrite dans la
+  #link("https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html")[documentation de `scipy.cluster.hierarchy.linkage`].
+]
+
+L'interprétation par une augmentation de somme des carrés suppose une géométrie
+euclidienne. Appliquer Ward à une dissimilarité quelconque ne suffit pas à lui
+donner cette interprétation. Avec des variables standardisées, l'inertie porte
+sur ces variables transformées, et non sur les mesures dans leurs unités initiales.
+
+=== Exemple : construire une hiérarchie à la main
+
+On reprend six observations unidimensionnelles, sans transformation :
+
+$ A=0, quad B=1, quad C=2, quad D=8, quad E=9, quad F=10. $
+
+On utilise Ward. Les premières distances présentent des égalités ; pour fixer
+la présentation, on retient successivement les fusions du tableau ci-dessous.
+Ce sont aussi celles produites par le script R avec cet ordre d'observations.
+La notation $"AB"$ désigne le groupe $\{A,B\}$.
+
+#block(breakable: false)[
+  #table(
+    columns: (0.65fr, 1.8fr, 1fr, 1.15fr, 0.65fr), align: center,
+    table.header([*Étape*], [*Groupes fusionnés*], [*$Delta W$*],
+      [*Hauteur $h$*], [*$K$*]),
+    [1], [$A$ et $B$], [0,5], [1], [5],
+    [2], [$D$ et $E$], [0,5], [1], [4],
+    [3], [$"AB"$ et $C$], [1,5], [1,732], [3],
+    [4], [$"DE"$ et $F$], [1,5], [1,732], [2],
+    [5], [$"ABC"$ et $"DEF"$], [96], [13,856], [1],
+  )
+]
+
+La première fusion coûte $(1 times 1)/(1+1) times (0-1)^2=0.5$.
+À la troisième étape, le groupe $"AB"$ a pour moyenne $0.5$ et pour effectif $2$ :
+le fusionner avec $C$ coûte
+$(2 times 1)/(2+1) times (0.5-2)^2=1.5$.
+
+Après quatre fusions, les groupes sont $\{0,1,2\}$ et $\{8,9,10\}$, de
+moyennes $1$ et $9$. Leur inertie intra-groupe vaut
+$W=0.5+0.5+1.5+1.5=4$. La dernière fusion ajoute
+$(3 times 3)/(3+3) times (1-9)^2=96$, d'où $W=100$ pour un seul groupe :
+on retrouve l'inertie totale.
+
+Plus généralement, en partant des singletons d'inertie nulle, l'inertie de
+la coupe en $K$ groupes est la somme des coûts des $n-K$ premières fusions.
+Ce lien relie directement la hiérarchie de Ward aux critères de partition
+définis au début du chapitre.
+
+#figure(
+  image("../figures/cah_exemple.svg", width: 100%,
+    alt: "Dendrogramme de Ward des valeurs 0, 1, 2, 8, 9 et 10. Une coupe à hauteur 2,5 donne deux groupes ; un zoom montre qu'une coupe à 1,3 donne quatre groupes."),
+  caption: [Hiérarchie de Ward et deux coupes. À gauche, la dernière fusion
+    réunit deux ensembles bien séparés. À droite, le zoom montre les fusions
+    de hauteurs $1$ et $sqrt(3)$. Les couleurs repèrent les deux grandes branches ;
+    elles ne représentent pas la partition en quatre groupes du zoom.],
+)
 
 === Lire un dendrogramme
 
-Un dendrogramme ne fournit pas automatiquement le nombre de groupes. On peut
-choisir une coupe à partir :
+*Suivre les fusions.* On part des observations, en bas, puis on remonte leurs
+branches. Deux observations appartiennent au même groupe à partir du premier
+nœud qui leur est commun. La hauteur de ce nœud résume leur rapprochement dans
+la hiérarchie ; elle est parfois appelée *dissimilarité cophénétique*. Elle
+n'est pas nécessairement leur distance initiale.
 
-- d'une connaissance métier ou d'une contrainte opérationnelle;
-- d'une rupture visible dans les hauteurs de fusion;
-- d'un critère d'inertie;
-- d'un indice de silhouette;
-- de la stabilité des groupes sous rééchantillonnage.
+*Ne pas interpréter l'axe horizontal comme une distance.* On peut permuter les
+deux branches issues d'un nœud sans changer aucun groupe ni aucune hauteur.
+Deux feuilles voisines sur le dessin ne sont donc pas nécessairement les deux
+observations les plus proches. C'est la hauteur de leur réunion et la structure
+des branches qu'il faut lire.
 
-Une grande hauteur de fusion indique que deux groupes étaient assez éloignés
-avant d'être réunis. Une coupe horizontale du dendrogramme transforme la
-hiérarchie en partition.
+*Passer à une partition.* Lorsque les hauteurs sont non décroissantes, une
+coupe horizontale à une hauteur $h$ regroupe les observations reliées sous
+cette coupe. Si la droite ne passe par aucun nœud, le nombre de branches
+verticales qu'elle traverse est le nombre de groupes $K$.
+
+Dans l'exemple, une coupe à $h=2.5$ produit $\{A,B,C\}$ et $\{D,E,F\}$.
+Une coupe à $h=1.3$ donne $\{A,B\}$, $\{C\}$, $\{D,E\}$ et $\{F\}$.
+Il s'agit de deux partitions extraites du même arbre, sans nouvel ajustement.
+
+On peut aussi demander directement $K$ groupes en conservant les $n-K$
+premières fusions. *Une coupe par hauteur et une coupe par nombre ne sont pas
+toujours équivalentes.* Ici, deux fusions ont la même hauteur $sqrt(3)$ :
+aucune droite horizontale, en dehors des nœuds, ne donne exactement trois
+groupes. `cutree(arbre, k = 3)` utilise l'ordre enregistré des fusions pour
+conserver $\{A,B,C\}$, $\{D,E\}$ et $\{F\}$. L'autre ordre des deux fusions
+ex æquo donnerait $\{A,B\}$, $\{C\}$ et $\{D,E,F\}$.#footnote[
+  La #link("https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cutree.html")[documentation
+  de `stats::cutree`] distingue les arguments `k` et `h` et précise la condition
+  de monotonie pour une coupe par hauteur.
+]
+
+#remark(title: [Des hauteurs qui peuvent redescendre])[
+  La liaison par centroïdes peut produire une *inversion* : une fusion a
+  une hauteur inférieure à celle d'une fusion précédente. Par exemple, pour
+  $A=(-1,0)^top$, $B=(1,0)^top$ et $C=(0,1.8)^top$, les points $A$ et $B$
+  sont les plus proches, à distance $2$. Leur centroïde est $(0,0)^top$,
+  à distance $1.8$ de $C$ : la fusion suivante est plus basse.
+
+  La hiérarchie reste emboîtée, mais la lecture par coupe horizontale devient
+  problématique. Ce phénomène ne se produit pas pour les liaisons simple,
+  complète et moyenne, ni pour Ward dans le cadre euclidien utilisé ici.
+]
+
+=== Choisir le nombre de groupes
+
+La hiérarchie reporte le choix de $K$ ; elle ne le résout pas automatiquement.
+Plusieurs niveaux peuvent être utiles selon la question étudiée.
+
+*Examiner les sauts de fusion.* Une forte augmentation du critère indique
+qu'une fusion réunit des groupes nettement moins semblables que les précédents.
+On peut couper juste avant ce saut. Dans l'exemple, le passage de deux groupes
+à un seul coûte $96$ unités d'inertie, contre $1.5$ pour chacune des deux
+fusions précédentes : une description en deux groupes est naturelle.
+Le saut doit être interprété selon le critère et sa convention d'affichage ;
+les hauteurs de méthodes différentes ne sont pas directement comparables.
+
+*Comparer les partitions extraites.* Pour les valeurs candidates de $K$, on
+calcule les silhouettes dans la distance choisie, ou des critères comme
+Calinski-Harabasz dans un espace euclidien. On examine aussi les effectifs et
+les profils : un groupe minuscule peut signaler une observation isolée plutôt
+qu'une subdivision utile. Diminuer seulement l'inertie de Ward conduirait,
+comme pour les $k$-moyennes, à multiplier les groupes.
+
+*Étudier la stabilité.* On peut refaire l'analyse après rééchantillonnage,
+sur des sous-échantillons ou avec des choix de préparation plausibles.
+Comparer la fréquence avec laquelle des observations sont regroupées aide
+à distinguer une séparation robuste d'une branche fragile. Une grande hauteur
+de fusion n'est, à elle seule, ni une probabilité ni un test de significativité.
+
+Une contrainte d'usage peut enfin fixer le niveau pertinent : deux grandes
+familles pour une synthèse, puis plusieurs sous-groupes pour une description
+plus fine. Ce choix doit rester explicite.
+
+=== Étude de cas : Palmer Penguins
+
+On reprend les $342$ manchots complets pour `bill_length_mm`, `bill_depth_mm`,
+`flipper_length_mm` et `body_mass_g`. Les quatre mesures sont centrées et
+réduites avec les écarts-types de diviseur $n-1$, comme pour les $k$-moyennes.
+L'analyse est descriptive et utilise l'ensemble disponible. `species`
+n'intervient ni dans les distances, ni dans Ward, ni dans la sélection de $K$.
+
+Le script `codes/classification_hierarchique.R` reproduit la hiérarchie,
+les diagnostics et les tableaux. Le cœur de l'ajustement est le suivant :
+
+```r
+penguins <- read.csv("assets/penguins.csv")
+variables <- c("bill_length_mm", "bill_depth_mm",
+               "flipper_length_mm", "body_mass_g")
+d <- penguins[complete.cases(penguins[variables]), ]
+z <- scale(d[variables])
+distances <- dist(z, method = "euclidean")
+arbre <- hclust(distances, method = "ward.D2")
+
+K_candidats <- 2:8
+silhouettes <- sapply(K_candidats, function(K) {
+  groupes <- cutree(arbre, k = K)
+  mean(cluster::silhouette(groupes, distances)[, "sil_width"])
+})
+K_retenu <- K_candidats[which.max(silhouettes)]
+groupes <- cutree(arbre, k = K_retenu)
+plot(arbre, labels = FALSE, hang = -1)
+rect.hclust(arbre, k = K_retenu)
+```
+
+Une seule hiérarchie fournit toutes les partitions candidates. La silhouette
+est calculée avec les distances euclidiennes initiales entre mesures réduites,
+et non avec les hauteurs du dendrogramme. En cas d'égalité exacte du maximum,
+le script retient le plus petit $K$.
+
+#block(breakable: false)[
+  #table(
+    columns: (0.6fr, 1.2fr, 1.2fr, 1.4fr), align: center,
+    table.header([*$K$*], [*Inertie $W$*], [*Pseudo-$R^2$*], [*Silhouette moyenne*]),
+    [*2*], [*564,05*], [*58,65~%*], [*0,532*],
+    [3], [391,72], [71,28~%], [0,454],
+    [4], [315,67], [76,86~%], [0,418],
+    [5], [240,92], [82,34~%], [0,363],
+    [6], [220,19], [83,86~%], [0,335],
+    [7], [199,63], [85,36~%], [0,305],
+    [8], [181,36], [86,70~%], [0,259],
+  )
+]
+
+La silhouette moyenne est maximale pour $K=2$ parmi les coupes comparées.
+La dernière fusion a une hauteur d'environ $40.00$, contre $18.57$ pour
+l'avant-dernière. Une coupe entre ces hauteurs donne deux groupes. L'augmentation
+finale d'inertie est $40.00^2/2 approx 800$, ce qui retrouve, à l'arrondi près,
+$T-W_2=1364-564.05=799.95$.
+
+#figure(
+  image("../figures/cah_palmerpenguins.svg", width: 100%,
+    alt: "Dendrogramme de Ward des 342 manchots, coupé en deux groupes de 219 et 123 individus. La silhouette moyenne des coupes de deux à huit groupes atteint son maximum, 0,532, à deux groupes."),
+  caption: [Ward sur les quatre mesures standardisées de Palmer Penguins.
+    Les étiquettes individuelles sont masquées pour rendre la hiérarchie lisible.
+    La coupe représentée et les couleurs correspondent à $K=2$, retenu par
+    silhouette moyenne parmi les valeurs étudiées.],
+)
+
+*Décrire la coupe retenue.* Pour la présentation, le script numérote les groupes
+par `body_mass_g` moyen croissant. Le groupe 1 contient $219$ individus et
+présente une masse moyenne de $3710.73$~g ; le groupe 2 contient $123$ individus
+et présente une moyenne de $5076.02$~g. Le second groupe a aussi, en moyenne,
+un bec et des nageoires plus longs, mais un bec moins profond.
+
+Le tableau croisé calculé *après* l'ajustement donne :
+
+#block(breakable: false)[
+  #table(
+    columns: (1fr, 1fr, 1fr, 1fr), align: center,
+    table.header([*Groupe*], [*Adelie*], [*Chinstrap*], [*Gentoo*]),
+    [1], [151], [68], [0],
+    [2], [0], [0], [123],
+  )
+]
+
+Cette coupe retrouve la partition en deux groupes présentée dans la
+#link(<kmeans>)[section sur les $k$-moyennes]. Elle ne sépare pas les trois espèces. La correspondance biologique
+sert ici à interpréter la partition ; elle n'a pas servi à construire la
+hiérarchie ou à choisir sa coupe.
+
+*Vérifier l'effet de la liaison.* Sur les mêmes distances et à $K=2$, les
+résultats suivants montrent que le choix de liaison peut compter autant que
+le nombre de groupes :
+
+#block(breakable: false)[
+  #table(
+    columns: (1.2fr, 1fr, 1fr, 1.4fr), align: center,
+    table.header([*Liaison*], [*Petit groupe*], [*Grand groupe*], [*Silhouette moyenne*]),
+    [Simple], [1], [341], [0,253],
+    [Complète], [123], [219], [0,532],
+    [Moyenne], [123], [219], [0,532],
+    [Ward], [123], [219], [0,532],
+  )
+]
+
+La liaison simple relie progressivement presque tous les manchots et laisse
+un singleton dans la coupe en deux groupes. Sa silhouette est moins élevée et
+ses effectifs très déséquilibrés invitent à examiner cette solution. Ce résultat
+ne condamne pas la liaison simple dans toute analyse : il décrit sa sensibilité
+aux chemins de proximité dans ces données.
+
+=== Comparaison avec les k-moyennes
+
+Ward et les $k$-moyennes utilisent la même notion d'inertie intra-groupe
+euclidienne, mais ne l'optimisent pas de la même manière. Pour un $K$ fixé,
+les $k$-moyennes peuvent réaffecter les observations à des centres. Ward choisit
+des fusions successives et conserve toutes les décisions précédentes.
+
+Une coupe de Ward ne minimise donc pas nécessairement l'inertie parmi toutes
+les partitions en $K$ groupes. Sur Palmer Penguins, pour $K=3$, elle donne
+$W approx 391.72$, contre $378.28$ pour la solution de $k$-moyennes présentée
+précédemment. L'accord à $K=2$ ne s'étend donc pas à tous les niveaux.
+
+En contrepartie, Ward fournit une hiérarchie cohérente : les groupes à $K=3$
+subdivisent nécessairement ceux à $K=2$. Deux ajustements indépendants de
+$k$-moyennes avec ces nombres de groupes n'ont pas cette contrainte.
+On peut aussi utiliser les centroïdes d'une coupe de Ward pour initialiser
+des $k$-moyennes ; les réaffectations éventuelles abandonnent alors l'emboîtement
+initial.
 
 === Forces et limites
 
-La classification hiérarchique est utile lorsque l'on veut comprendre plusieurs
-niveaux de regroupement. Elle ne demande pas de choisir immédiatement le nombre
-de groupes et produit une visualisation interprétable.
+*Une description à plusieurs niveaux.* Le dendrogramme montre comment les
+groupes s'organisent et permet d'explorer plusieurs coupes sans réajuster la
+méthode. Cette représentation est particulièrement utile lorsque les niveaux
+fins et grossiers ont chacun une interprétation. Avec beaucoup d'observations,
+il faut toutefois masquer les étiquettes, zoomer sur certaines branches ou
+résumer les profils pour que le dessin reste lisible.
 
-Elle devient plus coûteuse lorsque le nombre d'observations est grand. Elle est
-aussi sensible au choix de distance et de liaison. Une fusion réalisée tôt ne
-peut pas être corrigée plus tard dans les méthodes ascendantes classiques.
+*Des choix de géométrie déterminants.* Variables, standardisation, dissimilarité
+et liaison définissent ce que signifie « être proche ». Des variables
+corrélées peuvent donner plusieurs fois du poids à une même caractéristique.
+Les valeurs extrêmes peuvent former de petites branches ou modifier les
+fusions ; ni le dendrogramme ni la standardisation ne les rendent inoffensives.
+
+*Des fusions irréversibles.* Une réunion mal choisie au début affecte toutes
+les coupes suivantes. Une petite perturbation des données peut aussi changer
+l'ordre de fusions presque ex æquo. Obtenir exactement le même arbre à chaque
+exécution sur un tableau fixé ne démontre pas qu'on l'obtiendrait sur un
+autre échantillon.
+
+*Un coût qui croît avec l'effectif.* Stocker toutes les distances nécessite
+$n(n-1)/2$ nombres, soit une mémoire d'ordre $n^2$. Pour $n=10^4$, cela
+représente près de $50$ millions de distances et environ $400$ Mo en nombres
+de huit octets, avant les autres structures de calcul. Le temps dépend de
+l'algorithme et de la liaison. Des pré-regroupements ou des approximations
+peuvent faciliter l'analyse de grands jeux, mais modifient la hiérarchie recherchée.
+
+*Une méthode descriptive, sans règle de prédiction automatique.* Ajouter une
+observation et reconstruire l'arbre peut modifier les groupes existants.
+L'affecter au centroïde le plus proche d'une coupe est une règle supplémentaire,
+qui ne reproduit pas nécessairement la CAH sur les données augmentées.
+
+Enfin, un arbre est construit même lorsque les données ne présentent pas de
+groupes nettement séparés. Une coupe utile doit être soutenue par les profils,
+les effectifs, des diagnostics adaptés et la stabilité, plutôt que par la seule
+apparence du dendrogramme.
 
 == Le mélange de gaussiennes
 
