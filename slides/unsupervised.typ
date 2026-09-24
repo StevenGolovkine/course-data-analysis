@@ -4,159 +4,13 @@
 // Compilation depuis la racine du dépôt :
 // typst compile --root . slides/unsupervised.typ
 // --root . autorise l'accès au dossier voisin figures/.
-#import "@preview/touying:0.7.4": *
-#import themes.metropolis: *
+#import "../styles/slides.typ": *
 
-#let accent = rgb("#00695c")
-#let ink = rgb("#24313a")
-#let muted = rgb("#60747d")
-#let pale = rgb("#edf7f5")
-#let pale-blue = rgb("#eef4f8")
-#let pale-orange = rgb("#fff4e5")
-#let pale-purple = rgb("#f4eff8")
-
-#let card(title, body, fill: pale, height: 2.2in) = block(
-  width: 100%, height: height, inset: 12pt, radius: 5pt,
-  fill: fill, stroke: 0.7pt + rgb("#cbdedb"), breakable: false,
-)[
-  #align(left + top)[
-    #text(size: 20pt, weight: "bold", fill: accent)[#title]
-    #v(0.4em)
-    #text(size: 18pt, fill: ink)[#body]
-  ]
-]
-
-#let formula(body) = block(
-  width: 100%, inset: 12pt, radius: 5pt,
-  fill: rgb("#f7f9fa"), stroke: 0.7pt + rgb("#d8e0e3"),
-  breakable: false,
-)[#align(center)[#text(size: 20pt, fill: ink)[#body]]]
-
-#let takeaway(body, fill: pale) = block(
-  width: 100%, inset: 11pt, radius: 5pt, fill: fill, breakable: false,
-)[#text(size: 18pt, weight: "bold", fill: accent)[#body]]
-
-#let small(body) = text(size: 16pt, fill: muted)[#body]
-
-#let course-table(columns: (), ..cells) = {
-  set text(size: 18pt)
-  table(
-    columns: columns, inset: 8pt, align: center + horizon,
-    stroke: 0.6pt + rgb("#d4dfe1"),
-    fill: (x, y) => if y == 0 { pale } else { none },
-    ..cells,
-  )
-}
-
-#show: metropolis-theme.with(
-  aspect-ratio: "16-9",
-  footer: self => [STT-2200 · Apprentissage non supervisé],
-  config-info(
-    title: [Apprentissage non supervisé],
-    subtitle: [Introduction · STT-2200],
-    author: [Steven Golovkine],
-    date: [Automne 2026],
-    institution: [Université Laval],
-  ),
-)
-
-#set text(lang: "fr", size: 18pt, fill: ink)
-#set par(justify: false, leading: 0.4em)
-#set list(indent: 1em, body-indent: 0.4em, spacing: 0.4em)
-#set enum(indent: 1em, body-indent: 0.4em, spacing: 0.4em)
-#show raw: set text(size: 16pt)
+#show : course-slides.with(title: [Apprentissage non supervisé])
 
 #title-slide()
 
 = Construire des groupes
-
-== Le parcours du cours
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Groupes et similarité], [
-    Comprendre ce que l'on cherche sans variable réponse.
-  ], height: 1.55in),
-  card([Qualité d'une partition], [
-    Relier les critères aux distances dans les groupes et entre groupes.
-  ], fill: pale-blue, height: 1.55in),
-  card([Exemple numérique], [
-    Comparer trois partitions des mêmes six observations.
-  ], fill: pale-purple, height: 1.55in),
-  card([Stabilité et interprétation], [
-    Examiner les choix de l'analyse et la portée des résultats.
-  ], fill: pale-orange, height: 1.55in),
-)
-
-== Classification supervisée et regroupement
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Classification supervisée], [
-    On observe des couples $(x_i,y_i)$.
-
-    Les classes $y_i$ guident l'ajustement.
-
-    On cherche à prédire la classe d'une nouvelle observation.
-  ], height: 2.65in),
-  card([Regroupement non supervisé], [
-    On observe des vecteurs $x_i$ à $p$ composantes.
-
-    Aucune réponse $y_i$ ne guide l'ajustement.
-
-    Les groupes constituent un résultat à interpréter.
-  ], fill: pale-blue, height: 2.65in),
-)
-#v(0.7em)
-#takeaway([
-  Le non supervisé comprend aussi la réduction de dimension et le repérage
-  d'observations atypiques.
-])
-
-== La similarité dépend de la question
-
-#course-table(
-  columns: (1.2fr, 3fr),
-  [*Choix*], [*Conséquence pour le regroupement*],
-  [Variables], [Décrire la taille, la forme ou un autre aspect des observations.],
-  [Représentation], [Transformer, coder ou standardiser les mesures.],
-  [Distance], [Définir quelles différences rendent deux observations éloignées.],
-)
-#v(0.7em)
-#takeaway([Un même tableau peut conduire à plusieurs regroupements pertinents.])
-#v(0.4em)
-#small([
-  Les variables peuvent être quantitatives ou qualitatives.
-  Leur nature guide le choix de la représentation et de la distance.
-])
-
-== Exemple : les profils des manchots
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Mesures utilisées], [
-    Longueur et profondeur du bec.
-
-    Longueur de la nageoire.
-
-    Masse corporelle.
-  ], height: 2.3in),
-  card([Espèce mise de côté], [
-    `species` ne participe pas à l'ajustement.
-
-    Les groupes décrivent des profils morphologiques, qui peuvent recouper
-    partiellement les espèces.
-  ], fill: pale-blue, height: 2.3in),
-)
-#v(0.65em)
-#takeaway([
-  Un tableau groupes × espèces peut aider à décrire le résultat après l'ajustement.
-])
-#v(0.35em)
-#small([
-  Si l'espèce sert à choisir les variables ou $K$, cette comparaison utilise
-  une information externe et ne vérifie plus ces choix de façon indépendante.
-])
 
 == Définition d'une partition
 
@@ -173,6 +27,7 @@ Une partition $cal(C)=(C_1,dots,C_K)$ répartit les indices des $n$ observations
   $K$ compte les groupes, $g$ les indexe et $j$ indexe les $p$ variables.
   Le $k$ des plus proches voisins comptait des voisins.
 ])
+
 
 == Les numéros des groupes sont arbitraires
 
@@ -574,7 +429,7 @@ qui restent dans un même groupe.
 == La démarche d'analyse
 
 #enum(
-  tight: false, spacing: 0.8em,
+  tight : false, spacing : 0.8em,
   [Définir les observations, les variables et la similarité recherchée.],
   [Traiter les valeurs manquantes et examiner transformations, unités et valeurs atypiques.],
   [Comparer les nombres de groupes, les initialisations ou les méthodes lorsque ces choix sont incertains.],

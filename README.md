@@ -9,6 +9,8 @@ Typst source for lecture notes for a data analysis course.
 - `styles/notes.typ` stores shared formatting and helper blocks.
 - `styles/math.typ` stores shared mathematical shortcuts; see the
   [notation and presentation conventions](styles/README.md).
+- `styles/slides.typ` stores the shared Touying Metropolis theme and components
+  for all presentations in `slides/`.
 - `lectures/` contains one Typst file per lecture.
 - `figures/` and `assets/` are placeholders for images, datasets, or other supporting files.
 
@@ -24,6 +26,13 @@ For live preview while editing:
 
 ```sh
 typst watch main.typ
+```
+
+Compile presentations from the repository root so that shared styles and
+figures remain accessible:
+
+```sh
+typst compile --root . slides/introduction.typ
 ```
 
 

@@ -4,67 +4,9 @@
 // Compilation depuis la racine du dépôt :
 // typst compile --root . slides/k_plus_proches_voisins.typ
 // L'option --root . autorise l'accès aux figures du dossier voisin.
-#import "@preview/touying:0.7.4": *
-#import themes.metropolis: *
+#import "../styles/slides.typ": *
 
-#let accent = rgb("#00695c")
-#let ink = rgb("#24313a")
-#let muted = rgb("#60747d")
-#let pale = rgb("#edf7f5")
-#let pale-blue = rgb("#eef4f8")
-#let pale-orange = rgb("#fff4e5")
-#let pale-purple = rgb("#f4eff8")
-
-#let card(title, body, fill: pale, height: 2.45in) = block(
-  width: 100%, height: height, inset: 12pt, radius: 5pt,
-  fill: fill, stroke: 0.7pt + rgb("#cbdedb"), breakable: false,
-)[
-  #align(left + top)[
-    #text(size: 20pt, weight: "bold", fill: accent)[#title]
-    #v(0.4em)
-    #text(size: 18pt, fill: ink)[#body]
-  ]
-]
-
-#let formula(body) = block(
-  width: 100%, inset: 12pt, radius: 5pt,
-  fill: rgb("#f7f9fa"), stroke: 0.7pt + rgb("#d8e0e3"),
-  breakable: false,
-)[#align(center)[#text(size: 20pt, fill: ink)[#body]]]
-
-#let takeaway(body, fill: pale) = block(
-  width: 100%, inset: 11pt, radius: 5pt, fill: fill, breakable: false,
-)[#text(size: 18pt, weight: "bold", fill: accent)[#body]]
-
-#let small(body) = text(size: 16pt, fill: muted)[#body]
-
-#let course-table(columns: (), ..cells) = {
-  set text(size: 17pt)
-  table(
-    columns: columns, inset: 8pt, align: center + horizon,
-    stroke: 0.6pt + rgb("#d4dfe1"),
-    fill: (x, y) => if y == 0 { pale } else { none },
-    ..cells,
-  )
-}
-
-#show: metropolis-theme.with(
-  aspect-ratio: "16-9",
-  footer: self => [STT-2200 · La méthode des $k$ plus proches voisins],
-  config-info(
-    title: [La méthode des $k$ plus proches voisins],
-    subtitle: [STT-2200],
-    author: [Steven Golovkine],
-    date: [Automne 2026],
-    institution: [Université Laval],
-  ),
-)
-
-#set text(lang: "fr", size: 18pt, fill: ink)
-#set par(justify: false, leading: 0.4em)
-#set list(indent: 1em, body-indent: 0.4em, spacing: 0.4em)
-#set enum(indent: 1em, body-indent: 0.4em, spacing: 0.45em)
-#show raw: set text(size: 16pt)
+#show : course-slides.with(title: [La méthode des $k$ plus proches voisins])
 
 #title-slide()
 
@@ -173,7 +115,7 @@
 - La classe ayant le plus de voix gagne, selon la règle de départage.
 
 #v(0.45em)
-#text(size: 17pt, fill: muted)[
+#small[
   Avec plusieurs classes, gagner ne demande pas forcément plus de 50 % des voix.
   Une proportion locale n'est pas une garantie de probabilité bien calibrée.
 ]
@@ -206,7 +148,7 @@ On cherche la classe de $x = (0, 0)^top$, avec la distance euclidienne.
     alt: "Le même point est classé A avec trois voisins puis B avec cinq voisins.")
 ]
 
-#text(size: 17pt, fill: muted)[
+#small[
   Le cercle passe par le $k$-ième voisin. Les numéros renvoient au tableau.
   Les deux points les plus éloignés sont hors des cinq voisins du tableau.
 ]
@@ -234,7 +176,7 @@ On cherche la classe de $x = (0, 0)^top$, avec la distance euclidienne.
 ], fill: pale-orange)
 
 #v(0.35em)
-#text(size: 17pt, fill: muted)[
+#small[
   Ces règles font partie de la méthode et précèdent son évaluation.
 ]
 
@@ -256,7 +198,7 @@ $ hat(f)_k (x) = op("argmin", limits: #true)_a
   sum_(i in cal(N)_k (x)) (y_i-a)^2. $
 
 #v(0.55em)
-#text(size: 17pt, fill: muted)[
+#small[
   Une médiane minimise plutôt la somme des erreurs absolues et résiste davantage aux réponses extrêmes.
 ]
 
@@ -295,12 +237,12 @@ Moyenne uniforme : $12$. Moyenne pondérée : $(10 + 14/3)/(1 + 1/3) = 11$.
     Prédiction très locale, capable de suivre des détails fins.
 
     Plus sensible au bruit, aux étiquettes erronées et aux observations atypiques.
-  ]),
+  ], height: 2.45in),
   card([Grand $k$], [
     Prédiction généralement plus stable.
 
     Risque de mélanger des régions différentes et d'effacer une structure utile.
-  ], fill: pale-blue),
+  ], fill: pale-blue, height: 2.45in),
 )
 
 #v(0.7em)
@@ -318,7 +260,7 @@ Moyenne uniforme : $12$. Moyenne pondérée : $(10 + 14/3)/(1 + 1/3) = 11$.
       + "voisin disparaissent en utilisant neuf puis cinquante et un voisins.")
 ]
 
-#text(size: 17pt, fill: muted)[
+#small[
   Même échantillon simulé, avec quelques étiquettes bruitées.
   L'apparence de la frontière sur l'entraînement ne suffit pas à choisir $k$.
 ]

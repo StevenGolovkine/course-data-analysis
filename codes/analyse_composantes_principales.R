@@ -235,5 +235,3 @@ z_reconstruit <- scale(
 perte_penguins <- sum((z_penguins - z_reconstruit)^2) / (nrow(donnees) - 1)
 cat("\nInertie perdue avec trois composantes :", perte_penguins, "\n")
 cat("Dernière valeur propre :", valeurs_penguins[4], "\n")
-
-

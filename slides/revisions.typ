@@ -1,84 +1,6 @@
-#import "@preview/touying:0.7.4": *
-#import themes.metropolis: *
+#import "../styles/slides.typ": *
 
-#let course_title = "Analyse de données - Révisions"
-#let course_author = "Steven Golovkine"
-
-#let accent = rgb("#00897b")
-#let accent-dark = rgb("#00695c")
-#let ink = rgb("#24313a")
-#let muted = rgb("#60747d")
-#let pale = rgb("#edf7f5")
-#let pale-blue = rgb("#eef4f8")
-#let pale-orange = rgb("#fff4e5")
-#let pale-purple = rgb("#f4eff8")
-#let pale-red = rgb("#fcecec")
-
-#let card(
-  title,
-  body,
-  fill: pale,
-  stroke: rgb("#bedbd5"),
-  height: auto,
-) = block(
-  width: 100%,
-  height: height,
-  inset: 11pt,
-  radius: 5pt,
-  fill: fill,
-  stroke: 0.8pt + stroke,
-  breakable: false,
-)[
-  #text(size: 15pt, weight: "bold", fill: accent-dark)[#title]
-  #v(0.32em)
-  #text(size: 12.3pt, fill: ink)[#body]
-]
-
-#let formula(body, fill: rgb("#f7f9fa"), height: auto) = block(
-  width: 100%,
-  height: height,
-  inset: 12pt,
-  radius: 5pt,
-  fill: fill,
-  stroke: 0.7pt + rgb("#d8e0e3"),
-  breakable: false,
-)[#align(center + horizon)[#text(size: 18pt, fill: ink)[#body]]]
-
-#let tag(body, fill: accent) = box(
-  inset: (x: 8pt, y: 3pt),
-  radius: 10pt,
-  fill: fill,
-)[#text(size: 10.5pt, weight: "bold", fill: white)[#body]]
-
-#let check(body) = block(
-  width: 100%,
-  height: 0.72in,
-  inset: 8pt,
-  radius: 4pt,
-  fill: rgb("#f7f9fa"),
-  stroke: 0.6pt + rgb("#d8e0e3"),
-  breakable: false,
-)[
-  #text(size: 14pt, weight: "bold", fill: accent)[✓]
-  #h(0.35em)
-  #text(size: 11.3pt, fill: ink)[#body]
-]
-
-#show: metropolis-theme.with(
-  aspect-ratio: "16-9",
-  footer: self => [STT-2200 · #course_title],
-  config-info(
-    title: [#course_title],
-    subtitle: [STT-2200],
-    author: [#course_author],
-    date: [Automne 2026],
-    institution: [Université Laval],
-  ),
-)
-
-#set text(lang: "fr")
-#set par(justify: false, leading: 0.68em)
-#set list(indent: 1.05em, body-indent: 0.45em, spacing: 0.32em)
+#show : course-slides.with(title: [Analyse de données - Révisions])
 
 #title-slide()
 
@@ -89,24 +11,22 @@
   gutter: 0.85em,
   card([1 · Algèbre linéaire], [
     Matrices, géométrie, valeurs propres, projections et optimisation.
-  ], height: 1.08in),
+  ], height: 1.46in),
   card([2 · Probabilités], [
     Incertitude, variables aléatoires, moments et dépendance.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.08in),
+  ], fill: pale-blue, height: 1.46in),
   card([3 · Statistiques], [
     Échantillons, estimateurs, covariance empirique et interprétation.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.08in),
+  ], fill: pale-purple, height: 1.46in),
   card([4 · Programmation reproductible], [
     Organisation, environnements, contrôle de version et rapports.
-  ], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.08in),
+  ], fill: pale-orange, height: 1.46in),
 )
 
 #v(0.8em)
-#align(center)[
-  #text(size: 20pt, weight: "bold", fill: accent-dark)[
-    représenter → quantifier l'incertitude → estimer → reproduire
-  ]
-]
+#takeaway([
+  représenter → quantifier l'incertitude → estimer → reproduire
+])
 
 = Algèbre linéaire
 
@@ -121,30 +41,28 @@
     #grid(
       columns: (1fr, 1fr),
       gutter: 0.6em,
-      card([$n$ lignes], [Une ligne par observation.], height: 1.2in),
-      card([$p$ colonnes], [Une colonne par variable.], height: 1.2in),
+      card([$n$ lignes], [Une ligne par observation.], height: 1.62in),
+      card([$p$ colonnes], [Une colonne par variable.], height: 1.62in),
     )
   ],
   [
     #card([Dimensions compatibles], [
       Si $A in RR^(n times p)$ et $B in RR^(p times q)$, alors
       $A B in RR^(n times q)$.
-    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.2in)
+    ], fill: pale-blue, height: 1.62in)
     #v(0.65em)
     #card([Transposition], [
       $A^top in RR^(p times n)$ et $(A B)^top = B^top A^top$.
-    ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.2in)
+    ], fill: pale-purple, height: 1.62in)
   ],
 )
 
 #pause
 
 #v(0.65em)
-#align(center)[
-  #text(size: 20pt, weight: "bold", fill: accent-dark)[
-    Toujours vérifier les dimensions avant de calculer.
-  ]
-]
+#takeaway([
+  Toujours vérifier les dimensions avant de calculer.
+])
 
 == Produit scalaire et géométrie
 
@@ -155,24 +73,24 @@
     $chevron.l u, v chevron.r = u^top v$
 
     Il mesure l'alignement de deux vecteurs.
-  ], height: 1.55in),
+  ], height: 2.09in),
   card([Norme euclidienne], [
     $norm(u) = sqrt(u^top u)$
 
     Elle mesure la longueur du vecteur.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.55in),
+  ], fill: pale-blue, height: 2.09in),
   card([Orthogonalité], [
     $u^top v = 0$
 
     Les deux directions sont perpendiculaires.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.55in),
+  ], fill: pale-purple, height: 2.09in),
 )
 
 #v(0.9em)
 #card([En analyse de données], [
   Distances, projections, variances et critères quadratiques s'expriment avec
   ces trois objets géométriques.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.95in)
+], fill: pale-orange, height: 1.28in)
 
 == Inverse, déterminant et trace
 
@@ -183,17 +101,17 @@
     $A A^(-1) = A^(-1) A = I_n$
 
     Résoudre conceptuellement $A x = b$.
-  ], height: 1.65in),
+  ], height: 2.23in),
   card([Déterminant], [
     $det(A) != 0 <=> A$ est inversible.
 
     Facteur de dilatation des volumes.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.65in),
+  ], fill: pale-blue, height: 2.23in),
   card([Trace], [
     $tr(A) = sum_(i=1)^n a_(i i)$
 
     Somme des éléments diagonaux.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.65in),
+  ], fill: pale-purple, height: 2.23in),
 )
 
 #v(0.8em)
@@ -213,28 +131,28 @@
     $A^top = A$
 
     Valeurs propres réelles et directions propres orthogonales.
-  ], height: 1.75in),
+  ], height: 2.36in),
   card([Semi-définie positive], [
     $u^top A u >= 0$ pour $u != 0$.
 
     Toutes les valeurs propres sont positives ou nulles.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.75in),
+  ], fill: pale-blue, height: 2.36in),
   card([Orthogonale], [
     $Q^top Q = I_n$ et $Q^(-1) = Q^top$
 
     Les distances sont conservées et les angles sont préservés.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.75in),
+  ], fill: pale-purple, height: 2.36in),
 )
 
 #v(0.75em)
-#text(size: 14pt, fill: muted)[
+#small[
   Les matrices de covariance et de corrélation sont symétriques et
   semi-définies positives.
-  
+
   Cette structure rend possible leur analyse spectrale.
 ]
 
-== Une covariance est semi-définie positive.
+== Une covariance est semi-définie positive
 
 #grid(
   columns: (1fr, 1fr),
@@ -243,12 +161,12 @@
     Soit $Sigma = "Cov"(X)$ et une direction $u$.
 
     La projection aléatoire est $u^top X$.
-  ], height: 1.75in),
+  ], height: 2.36in),
   card([Identité clé], [
     $u^top Sigma u = "Var"(u^top X) >= 0$
 
     Une variance ne peut jamais être négative.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.75in),
+  ], fill: pale-blue, height: 2.36in),
 )
 
 #v(0.75em)
@@ -256,7 +174,7 @@
   Si une combinaison linéaire non triviale des variables est constante, sa
   variance est nulle : il existe alors une direction $u != 0$ telle que
   $u^top Sigma u = 0$.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.1in)
+], fill: pale-orange, height: 1.49in)
 
 == Valeurs propres et quotient de Rayleigh
 
@@ -267,12 +185,12 @@
     $A u = lambda u$, avec $u != 0$.
 
     Dans cette direction, $A$ agit comme une simple mise à l'échelle.
-  ], height: 1.65in),
+  ], height: 2.23in),
   card([Quotient de Rayleigh], [
     $R_A (u) = (u^top A u) / (u^top u)$.
 
     Pour une covariance, il mesure la variance dans la direction $u$.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.65in),
+  ], fill: pale-blue, height: 2.23in),
 )
 
 #pause
@@ -281,35 +199,27 @@
 #grid(
   columns: (1fr, 1fr),
   gutter: 0.75em,
-  card([Matrice symétrique], [Valeurs propres réelles et vecteurs propres orthogonaux.], height: 0.95in),
-  card([Matrice semi-définie positive], [Valeurs propres positives ou nulles.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.95in),
+  card([Matrice symétrique], [Valeurs propres réelles et vecteurs propres orthogonaux.], height: 1.28in),
+  card([Matrice semi-définie positive], [Valeurs propres positives ou nulles.], fill: pale-purple, height: 1.28in),
 )
 
 == Théorème de décomposition spectrale
 
-#align(center)[
-  #block(width: 88%, inset: 15pt, radius: 6pt, fill: pale, stroke: 1pt + rgb("#bedbd5"))[
-    #text(size: 17pt, weight: "bold", fill: accent-dark)[Théorème]
-    #v(0.4em)
-    #text(size: 14pt, fill: ink)[
-      Toute matrice symétrique réelle $A$ s'écrit
-    ]
-    #v(0.45em)
-    #align(center)[#text(size: 24pt)[$A = Q Lambda Q^top$]]
-    #v(0.45em)
-    #text(size: 13pt, fill: ink)[
-      où $Q$ est orthogonale et $Lambda = "diag"(lambda_1, dots, lambda_n)$.
-      Les colonnes de $Q$ forment une base orthonormée de vecteurs propres.
-    ]
-  ]
-]
+#card([Théorème], [
+  Toute matrice symétrique réelle $A$ s'écrit
+
+  $ A = Q Lambda Q^top $
+
+  où $Q$ est orthogonale et $Lambda = "diag"(lambda_1, dots, lambda_n)$.
+  Les colonnes de $Q$ forment une base orthonormée de vecteurs propres.
+])
 
 #v(0.65em)
 #grid(
   columns: (1fr, 1fr),
   gutter: 0.75em,
-  card([Déterminant], [#align(center)[#text(size: 14pt)[$det(A) = product_(i=1)^n lambda_i$]]], height: 0.9in),
-  card([Trace], [#align(center)[#text(size: 14pt)[$tr(A) = sum_(i=1)^n lambda_i$]]], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 0.9in),
+  card([Déterminant], [$ det(A) = product_(i=1)^n lambda_i $], height: 1.4in),
+  card([Trace], [$ tr(A) = sum_(i=1)^n lambda_i $], fill: pale-blue, height: 1.4in),
 )
 
 == Projections et optimisation quadratique
@@ -323,14 +233,14 @@
     coordonnée : $u^top x$,
 
     projection : $u u^top x$.
-  ], height: 2.05in),
+  ], height: 2.77in),
   card([Projection sur un sous-espace], [
     Si les colonnes de $U$ sont orthonormées,
 
     $P = U U^top$
 
     vérifie $P^top = P$ et $P^2 = P$.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.05in),
+  ], fill: pale-blue, height: 2.77in),
 )
 
 #pause
@@ -349,21 +259,19 @@
     Vecteurs propres : axes de projection.
 
     Valeurs propres : variances expliquées.
-  ], height: 1.65in),
+  ], height: 2.23in),
   card([Analyse discriminante], [
     Maximiser la séparation entre groupes relativement à leur dispersion.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.65in),
+  ], fill: pale-blue, height: 2.23in),
   card([Méthodes factorielles], [
     Transformer un critère géométrique en coordonnées interprétables.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.65in),
+  ], fill: pale-purple, height: 2.23in),
 )
 
 #v(0.8em)
-#align(center)[
-  #text(size: 15pt, weight: "bold", fill: accent-dark)[
-    Vecteurs propres = directions privilégiées et valeurs propres = importance.
-  ]
-]
+#takeaway([
+  Vecteurs propres = directions privilégiées et valeurs propres = importance.
+])
 
 = Probabilités
 
@@ -376,12 +284,12 @@
     $S$ rassemble tous les résultats possibles d'une expérience.
 
     Un évènement $E$ est un sous-ensemble de $S$.
-  ], height: 1.55in),
+  ], height: 2.09in),
   card([Mesure de probabilité], [
     $PP(E)$ quantifie la plausibilité de l'évènement.
 
     $0 <= PP(E) <= 1$ et $PP(S) = 1$.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.55in),
+  ], fill: pale-blue, height: 2.09in),
 )
 
 #v(0.75em)
@@ -391,7 +299,7 @@
 ], height: 0.95in)
 
 #v(0.55em)
-#text(size: 14pt, fill: muted)[
+#small[
   Les probabilités décrivent les résultats possibles et leur fréquence attendue,
   pas le résultat certain d'une expérience particulière.
 ]
@@ -406,20 +314,18 @@
     $PP(E | F) = PP(E ∩ F) / PP(F)$.
 
     On met à jour l'univers en sachant $F$.
-  ], height: 2.0in),
+  ], height: 2.7in),
   card([Indépendance], [
     $PP(E ∩ F) = PP(E) PP(F)$ ou
-    
+
     si $PP(F) > 0$, $PP(E | F) = PP(E)$.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.0in),
+  ], fill: pale-blue, height: 2.7in),
 )
 
 #v(0.65em)
-#align(center)[
-  #text(size: 20pt, weight: "bold", fill: accent-dark)[
-    Indépendance = connaître $F$ ne change pas la probabilité de $E$.
-  ]
-]
+#takeaway([
+  Indépendance = connaître $F$ ne change pas la probabilité de $E$.
+])
 
 == Variables aléatoires
 
@@ -432,22 +338,22 @@
     Distribution décrite par $PP(X = x)$.
 
     Exemple : nombre de succès.
-  ], height: 1.85in),
+  ], height: 2.5in),
   card([Continue], [
     Une densité $f$ vérifie
 
     $PP(X in A) = integral_A f(x) dif x$.
 
     Pour une valeur fixée, $PP(X = x) = 0$.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.85in),
+  ], fill: pale-blue, height: 2.5in),
 )
 
-#pause 
+#pause
 #v(0.7em)
 #card([Fonction de répartition], [
   $F_X (t) = PP(X <= t)$ caractérise entièrement la distribution, dans les cas
   discret comme continu.
-], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.95in)
+], fill: pale-purple, height: 1.28in)
 
 == Espérance et théorème de transfert
 
@@ -458,22 +364,22 @@
     $EE(X) = sum_x x PP(X = x)$
 
     $EE(g(X)) = sum_x g(x) PP(X = x)$
-  ], height: 1.65in),
+  ], height: 2.23in),
   card([Cas continu], [
     $EE(X) = integral x f(x) dif x$
 
     $EE(g(X)) = integral g(x) f(x) dif x$
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.65in),
+  ], fill: pale-blue, height: 2.23in),
 )
 
-#pause 
+#pause
 
 #v(0.75em)
 #card([Idée du transfert], [
   Pour calculer l'espérance de $g(X)$, il n'est pas nécessaire de déterminer
   d'abord la distribution de $g(X)$ : on moyenne directement $g(x)$ selon la
   distribution de $X$.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.1in)
+], fill: pale-orange, height: 1.49in)
 
 == Linéarité et variance
 
@@ -486,23 +392,21 @@
     $EE(a X) = a EE(X)$
 
     Aucune indépendance n'est nécessaire.
-  ], height: 1.9in),
+  ], height: 2.57in),
   card([Variance], [
     $"Var"(X) = EE((X - EE(X))^2) = EE(X^2) - EE(X)^2$
 
     $"Var"(a X + b) = a^2 "Var"(X)$
 
     $"Var"(X + Y) = "Var"(X) + "Var"(Y)$ si X et Y sont indépendants.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.9in),
+  ], fill: pale-blue, height: 2.57in),
 )
 
-#pause 
+#pause
 #v(0.7em)
-#align(center)[
-  #text(size: 20pt, weight: "bold", fill: accent-dark)[
-    L'écart-type $sigma(X) = sqrt("Var"(X))$ s'exprime dans la même unité que $X$.
-  ]
-]
+#takeaway([
+  L'écart-type $sigma(X) = sqrt("Var"(X))$ s'exprime dans la même unité que $X$.
+])
 
 == Variables aléatoires indépendantes
 
@@ -511,22 +415,22 @@
   gutter: 0.9em,
   card([Définition], [
     Pour tous ensembles $A$ et $B$,
-    
+
     $PP(X in A, Y in B) = PP(X in A) PP(Y in B)$.
-  ], height: 1.9in),
+  ], height: 2.57in),
   card([Conséquence], [
     Si les espérances existent, $EE(X Y) = EE(X) EE(Y)$.
 
     De plus, $g(X)$ et $h(Y)$ restent indépendantes.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.9in),
+  ], fill: pale-blue, height: 2.57in),
 )
 
-#pause 
+#pause
 #v(0.6em)
 #card([Deux lancers de pièce], [
   Si $X$ et $Y$ indiquent l'obtention de face aux premier et second lancers,
   alors $PP(X=x,Y=y)=1/4= 1/2 dot 1/2$ : la distribution conjointe se factorise.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.05in)
+], fill: pale-orange, height: 1.42in)
 
 == Covariance et corrélation
 
@@ -537,21 +441,21 @@
     $"Cov"(X,Y) = EE((X-EE(X))(Y-EE(Y)))$
 
     Dépend des unités de mesure.
-  ], height: 1.85in),
+  ], height: 2.5in),
   card([Corrélation], [
     $"Corr"(X,Y) = "Cov"(X,Y)/(sigma(X) sigma(Y))$
 
     Sans unité et comprise entre $-1$ et $1$.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.85in),
+  ], fill: pale-blue, height: 2.5in),
 )
 
-#pause 
+#pause
 #v(0.7em)
 #grid(
   columns: (1fr, 1fr),
   gutter: 0.75em,
-  card([Indépendance], [Implique une covariance nulle.], height: 0.85in),
-  card([Covariance nulle], [N'implique généralement pas l'indépendance.], fill: pale-red, stroke: rgb("#ecc1c1"), height: 0.85in),
+  card([Indépendance], [Implique une covariance nulle.], height: 1.15in),
+  card([Covariance nulle], [N'implique généralement pas l'indépendance.], fill: pale-red, height: 1.15in),
 )
 
 == Vecteurs aléatoires
@@ -566,7 +470,7 @@
       $Sigma = EE((X-mu)(X-mu)^top)$
 
       La diagonale contient les variances; les autres termes, les covariances.
-    ], height: 2.05in)
+    ], height: 2.77in)
   ],
   [
     #card([Loi normale multivariée], [
@@ -575,12 +479,12 @@
       Sa densité dépend de la distance quadratique :
 
       #align(center)[$(x-mu)^top Sigma^(-1)(x-mu)$]
-    ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 2.05in)
+    ], fill: pale-blue, height: 2.77in)
   ],
 )
 
 #v(0.65em)
-#text(size: 14pt, fill: muted)[
+#small[
   La loi normale multivariée intervient notamment dans l'analyse discriminante et
   dans les modèles de mélanges gaussiens.
 ]
@@ -593,20 +497,20 @@
   columns: (1fr, auto, 1fr),
   gutter: 0.55em,
   align: horizon,
-  card([Population], [Distribution théorique et paramètres inconnus.], height: 1.15in),
+  card([Population], [Distribution théorique et paramètres inconnus.], height: 1.55in),
   text(size: 24pt, fill: accent)[→],
-  card([Échantillon], [$X_1, dots, X_n$ indépendantes et de même distribution.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.15in),
+  card([Échantillon], [$X_1, dots, X_n$ indépendantes et de même distribution.], fill: pale-blue, height: 1.55in),
 )
 
-#pause 
+#pause
 #v(0.85em)
 #grid(
   columns: (1fr, auto, 1fr),
   gutter: 0.55em,
   align: horizon,
-  card([Estimateur], [Fonction aléatoire de l'échantillon avant l'observation.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.15in),
+  card([Estimateur], [Fonction aléatoire de l'échantillon avant l'observation.], fill: pale-purple, height: 1.55in),
   text(size: 24pt, fill: accent)[→],
-  card([Estimation], [Valeur numérique obtenue après avoir observé les données.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.15in),
+  card([Estimation], [Valeur numérique obtenue après avoir observé les données.], fill: pale-orange, height: 1.55in),
 )
 
 == Moyenne et covariance empiriques
@@ -618,22 +522,22 @@
     #align(center)[$hat(mu) = 1/n sum_(i=1)^n X_i$]
 
     Centre du nuage d'observations.
-  ], height: 1.6in),
+  ], height: 2.16in),
   card([Covariance empirique], [
     #align(center)[$hat(Sigma) = 1/(n-1) sum_(i=1)^n$
     $(X_i-hat(mu))(X_i-hat(mu))^top$]
 
     Dispersion et dépendances linéaires.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.6in),
+  ], fill: pale-blue, height: 2.16in),
 )
 
 #v(0.8em)
 #card([Pourquoi $n-1$?], [
   Une contrainte est utilisée pour estimer la moyenne à partir des mêmes
   observations.
-  
+
   La correction par $n-1$ rend l'estimateur de covariance sans biais.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.6in)
+], fill: pale-orange, height: 2.16in)
 
 == Des estimateurs sans biais
 
@@ -643,7 +547,7 @@
   ], fill: pale, height: 1.05in)
 ]
 
-#pause 
+#pause
 #v(0.8em)
 #grid(
   columns: (1fr, 1fr),
@@ -654,11 +558,11 @@
     $= mu$,]
 
     comme les $X_i$ sont indépendantes et de même distribution.
-  ], height: 1.5in),
+  ], height: 2.03in),
   card([Pour la covariance], [
     La somme des carrés centrés par $hat(mu)$ a pour espérance $(n-1)Sigma$.
     La division par $n-1$ corrige donc le biais.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.5in),
+  ], fill: pale-blue, height: 2.03in),
 )
 
 == Corrélation empirique
@@ -669,19 +573,19 @@
   align: horizon,
   card([Écarts-types], [
     #align(center)[$hat(D) = "diag"(hat(sigma)_1, dots, hat(sigma)_p)$]
-  ], height: 1.2in),
+  ], height: 1.62in),
   text(size: 24pt, fill: accent)[→],
   card([Corrélation], [
     #align(center)[$hat(R) = hat(D)^(-1) hat(Sigma) hat(D)^(-1)$]
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.2in),
+  ], fill: pale-blue, height: 1.62in),
 )
 
 #v(0.85em)
 #grid(
   columns: (1fr, 1fr),
   gutter: 0.75em,
-  card([Pourquoi standardiser?], [Comparer des variables dont les unités ou les ordres de grandeur diffèrent.], height: 1.2in),
-  card([Application], [ACP fondée sur les corrélations plutôt que sur les covariances.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.2in),
+  card([Pourquoi standardiser?], [Comparer des variables dont les unités ou les ordres de grandeur diffèrent.], height: 1.62in),
+  card([Application], [ACP fondée sur les corrélations plutôt que sur les covariances.], fill: pale-purple, height: 1.62in),
 )
 
 == Interpréter une estimation
@@ -691,13 +595,13 @@
   gutter: 0.65em,
   card([Variabilité], [
     Un nouvel échantillon produirait une autre estimation.
-  ], height: 1.2in),
+  ], height: 1.62in),
   card([Représentativité], [
     Une grande taille d'échantillon ne corrige pas un biais de sélection.
-  ], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.2in),
+  ], fill: pale-blue, height: 1.62in),
   card([Stabilité], [
     Axes factoriels, groupes et modèles héritent de l'incertitude des données.
-  ], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.2in),
+  ], fill: pale-purple, height: 1.62in),
 )
 
 #v(0.75em)
@@ -705,33 +609,25 @@
   Un taux d'erreur de validation estime une performance future : il n'est pas
   une vérité exacte. La validation croisée réduit une partie de la variabilité,
   sans réparer un échantillon mal défini ni une fuite d'information.
-], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.15in)
+], fill: pale-orange, height: 1.55in)
 
 = Programmation reproductible
 
 == Qu'est-ce qu'une analyse reproductible?
 
-#align(center)[
-  #block(width: 88%, inset: 14pt, radius: 6pt, fill: pale, stroke: 0.9pt + rgb("#bedbd5"))[
-    #align(center)[
-      #text(size: 18pt, weight: "bold", fill: accent-dark)[Reproductibilité]
-      #v(0.45em)
-      #text(size: 13.5pt, fill: ink)[
-        Une autre personne peut reconstruire les résultats à partir des mêmes
-        données, du même code et des mêmes instructions.
-      ]
-    ]
-  ]
-]
+#card([Reproductibilité], [
+  Une autre personne peut reconstruire les résultats à partir des mêmes
+  données, du même code et des mêmes instructions.
+])
 
 #v(0.75em)
 #grid(
   columns: (1fr, 1fr, 1fr, 1fr),
   gutter: 0.55em,
-  card([Entrées], [Données et provenance.], height: 0.95in),
-  card([Code], [Transformations versionnées.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 0.95in),
-  card([Environnement], [Versions des dépendances.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 0.95in),
-  card([Exécution], [Procédure explicite et testée.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 0.95in),
+  card([Entrées], [Données et provenance.], height: 1.28in),
+  card([Code], [Transformations versionnées.], fill: pale-blue, height: 1.28in),
+  card([Environnement], [Versions des dépendances.], fill: pale-purple, height: 1.28in),
+  card([Exécution], [Procédure explicite et testée.], fill: pale-orange, height: 1.28in),
 )
 
 
@@ -741,22 +637,21 @@
   columns: (1fr, auto, 1fr, auto, 1fr, auto, 1fr),
   gutter: 0.35em,
   align: horizon,
-  card([Importer], [Types, noms, provenance.], height: 1.05in),
+  card([Importer], [Types, noms, provenance.], height: 1.42in),
   text(size: 20pt, fill: accent)[→],
-  card([Valider], [Unités, plages, manque.], fill: pale-blue, stroke: rgb("#c7d8e4"), height: 1.05in),
+  card([Valider], [Unités, plages, manque.], fill: pale-blue, height: 1.42in),
   text(size: 20pt, fill: accent)[→],
-  card([Transformer], [Variables, filtres, jointures.], fill: pale-purple, stroke: rgb("#d9cbe4"), height: 1.05in),
+  card([Transformer], [Variables, filtres, jointures.], fill: pale-purple, height: 1.42in),
   text(size: 20pt, fill: accent)[→],
-  card([Produire], [Modèles, figures, rapports.], fill: pale-orange, stroke: rgb("#ead4ad"), height: 1.05in),
+  card([Produire], [Modèles, figures, rapports.], fill: pale-orange, height: 1.42in),
 )
 
-#pause 
+#pause
 
 #v(0.85em)
 #grid(
   columns: (1fr, 1fr),
   gutter: 0.75em,
-  card([Paramètres explicites], [Chemins, graines, seuils et hyperparamètres regroupés dans un fichier de configuration.], height: 1.05in),
-  card([Contrôles automatiques], [Arrêter l'exécution si une hypothèse essentielle n'est pas satisfaite.], fill: pale-red, stroke: rgb("#ecc1c1"), height: 1.05in),
+  card([Paramètres explicites], [Chemins, graines, seuils et hyperparamètres regroupés dans un fichier de configuration.], height: 1.42in),
+  card([Contrôles automatiques], [Arrêter l'exécution si une hypothèse essentielle n'est pas satisfaite.], fill: pale-red, height: 1.42in),
 )
-

@@ -5,67 +5,9 @@
 // Depuis la racine du dépôt :
 // typst compile --root . slides/analyse_discriminante_fisher.typ
 // --root . autorise l'accès aux figures du dossier voisin.
-#import "@preview/touying:0.7.4": *
-#import themes.metropolis: *
+#import "../styles/slides.typ": *
 
-#let accent = rgb("#00695c")
-#let ink = rgb("#24313a")
-#let muted = rgb("#60747d")
-#let pale = rgb("#edf7f5")
-#let pale-blue = rgb("#eef4f8")
-#let pale-orange = rgb("#fff4e5")
-#let pale-purple = rgb("#f4eff8")
-
-#let card(title, body, fill: pale, height: 2.2in) = block(
-  width: 100%, height: height, inset: 12pt, radius: 5pt,
-  fill: fill, stroke: 0.7pt + rgb("#cbdedb"), breakable: false,
-)[
-  #align(left + top)[
-    #text(size: 20pt, weight: "bold", fill: accent)[#title]
-    #v(0.4em)
-    #text(size: 18pt, fill: ink)[#body]
-  ]
-]
-
-#let formula(body) = block(
-  width: 100%, inset: 12pt, radius: 5pt,
-  fill: rgb("#f7f9fa"), stroke: 0.7pt + rgb("#d8e0e3"),
-  breakable: false,
-)[#align(center)[#text(size: 20pt, fill: ink)[#body]]]
-
-#let takeaway(body, fill: pale) = block(
-  width: 100%, inset: 11pt, radius: 5pt, fill: fill, breakable: false,
-)[#text(size: 18pt, weight: "bold", fill: accent)[#body]]
-
-#let small(body) = text(size: 16pt, fill: muted)[#body]
-
-#let course-table(columns: (), ..cells) = {
-  set text(size: 18pt)
-  table(
-    columns: columns, inset: 8pt, align: center + horizon,
-    stroke: 0.6pt + rgb("#d4dfe1"),
-    fill: (x, y) => if y == 0 { pale } else { none },
-    ..cells,
-  )
-}
-
-#show: metropolis-theme.with(
-  aspect-ratio: "16-9",
-  footer: self => [STT-2200 · Analyse discriminante de Fisher],
-  config-info(
-    title: [Analyse discriminante de Fisher],
-    subtitle: [STT-2200],
-    author: [Steven Golovkine],
-    date: [Automne 2026],
-    institution: [Université Laval],
-  ),
-)
-
-#set text(lang: "fr", size: 18pt, fill: ink)
-#set par(justify: false, leading: 0.4em)
-#set list(indent: 1em, body-indent: 0.4em, spacing: 0.4em)
-#set enum(indent: 1em, body-indent: 0.4em, spacing: 0.4em)
-#show raw: set text(size: 16pt)
+#show : course-slides.with(title: [Analyse discriminante de Fisher])
 
 #title-slide()
 
@@ -700,7 +642,7 @@ Le partage stratifié conserve environ 70 % de chaque espèce pour apprendre.
 
 Le script utilise R de base et les données locales.
 
-#block(fill: rgb("#f7f9fa"), inset: 12pt, radius: 5pt)[
+#block(fill: pale-gray, inset: 12pt, radius: 5pt)[
 ```r
 source("codes/analyse_discriminante_fisher.R")
 

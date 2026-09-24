@@ -1,69 +1,10 @@
 // STT-2200 — ACP. Source : lectures/dimension_reduction.typ,
 // introduction et section « L'analyse en composantes principales ».
 // Compilation depuis la racine :
-// typst compile --root . slides/dimension_reduction.typ
-#import "@preview/touying:0.7.4": *
-#import themes.metropolis: *
+// typst compile --root . slides/analyse_composantes_principales.typ
+#import "../styles/slides.typ": *
 
-#let accent = rgb("#00897b")
-#let accent-dark = rgb("#00695c")
-#let ink = rgb("#24313a")
-#let muted = rgb("#60747d")
-#let pale = rgb("#edf7f5")
-#let pale-blue = rgb("#eef4f8")
-#let pale-orange = rgb("#fff4e5")
-#let pale-purple = rgb("#f4eff8")
-
-#let card(title, body, fill: pale, height: 1.85in) = block(
-  width: 100%, height: height, inset: 12pt, radius: 5pt,
-  fill: fill, stroke: 0.7pt + rgb("#cbdedb"), breakable: false,
-)[
-  #align(left + top)[
-    #text(size: 20pt, weight: "bold", fill: accent-dark)[#title]
-    #v(0.4em)
-    #text(size: 18pt, fill: ink)[#body]
-  ]
-]
-
-#let formula(body, height: auto) = block(
-  width: 100%, height: height, inset: 12pt, radius: 5pt,
-  fill: rgb("#f7f9fa"), stroke: 0.7pt + rgb("#d8e0e3"),
-  breakable: false,
-)[#align(center + horizon)[#text(size: 20pt, fill: ink)[#body]]]
-
-#let takeaway(body, fill: pale) = block(
-  width: 100%, inset: 11pt, radius: 5pt, fill: fill, breakable: false,
-)[#text(size: 18pt, weight: "bold", fill: accent-dark)[#body]]
-
-#let small(body) = text(size: 14pt, fill: muted)[#body]
-
-#let course-table(columns: (), ..cells) = {
-  set text(size: 17pt)
-  table(
-    columns: columns, inset: 9pt, align: center + horizon,
-    stroke: 0.6pt + rgb("#d4dfe1"),
-    fill: (x, y) => if y == 0 { pale } else { none },
-    ..cells,
-  )
-}
-
-#show: metropolis-theme.with(
-  aspect-ratio: "16-9",
-  footer: self => [STT-2200 · Analyse en composantes principales],
-  config-info(
-    title: [Analyse en composantes principales],
-    subtitle: [STT-2200],
-    author: [Steven Golovkine],
-    date: [Automne 2026],
-    institution: [Université Laval],
-  ),
-)
-
-#set text(lang: "fr", size: 18pt, fill: ink)
-#set par(justify: false, leading: 0.4em)
-#set list(indent: 1em, body-indent: 0.4em, spacing: 0.35em)
-#set enum(indent: 1em, body-indent: 0.4em, spacing: 0.35em)
-#show raw: set text(size: 15pt)
+#show : course-slides.with(title: [Analyse en composantes principales])
 
 #title-slide()
 
@@ -76,12 +17,12 @@
   card([Sélection de variables], [
     Garder certaines variables originales.
 
-    *Exemple :* conserver uniquement la note de l'examen final.
+    *Exemple : * conserver uniquement la note de l'examen final.
   ], height: 2in),
   card([Construction de composantes], [
     Combiner les variables en quelques scores.
 
-    *Exemple :* résumer plusieurs évaluations par un niveau commun.
+    *Exemple : * résumer plusieurs évaluations par un niveau commun.
   ], fill: pale-blue, height: 2in),
 )
 
@@ -119,10 +60,10 @@
   card([Effet géométrique], [
     Le point moyen devient l'origine. Les distances entre observations
     restent identiques.
-  ]),
+  ], height: 1.85in),
   card([Exemple : une note sur 20], [
     Si la moyenne vaut 12, une note de 14 donne une valeur centrée de 2 points.
-  ], fill: pale-blue),
+  ], fill: pale-blue, height: 1.85in),
 )
 
 == ACP centrée ou centrée réduite
@@ -179,7 +120,7 @@
 )
 
 #v(0.65em)
-#text(size: 17pt, fill: muted)[
+#small[
   Les $n$ observations ont le même poids. Les variances utilisent le diviseur $n-1$.
 ]
 
@@ -197,7 +138,7 @@ Pour une direction unitaire $alpha$, le vecteur des scores est $y = Z alpha$.
 ])
 
 #v(0.65em)
-#text(size: 17pt, fill: muted)[
+#small[
   La contrainte $alpha^top alpha = 1$ fixe l'échelle : multiplier les
   coefficients par $c$ multiplierait la variance par $c^2$.
 ]
@@ -277,7 +218,7 @@ Les composantes sont non corrélées, ce qui n'implique pas leur indépendance.
   ], height: 2.2in),
   card([Nombre d'axes non nuls], [
     Exactement $r$ composantes ont une variance strictement positive.
-    
+
     $ r = op("rang")(Z) <= min(n-1, p). $
   ], fill: pale-blue, height: 2.2in),
 )
@@ -300,7 +241,7 @@ Les composantes sont non corrélées, ce qui n'implique pas leur indépendance.
 )
 
 #v(0.55em)
-#text(size: 17pt, fill: muted)[
+#small[
   Avec une normalisation par $n$, l'inertie vaut $(n-1) / n I$.
   Les proportions de variance conservée restent identiques.
 ]
@@ -323,8 +264,8 @@ Les composantes sont non corrélées, ce qui n'implique pas leur indépendance.
   card([ACP centrée réduite], [
     Chaque variable a une variance égale à 1.
 
-    L'inertie totale vaut donc 
-    
+    L'inertie totale vaut donc
+
     $ I = p. $
   ], fill: pale-blue, height: 2.4in),
 )
@@ -350,7 +291,7 @@ Les composantes sont non corrélées, ce qui n'implique pas leur indépendance.
 )
 
 #v(0.55em)
-#text(size: 17pt, fill: muted)[
+#small[
   « Expliquée » signifie conservée par la projection, sans interprétation causale.
 ]
 
@@ -478,7 +419,7 @@ Exemple d'une ACP centrée réduite de six variables :
   #image("../figures/acp_nombre_composantes.svg", height: 4.5in)
 ]
 
-#text(size: 17pt, fill: muted)[
+#small[
   Dans cet exemple, le coude illustratif au rang 4 suggère $q = 4$.
   Sa position reste un jugement visuel à justifier.
 ]
@@ -569,7 +510,7 @@ Dans une ACP centrée réduite, pour $lambda_k > 0$ :
 )
 
 #v(0.45em)
-#text(size: 17pt, fill: muted)[
+#small[
   Les flèches atteignent le cercle car les deux axes représentent toute
   la variation. Le cosinus de leur angle vaut exactement 0,8.
 ]
@@ -614,7 +555,7 @@ Dans une ACP centrée réduite, pour $lambda_k > 0$ :
 )
 
 #v(0.65em)
-#text(size: 17pt, fill: muted)[
+#small[
   Contributions définies pour $lambda_k > 0$ ; cosinus carrés définis
   pour $norm(z_i) > 0$. Dans un plan, additionner les cosinus carrés de ses axes.
 ]
@@ -635,7 +576,7 @@ La contribution moyenne d'un individu est $1/45 approx 2.22%$.
 )
 
 #v(0.65em)
-#text(size: 17pt, fill: muted)[
+#small[
   Les observations A et B sont à la même distance du centre. L' observation B porte près du quart de l'inertie du second axe, qui est beaucoup plus faible.
 ]
 
@@ -657,7 +598,7 @@ Pour une ACP centrée réduite et $lambda_k > 0$ :
 )
 
 #v(0.6em)
-#text(size: 17pt, fill: muted)[
+#small[
   Sur un axe, les contributions des variables totalisent 1.
   Le repère $1/p$ est une contribution moyenne, pas un seuil de qualité.
 ]
@@ -682,7 +623,7 @@ Pour une ACP centrée réduite et $lambda_k > 0$ :
 )
 
 #v(0.6em)
-#text(size: 17pt, fill: muted)[
+#small[
   L'optimalité concerne la reconstruction quadratique par projection
   orthogonale. Elle ne garantit pas la pertinence pour chaque objectif.
 ]

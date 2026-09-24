@@ -113,3 +113,60 @@ git diff --check
 
 Contrôler également le rendu des nouveaux encadrés, des formules longues et
 des tableaux, en particulier lorsqu'ils se trouvent près d'une fin de page.
+
+## Présentations
+
+Les huit présentations de `slides/` utilisent `styles/slides.typ`, fondé sur
+la mise en forme d'`exploratory.typ` et d'`introduction.typ` :
+
+```typst
+#import "../styles/slides.typ": *
+#show: course-slides.with(title: [Titre du cours])
+#title-slide()
+
+= Une section
+
+== Une diapositive
+
+#grid(
+  columns: (1fr, 1fr), gutter: 0.8em,
+  card([Notion], [Explication.], height: 1.5in),
+  card([Exemple], [Application.], fill: pale-blue, height: 1.5in),
+)
+#v(0.65em)
+#takeaway([Le point à retenir.])
+```
+
+- Thème Touying Metropolis, format 16:9, police Libertinus Serif, titres,
+  pieds de page et informations du cours configurés au même endroit.
+- Cartes : titre de 20 pt, texte de 18 pt, marges de 11 pt, angles de 5 pt.
+  Les cartes comparées dans une même rangée ont la même hauteur, choisie
+  selon le contenu. Un schéma dense peut utiliser `body-size: 16pt`.
+- `pale`, `pale-blue`, `pale-purple`, `pale-orange`, `pale-red` et `pale-gray`
+  définissent les fonds. Les bordures s'accordent automatiquement au fond.
+- `formula` encadre et centre les formules à 18 pt ; `takeaway` présente
+  une synthèse ; `small` réserve 16 pt aux précisions et légendes.
+- `course-table` applique les mêmes bordures, marges et texte de 17 pt.
+  Les arguments `columns`, `align` et `fill` permettent de conserver les
+  particularités pédagogiques d'un tableau.
+- Conserver le contenu, les figures et les animations `#pause` dans chaque
+  présentation ; ne pas y recopier les définitions du thème ou des composants.
+- Les règles de typographie française s'appliquent aussi aux diapositives.
+
+Compiler depuis la racine pour autoriser les imports et les figures :
+
+```sh
+typst compile --root . slides/introduction.typ
+```
+
+Le thème signale les débordements de diapositives. Pour vérifier aussi que
+le contenu tient dans les cartes à hauteur fixe, la commande suivante doit
+retourner `[]` :
+
+```sh
+typst eval --root . --input check-layout=true --in slides/introduction.typ \
+  'query(metadata).map(it => it.value).filter(it => type(it) == dictionary and it.at("kind", default: none) == "card-overflow")'
+```
+
+Ces contrôles complètent la vérification visuelle des tableaux, des formules
+longues et des flèches, mais ne la remplacent pas.
