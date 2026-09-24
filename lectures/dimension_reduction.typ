@@ -1519,72 +1519,490 @@ de déduire le parcours d'un étudiant particulier. Enfin, les propriétés du
 cercle des corrélations de l'ACP ne s'appliquent pas aux angles entre modalités
 sur une carte d'AFC.
 
-== L'ACM
+== L'analyse des correspondances multiples
 
 === Plusieurs variables qualitatives
 
-L'analyse des correspondances multiples, ou ACM, généralise l'AFC à plusieurs
-variables qualitatives. Elle est particulièrement utile pour les questionnaires
-ou les enquêtes comportant plusieurs questions à choix multiples.
+L'*analyse des correspondances multiples* (ACM) étudie les relations entre
+plusieurs variables qualitatives observées sur les mêmes individus. Elle
+construit des axes qui résument les principales oppositions entre profils de
+réponses. Elle permet ainsi de rapprocher des individus aux réponses semblables
+et de décrire les modalités qui caractérisent ces profils.
 
-Chaque variable est transformée en modalités binaires par codage disjonctif
-complet. Si une question possède trois modalités, elle devient trois colonnes
-binaires. Un individu reçoit un 1 pour la modalité choisie et 0 pour les autres.
+Contrairement à l'AFC d'un tableau croisant deux variables, l'ACM part ici d'un
+tableau *individus $times$ variables*. Aucune variable n'est une réponse à
+prédire : toutes les variables dites *actives* participent à la construction
+des axes. Les variables supplémentaires serviront ensuite à les interpréter.
 
-#definition(title: [Tableau de Burt])[
-  Le tableau de Burt, obtenu comme produit du tableau disjonctif transposé par le
-  tableau disjonctif, croise toutes les modalités entre elles.
-]
-
-L'ACM peut être vue comme une AFC appliquée au tableau disjonctif complet ou au tableau de Burt.
-
-=== Individus et modalités
-
-L'ACM représente à la fois les individus et les modalités. Deux individus proches
-ont tendance à partager des modalités semblables. Deux modalités proches sont
-souvent choisies par des individus aux profils semblables.
-
-Les axes d'une ACM opposent donc des profils de réponses. Par exemple, dans une
-enquête sur les habitudes d'étude, un premier axe peut opposer des étudiants
-très organisés à des étudiants qui déclarent travailler de manière irrégulière.
-Un second axe peut distinguer les habitudes individuelles des habitudes
-collectives.
-
-=== Encodage et regroupement des modalités
-
-Le choix des modalités est crucial. Pour une variable continue que l'on souhaite
-inclure dans une ACM, il faut d'abord la discrétiser en classes. Ce découpage
-fait perdre de l'information et doit être guidé par le contexte, les
-distributions observées et l'objectif de l'analyse.
-
-Pour les variables qualitatives, certaines modalités peuvent être trop rares.
-Il est préférable de les regrouper de manière interprétable plutôt que de les
-répartir arbitrairement dans d'autres catégories.
-
-On peut aussi déclarer certaines variables ou modalités comme supplémentaires.
-Elles sont alors projetées sur la carte sans contribuer à la construction des
-axes. Cette pratique est utile pour interpréter les dimensions sans laisser une
-variable illustrative dominer la géométrie.
-
-=== Interprétation et limites
-
-L'ACM est très utile pour résumer des données qualitatives nombreuses, mais son
-inertie est souvent plus difficile à lire que celle de l'ACP. Le codage
-disjonctif complet augmente le nombre de colonnes et dilue mécaniquement les
-pourcentages d'inertie. Une faible proportion d'inertie expliquée n'implique
-donc pas nécessairement que la carte soit inutile.
-
-Comme pour l'AFC, l'interprétation doit s'appuyer sur les contributions, les
-qualités de représentation et le retour aux données initiales. Une modalité rare
-peut attirer un axe à elle seule; elle doit alors être examinée avant de conclure
-qu'elle révèle une structure générale.
+On considère $n$ individus et $p >= 2$ variables qualitatives actives.
+La variable $v$ possède $J_v$ modalités, et
+$J=sum_(v=1)^p J_v$ est le nombre total de modalités. On note $i$ un individu,
+$j$ une modalité, $k$ un axe et $q$ le nombre d'axes retenus. Les formules
+ci-dessous supposent des individus de même poids, des données complètes et
+une seule modalité choisie par variable. Une question autorisant plusieurs
+réponses simultanées exige donc de préciser un autre codage.
 
 #example[
-  Dans un questionnaire étudiant, les modalités "jamais", "parfois", "souvent"
-  et "toujours" ne doivent pas être regroupées mécaniquement. Leur ordre et leur
-  sens substantiel doivent guider la construction des catégories utilisées dans
-  l'ACM.
+  *Une enquête fictive sur les habitudes d'étude.* Douze étudiants répondent
+  à trois questions : le rythme de travail, le support principalement utilisé
+  et le travail seul ou en groupe. « Ponctuel » désigne un travail concentré
+  sur certaines périodes ; « Mixte » désigne l'utilisation de livres et de
+  vidéos. On obtient huit profils distincts :
+
+  #block(breakable: false)[
+    #table(
+      columns: (0.6fr, 1.2fr, 1fr, 1fr, 0.8fr), align: center,
+      inset: 4pt, stroke: 0.4pt + luma(210),
+      table.header([*Profil*], [*Rythme*], [*Support*], [*Travail*], [*Effectif*]),
+      [A], [Régulier], [Livres], [Seul], [3],
+      [B], [Régulier], [Livres], [Groupe], [1],
+      [C], [Régulier], [Mixte], [Seul], [1],
+      [D], [Régulier], [Mixte], [Groupe], [2],
+      [E], [Ponctuel], [Vidéos], [Seul], [2],
+      [F], [Ponctuel], [Vidéos], [Groupe], [1],
+      [G], [Ponctuel], [Mixte], [Seul], [1],
+      [H], [Ponctuel], [Mixte], [Groupe], [1],
+    )
+  ]
+
+  Ici, $n=12$, $p=3$ et $J=2+3+2=7$. Les lettres A à H sont des repères de
+  lecture, pas des groupes fournis par l'ACM. Les trois étudiants du profil A
+  restent trois observations : il faut conserver leurs effectifs dans le calcul.
 ]
+
+=== Du tableau initial au codage disjonctif complet
+
+Le *tableau disjonctif complet* $Z$ possède $n$ lignes et $J$ colonnes.
+Son coefficient $z_(i j)$ vaut $1$ si l'individu $i$ possède la modalité $j$,
+et $0$ sinon. Les colonnes sont regroupées par variable : chaque individu a
+exactement un $1$ dans chaque bloc, donc
+
+$ sum_(j=1)^J z_(i j)=p. $
+
+Contrairement à certains codages de régression, on conserve *toutes* les
+modalités d'une variable. Retirer arbitrairement une colonne de référence
+modifierait la géométrie de l'ACM. Le codage ne donne pas non plus de sens
+numérique aux modalités : coder Livres, Mixte et Vidéos par $1,2,3$ puis
+faire une ACP imposerait un ordre et des écarts qui n'ont pas été définis.
+
+#figure(
+  image("../figures/acm_codage.svg", width: 100%,
+    alt: "Codage disjonctif des huit profils A à H. Chaque ligne contient "
+      + "une case égale à un pour le rythme, une pour le support et une "
+      + "pour le travail. L'effectif de chaque profil est indiqué."),
+  caption: [Une colonne par modalité, un $1$ par variable. Les lignes identiques
+    sont regroupées uniquement pour l'affichage : le tableau $Z$ utilisé dans
+    l'analyse comporte douze lignes et sept colonnes.],
+)
+
+En notant $n_j=sum_(i=1)^n z_(i j)$ l'effectif de la modalité $j$ et
+$f_j=n_j/n$ sa fréquence, on a $sum_(j=1)^J f_j=p$.
+Les fréquences somment à $1$ *dans chaque variable*, mais pas sur l'ensemble
+des colonnes. Toute modalité absente, de fréquence nulle, est retirée avant
+le calcul.
+
+L'ACM étudiée ici est l'AFC de $Z$. Le total de ce tableau est $n p$, et non
+$n$. Le tableau de fréquences et ses masses sont donc
+
+$ P=Z/(n p), quad r_i=1/n, quad c_j=f_j/p. $
+
+Chaque individu a la même masse. Chaque variable a une masse totale $1/p$,
+répartie entre ses modalités selon leurs fréquences. Dans l'exemple, Vidéos
+est choisi par trois étudiants : $f_("Vidéos")=3/12=1/4$, mais sa masse
+dans l'AFC de $Z$ est $c_("Vidéos")=1/12$.
+
+=== Distance entre individus et construction des axes
+
+Le profil-ligne de l'individu $i$ est $z_i/p$. En remplaçant les masses dans
+la distance de l'AFC, on obtient
+
+$ d_(chi^2)^2(i,ell)
+  = 1/p sum_(j=1)^J (z_(i j)-z_(ell j))^2/f_j. $
+
+Deux individus ayant exactement les mêmes réponses sont à distance nulle.
+Un désaccord sur une variable fait intervenir les deux modalités choisies.
+Les désaccords impliquant des modalités rares pèsent davantage.
+
+#example[
+  Les profils A et B diffèrent seulement par le travail Seul ou Groupe.
+  Ces modalités ont pour fréquences $7/12$ et $5/12$, donc
+
+  $ d_(chi^2)^2(A,B)=1/3 (1/(7/12)+1/(5/12))=48/35 approx 1.3714. $
+
+  Les autres variables n'ajoutent rien à cette distance, puisque leurs
+  réponses sont identiques. Deux étudiants du profil A sont à distance nulle.
+]
+
+Posons $D_r=diag(r_1,dots,r_n)$ et $D_c=diag(c_1,dots,c_J)$.
+Comme en AFC, on décompose la matrice des écarts standardisés :
+
+$ S=D_r^(-1/2)(P-r c^top)D_c^(-1/2)=U D V^top, $
+$ D=diag(sigma_1,dots,sigma_(r_S)), quad
+  sigma_1 >= dots >= sigma_(r_S)>0. $
+
+Ici, chaque coefficient s'écrit simplement
+
+$ S_(i j)=(z_(i j)-f_j)/sqrt(n p f_j). $
+
+On centre donc chaque indicatrice et on la pondère par sa fréquence.
+Il ne s'agit pas d'une ACP normée ordinaire des colonnes binaires, qui
+utiliserait les écarts-types des indicatrices. Les contraintes de codage
+limitent le rang à
+
+$ r_S <= min(n-1,J-p). $
+
+En effet, les colonnes centrées de chaque bloc somment à zéro. Des liaisons
+exactes entre variables peuvent encore réduire le rang. Les *coordonnées
+principales* des individus et des modalités sont
+
+$ F=D_r^(-1/2)U D=sqrt(n) U D, quad G=D_c^(-1/2)V D. $
+
+L'axe $k$ a pour inertie $lambda_k=sigma_k^2$. Les distances entre individus
+dans l'espace complet de $F$ sont exactement les distances du $chi^2$ définies
+ci-dessus. Le plan des deux premiers axes n'en montre qu'une projection.
+
+=== Tableau de Burt : une analyse liée, des inerties différentes
+
+#definition(title: [Tableau de Burt])[
+  Le tableau de Burt est la matrice symétrique
+
+  $ B=Z^top Z, quad B_(j h)=sum_(i=1)^n z_(i j) z_(i h). $
+
+  Son coefficient $(j,h)$ compte les individus possédant simultanément les
+  modalités $j$ et $h$. Un bloc hors diagonale croise deux variables. Un bloc
+  diagonal croise une variable avec elle-même : il contient les effectifs
+  des modalités sur sa diagonale et des zéros ailleurs.
+]
+
+Dans l'exemple, le bloc Rythme $times$ Support est
+
+#table(
+  columns: (1.2fr, 1fr, 1fr, 1fr), align: center,
+  inset: 4pt, stroke: 0.4pt + luma(210),
+  table.header([], [*Livres*], [*Mixte*], [*Vidéos*]),
+  [*Régulier*], [4], [3], [0],
+  [*Ponctuel*], [0], [2], [3],
+)
+
+Ainsi, les quatre utilisateurs de livres déclarent un rythme régulier, et
+les trois utilisateurs de vidéos un rythme ponctuel. Ces observations
+décrivent ce petit tableau fictif ; elles ne sont pas des conclusions sur
+les habitudes des étudiants en général.
+
+Le total de $B$ vaut $n p^2$, et ses masses lignes et colonnes sont toutes
+deux $c$. La matrice des écarts standardisés de son AFC vérifie
+
+$ S_B=D_c^(-1/2)(B/(n p^2)-c c^top)D_c^(-1/2)=S^top S. $
+
+Les directions des modalités sont donc les mêmes, mais l'AFC de Burt a pour
+inerties principales $lambda_k^2$, au lieu de $lambda_k$ pour l'AFC de $Z$.
+Ses coordonnées principales des modalités sont également redimensionnées,
+avec un facteur $sigma_k$ par rapport à $G$.#footnote[
+  Voir #link("https://econ-papers.upf.edu/papers/887.pdf")[Nenadić et Greenacre,
+  _Computation of Multiple Correspondence Analysis, with code in R_],
+  pour les relations entre les analyses du tableau disjonctif et de Burt.
+]
+Il faut donc identifier la convention du logiciel avant de comparer des
+valeurs propres ou des pourcentages. Dans la suite, tous les résultats bruts
+se rapportent au *tableau disjonctif*.
+
+=== Inertie et choix du nombre d'axes
+
+Le profil-colonne d'une modalité $j$ distribue uniformément sa masse entre
+les $n_j$ individus qui la possèdent. Sa distance carrée à l'origine vaut
+
+$ delta_j^2=sum_(i=1)^n ((z_(i j)/n_j)-1/n)^2/(1/n)=1/f_j-1. $
+
+On en déduit une particularité essentielle de l'ACM :
+
+$ inertia=sum_(j=1)^J c_j delta_j^2
+  =1/p sum_(j=1)^J (1-f_j)=(J-p)/p
+  =sum_(k=1)^(r_S) lambda_k. $
+
+L'inertie totale est donc fixée par le nombre de variables et de modalités.
+Elle ne mesure pas, à elle seule, la force de leurs associations. Même si
+les variables sont indépendantes, le codage crée de l'inertie : les modalités
+d'une même variable s'excluent mutuellement. Les associations changent la
+*répartition* de cette inertie entre les axes.
+
+La part brute conservée par $q$ axes reste
+$R_q=(sum_(k=1)^q lambda_k)/inertia$. Elle décrit bien la géométrie du codage,
+mais ne se lit pas comme une proportion de réponses correctement prédites.
+Une variable à $J_v$ modalités apporte $(J_v-1)/p$ à l'inertie totale ;
+multiplier ses catégories n'est donc pas neutre.
+
+#example(breakable: true)[
+  Dans l'enquête fictive, $inertia=(7-3)/3=4/3$ et quatre axes sont non nuls.
+
+  #block(breakable: false)[
+    #table(
+      columns: (0.6fr, 1fr, 1.2fr, 1.2fr), align: center,
+      inset: 4pt, stroke: 0.4pt + luma(210),
+      table.header([*Axe $k$*], [*$lambda_k$*], [*Inertie brute*], [*Cumul*]),
+      [1], [0,58921], [44,19~%], [44,19~%],
+      [2], [0,43921], [32,94~%], [77,13~%],
+      [3], [0,22900], [17,17~%], [94,31~%],
+      [4], [0,07592], [5,69~%], [100~%],
+    )
+  ]
+
+  Le premier plan conserve 77,13~% de l'inertie brute. Il reste donc 22,87~%
+  sur les deux autres axes. Un seuil fixé à 80~% conduirait à retenir trois
+  axes, alors que deux axes peuvent suffire pour présenter les principales
+  oppositions, à condition d'examiner ce qu'ils masquent.
+]
+
+Un repère propre à l'ACM est $lambda_k>1/p$. En cas d'indépendance exacte
+dans tous les tableaux croisés entre variables, les $J-p$ valeurs propres
+non triviales valent $1/p$. Dépasser ce niveau est un indice pour sélectionner
+des axes, pas un test de significativité. Dans l'exemple, $1/p=1/3$ : les deux
+premiers axes dépassent ce repère. On complète cette lecture par le coude,
+les contributions, la qualité de représentation et la stabilité des résultats.
+
+Certains logiciels présentent des *inerties corrigées*. La correction de
+Benzécri, pour $p>1$, est définie à partir des valeurs propres de $Z$ par
+
+$ lambda_k^"corr" = cases(
+  (p/(p-1) (lambda_k-1/p))^2 & "si" lambda_k>1/p,
+  0 & "sinon".
+) $
+
+On peut les rapporter à leur somme, si celle-ci est positive, mais ces taux
+ne sont plus les parts d'inertie brute. D'autres corrections, notamment celle
+de Greenacre, utilisent un autre dénominateur.#footnote[
+  Voir #link("https://personal.utdallas.edu/~herve/Abdi-MCA2007-pretty.pdf")[Abdi
+  et Valentin (2007), _Multiple Correspondence Analysis_], pour ces corrections.
+]
+Ici, seules les deux premières inerties corrigées sont positives, environ
+$0.14731$ et $0.02522$. Leur cumul renormalisé atteint donc 100~% à deux axes,
+alors que le plan n'en conserve que 77,13~% dans la géométrie brute. Corriger
+les taux ne rend pas tous les points parfaitement représentés.
+
+=== Individus, modalités et lecture du plan factoriel
+
+Les coordonnées des individus et des modalités sont liées. En reprenant les
+relations de transition de l'AFC, on obtient
+
+$ F_(i k)=1/(p sigma_k) sum_(j=1)^J z_(i j) G_(j k), $
+$ G_(j k)=1/(n_j sigma_k) sum_(i=1)^n z_(i j) F_(i k). $
+
+Un individu est donc la moyenne des coordonnées *standard* $G_(j k)/sigma_k$
+des modalités qu'il possède. Réciproquement, la coordonnée principale d'une
+modalité est la moyenne des coordonnées des individus concernés, divisée
+par $sigma_k$. Il ne faut pas oublier ce facteur lorsque les deux nuages
+sont représentés en coordonnées principales.
+
+#figure(
+  image("../figures/acm_plan.svg", width: 100%,
+    alt: "Deux cartes de l'ACM fictive. Les individus sont affichés à gauche, "
+      + "avec une aire proportionnelle à l'effectif du profil. À droite, "
+      + "Régulier et Livres s'opposent à Ponctuel et Vidéos sur l'axe 1. "
+      + "Mixte et Groupe sont du côté positif de l'axe 2, Seul du côté négatif."),
+  caption: [Individus et modalités en coordonnées principales de l'ACM de $Z$.
+    Les pourcentages sont les taux d'inertie brute. À gauche, les étudiants de
+    même profil sont superposés ; l'aire des disques indique leur effectif.
+    Les deux cartes sont séparées pour faciliter leur lecture.],
+)
+
+*Nommer les axes.* Le premier axe oppose principalement Régulier et Livres,
+à gauche, à Ponctuel et Vidéos, à droite. Le tableau de Burt confirme ces
+associations. Le deuxième axe oppose surtout Mixte et Groupe, en haut, à
+Seul, en bas. Les étudiants des profils D et H ont les deux premières
+modalités et se trouvent en haut du plan. Le signe des axes est arbitraire :
+une inversion simultanée des coordonnées ne change pas l'analyse.
+
+*Lire les proximités.* Les distances entre individus s'interprètent dans leur
+nuage, sous réserve de la projection. Du côté des modalités, il faut distinguer
+les modalités de variables différentes, qui peuvent être choisies ensemble,
+de celles d'une même variable, qui ne le peuvent pas. Deux modalités d'une
+même variable proches sur quelques axes caractérisent des individus ayant
+des scores moyens semblables sur ces axes ; elles ne sont pas « associées »
+au sens d'une cooccurrence. Une distance individu-modalité ne constitue pas
+non plus une distance du $chi^2$ : les deux nuages ont des rôles différents.
+
+#example(breakable: true)[
+  Mixte et Groupe sont presque superposés sur le plan : leurs coordonnées
+  sont environ $(-0.024,0.957)$ et $(0.041,0.961)$. Pourtant, chacun concerne
+  cinq étudiants, et seulement trois possèdent les deux modalités.
+
+  Dans l'espace complet, leur distance carrée vaut $1.92$, contre environ
+  $0.0043$ sur ce plan. L'écart apparaît surtout sur le troisième axe, où
+  leurs coordonnées sont $0.696$ et $-0.687$. La proximité sur deux axes
+  masque donc une différence réelle entre les ensembles de répondants.
+]
+
+*Interpréter l'éloignement du centre.* Puisque $delta_j^2=1/f_j-1$, une
+modalité rare est mécaniquement éloignée de l'origine dans l'espace complet.
+Cette distance ne prouve pas qu'elle organise une opposition générale.
+Sur un plan partiel, sa position dépend aussi des axes où cet éloignement
+se manifeste. On doit examiner ses contributions et ses cosinus carrés.
+
+=== Contributions, qualité de représentation et rôle des variables
+
+Les contributions des individus et des modalités à l'axe $k$ sont
+
+$ ctr_(i k)^r=((1/n) F_(i k)^2)/lambda_k, quad
+  ctr_(j k)^c=((f_j/p) G_(j k)^2)/lambda_k. $
+
+Elles somment à $1$ sur les individus, et séparément à $1$ sur les modalités.
+Les repères $1/n$ et $1/J$ correspondent aux contributions moyennes dans
+chaque nuage. Ce ne sont pas des seuils statistiques.
+
+Pour une modalité non constante, la qualité de représentation vaut
+
+$ cos^2_(j k)=G_(j k)^2/(1/f_j-1), quad
+  cos^2_(j, "plan")=(G_(j 1)^2+G_(j 2)^2)/(1/f_j-1). $
+
+Pour un individu, on remplace le dénominateur par sa distance carrée au
+profil moyen : $d_i^2=(1/p)sum_(j=1)^J (z_(i j)-f_j)^2/f_j$.
+Une contribution élevée signale un point qui construit l'axe ; un cosinus
+carré élevé indique que l'axe représente bien ce point.
+
+#example[
+  Pour Vidéos, $f_j=1/4$, $c_j=1/12$ et $delta_j^2=3$.
+  Avec $G_(j 1) approx 1.43942$ et $lambda_1 approx 0.58921$,
+
+  $ ctr_(j 1)^c approx ((1/12) times 1.43942^2)/0.58921 approx 0.293. $
+
+  Vidéos apporte donc 29,3~% de l'inertie de l'axe 1. Sa qualité sur cet axe
+  vaut $1.43942^2/3 approx 0.691$, soit 69,1~%. Sur le premier plan, elle
+  atteint 82,1~% : contribution et qualité ne répondent pas à la même question.
+]
+
+#table(
+  columns: (1.2fr, 1fr, 1fr, 1.1fr), align: center,
+  inset: 4pt, stroke: 0.4pt + luma(210),
+  table.header([*Modalité*], [*Contribution axe 1*], [*Contribution axe 2*],
+    [*Qualité sur le plan*]),
+  [Régulier], [20,8~%], [0,1~%], [88,4~%],
+  [Ponctuel], [29,1~%], [0,1~%], [88,4~%],
+  [Livres], [20,8~%], [13,4~%], [81,5~%],
+  [Mixte], [0,0~%], [28,9~%], [65,4~%],
+  [Vidéos], [29,3~%], [7,4~%], [82,1~%],
+  [Seul], [0,0~%], [20,9~%], [66,1~%],
+  [Groupe], [0,0~%], [29,2~%], [66,1~%],
+)
+
+Les pourcentages sont arrondis : une valeur affichée à 0,0~% peut être
+légèrement positive. Le premier axe est presque entièrement construit par
+Rythme et Support. Le second dépend surtout de Mixte, Groupe et Seul. La
+qualité de Mixte et Groupe, autour de 65~%, explique pourquoi leur proximité
+sur le plan doit être complétée par la lecture du troisième axe.
+
+Pour résumer le lien entre une *variable entière* $v$ et l'axe $k$, on peut
+utiliser le rapport de corrélation. Notons $cal(J)_v$ l'ensemble de ses
+modalités et $b_(j k)=(1/n_j)sum_(i=1)^n z_(i j) F_(i k)$ le score moyen
+des individus possédant $j$. Les scores de l'axe étant centrés,
+
+$ eta_(v k)^2=(sum_(j in cal(J)_v) f_j b_(j k)^2)/lambda_k. $
+
+Ce rapport, compris entre $0$ et $1$, mesure la part de la variance du score
+expliquée par les différences entre modalités de la variable. Dans l'exemple,
+les valeurs pour Rythme, Support et Travail sont respectivement $0.881$,
+$0.885$ et $0.001$ sur l'axe 1 ; elles deviennent $0.003$, $0.655$ et $0.660$
+sur l'axe 2. L'interprétation des deux oppositions est ainsi confirmée à
+l'échelle des variables.
+
+=== Pratique de l'ACM et éléments supplémentaires
+
+Le script `codes/analyse_correspondances_multiples.R` recrée l'enquête fictive,
+construit $Z$ et calcule la décomposition avec les fonctions de base de R.
+Il vérifie les identités d'inertie, les distances et les relations de
+transition. Lorsque FactoMineR est installé, il compare également les résultats
+à ceux de sa fonction `MCA`.#footnote[
+  Voir la #link("https://search.r-project.org/CRAN/refmans/FactoMineR/html/MCA.html")[documentation
+  de `FactoMineR::MCA`] pour les entrées, sorties et éléments supplémentaires.
+]
+
+Depuis la racine du projet, les opérations suivantes reproduisent l'analyse
+avec FactoMineR :
+
+#block(breakable: false)[
+```r
+source("codes/analyse_correspondances_multiples.R", encoding = "UTF-8")
+res <- FactoMineR::MCA(donnees, ncp = 4,
+                       method = "Indicator", graph = FALSE)
+res$eig          # valeurs propres et taux bruts
+res$var$coord    # coordonnées des modalités
+res$var$contrib  # contributions, en pourcentage
+res$var$cos2     # qualités de représentation, entre 0 et 1
+res$var$eta2     # liens entre variables et axes
+res$ind$coord   # coordonnées des individus
+```
+]
+
+Chaque colonne de `donnees` est un facteur représentant une variable. Les
+signes des axes peuvent différer de ceux des figures, ce qui ne change pas
+l'interprétation. Il faut toujours annoncer le tableau analysé et la
+convention des coordonnées ou des taux présentés.
+
+*Un individu supplémentaire.* Un nouvel étudiant peut être projeté sans
+modifier les axes, à condition qu'il réponde aux mêmes variables avec des
+modalités déjà présentes. Si son codage est $z_(ast j)$, sa coordonnée est
+
+$ F_(ast k)=1/(p sigma_k)sum_(j=1)^J z_(ast j)G_(j k). $
+
+Un nouvel étudiant Régulier, Livres et Seul se superpose donc au profil A,
+environ $(-0.813,-0.689)$ sur le plan. Il ne modifie ni les masses ni les
+valeurs propres. Une modalité nouvelle, absente de l'analyse active, ne peut
+pas recevoir une coordonnée par cette formule.
+
+*Une variable qualitative supplémentaire.* On peut, par exemple, réserver
+le programme d'études à l'interprétation des axes. Pour une de ses modalités
+$h$, notons $cal(I)_h$ l'ensemble des indices des $n_h$ étudiants concernés.
+Le barycentre de leurs scores est
+$b_(h k)=(1/n_h)sum_(i in cal(I)_h)F_(i k)$. Dans la convention principale utilisée
+pour les modalités, sa projection est $G_(h k)^"sup"=b_(h k)/sigma_k$.
+Cette variable ne contribue pas aux axes et n'entre pas dans $p$ ou $J$.
+Une variable quantitative, telle qu'un temps de trajet, peut aussi être
+illustrative en examinant ses corrélations avec les scores.
+
+Dans FactoMineR, ces usages correspondent notamment aux arguments `ind.sup`,
+`quali.sup` et `quanti.sup`.
+Projeter ces éléments sert à décrire les axes ; cela ne démontre pas que
+les variables actives causent les différences observées.
+
+=== Encodage, interprétation et limites
+
+*Des catégories qui définissent la géométrie.* Fusionner ou subdiviser des
+modalités change leurs fréquences, leurs poids et l'inertie totale. Un
+regroupement doit être justifié par le sens des réponses. Une modalité rare
+n'est pas à éliminer automatiquement, mais ses effectifs et la stabilité de
+sa position doivent être examinés. Retirer une seule modalité d'une variable
+active relève d'une ACM spécifique ; ce n'est pas équivalent à rendre toute
+la variable supplémentaire.
+
+*Des données manquantes à traiter explicitement.* Une absence de réponse ne
+doit pas être codée comme un bloc de zéros tout en conservant les formules
+du tableau disjonctif complet. On peut définir une modalité de non-réponse,
+analyser les cas complets ou utiliser une imputation adaptée, selon le
+problème. Une modalité de non-réponse peut faire ressortir le comportement de
+réponse plutôt que le contenu du questionnaire. Ces choix doivent être
+documentés et leur effet sur les résultats examiné.
+
+*Un ordre qui n'est pas utilisé automatiquement.* L'ACM ordinaire traite
+Jamais, Parfois, Souvent et Toujours comme quatre catégories nominales.
+Elle n'impose ni leur ordre ni une distance entre elles. Si l'ordre constitue
+l'information centrale, une méthode adaptée aux variables ordinales peut
+être plus pertinente. Discrétiser une mesure continue pour la rendre active
+en ACM fait perdre de l'information et rend les résultats dépendants des
+seuils ; une analyse factorielle de données mixtes permet aussi de traiter
+ensemble des variables quantitatives et qualitatives.
+
+*Des variables redondantes et des blocs déséquilibrés.* Dupliquer une question,
+ou inclure de nombreuses questions très proches sur un même thème, augmente
+le poids de ce thème dans les distances. Une variable à de nombreuses
+modalités dispose aussi de plus de dimensions et apporte davantage d'inertie.
+L'égalité du poids total des variables dans le codage ne garantit donc pas
+un équilibre entre les thèmes du questionnaire.
+
+*Une carte exploratoire.* L'ACM construit des axes, pas une partition des
+individus. D'éventuels groupes doivent être étudiés ensuite, en précisant les
+axes et la méthode de regroupement retenus. La lecture de la carte repose
+sur les effectifs, les contributions, les cosinus carrés et le retour aux
+tableaux croisés. Elle ne remplace ni une analyse de stabilité ni une étude
+des conditions d'échantillonnage, particulièrement lorsque l'enquête comporte
+des pondérations ou de nombreuses petites catégories.
 
 == t-SNE
 
