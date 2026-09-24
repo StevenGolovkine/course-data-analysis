@@ -42,7 +42,7 @@ typst compile --root . slides/introduction.typ
 
 - [ ] Réduction de dimension
     * [ ] ACP (~~notes~~, ~~slides~~, ~~code~~, exercices)
-    * [ ] AFC (~~notes~~, slides, code, exercices)
+    * [ ] AFC (~~notes~~, ~~slides~~, code, exercices)
     * [ ] ACM (notes, slides, code, exercices)
 
 - [ ] Apprentissage supervisée

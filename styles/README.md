@@ -116,7 +116,7 @@ des tableaux, en particulier lorsqu'ils se trouvent près d'une fin de page.
 
 ## Présentations
 
-Les huit présentations de `slides/` utilisent `styles/slides.typ`, fondé sur
+Les présentations de `slides/` utilisent `styles/slides.typ`, fondé sur
 la mise en forme d'`exploratory.typ` et d'`introduction.typ` :
 
 ```typst
