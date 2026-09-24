@@ -51,7 +51,7 @@ typst compile --root . slides/introduction.typ
     * [ ] LDA / QDA (notes, slides, code, exercices)
 
 - [ ] Apprentissage non-supervisée
-    * [ ] Concepts (~~notes~~, slides, code, exercices)
+    * [ ] Concepts (~~notes~~, ~~slides~~, ~~code~~, exercices)
     * [ ] k-means (~~notes~~, slides, code, exercices)
 
 - [ ] Données manquantes 
