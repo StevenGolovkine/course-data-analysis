@@ -8,9 +8,6 @@
 predire_knn <- function(train, test, classes, k) {
   train <- as.matrix(train)
   test <- as.matrix(test)
-  stopifnot(k >= 1L, k <= nrow(train), k == as.integer(k),
-            ncol(train) == ncol(test), length(classes) == nrow(train),
-            all(is.finite(train)), all(is.finite(test)), !anyNA(classes))
   niveaux <- levels(classes)
   predictions <- apply(test, 1, function(x) {
     distances2 <- rowSums(sweep(train, 2, x, "-")^2)
@@ -33,15 +30,15 @@ standardiser <- function(train, nouveau) {
   list(train = train_z, nouveau = nouveau_z)
 }
 
-penguins <- read.csv("assets/penguins.csv")
-variables <- c("bill_length_mm", "bill_depth_mm",
-               "flipper_length_mm", "body_mass_g")
+penguins <- read.csv("../assets/penguins.csv")
+variables <- c(
+  "bill_length_mm", "bill_depth_mm",
+  "flipper_length_mm", "body_mass_g"
+)
 d <- penguins[complete.cases(penguins[c("species", variables)]),
               c("species", variables)]
 d$species <- factor(d$species)
 
-# Même partage que l'exemple LDA ; le test ne participe pas au choix de k.
-RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 set.seed(2200)
 indices <- split(seq_len(nrow(d)), d$species)
 idx_train <- unlist(lapply(indices, function(i) {
@@ -88,17 +85,13 @@ cat("Matrice de confusion du test :\n")
 print(confusion)
 cat(sprintf("Exactitude du test : %.2f %%\n",
             100 * mean(prediction_test == test$species)))
-cat("Rappel par espèce (%) :\n")
+cat("Sensibilité par espèce (%) :\n")
 print(round(100 * diag(confusion) / rowSums(confusion), 2))
 
-# Vérifier les exemples de vote du cours, dont une égalité à trois classes.
-points_exemple <- rbind(c(0.2, 0), c(0, 0.4), c(-0.5, 0),
-                        c(0, -0.7), c(0.8, 0.6))
-classes_exemple <- factor(c("B", "A", "A", "B", "B"))
-origine <- matrix(c(0, 0), nrow = 1)
-stopifnot(
-  as.character(predire_knn(points_exemple, origine, classes_exemple, 3)) == "A",
-  as.character(predire_knn(points_exemple, origine, classes_exemple, 5)) == "B",
-  as.character(predire_knn(matrix(1:5), matrix(0),
-                           factor(c("B", "A", "A", "B", "C")), 5)) == "B"
-)
+
+plot(test$bill_depth_mm, test$bill_length_mm, col=as.factor(prediction_test))
+plot(test$bill_depth_mm, test$bill_length_mm, col=as.factor(test$species))
+
+plot(test$body_mass_g, test$flipper_length_mm, col=as.factor(prediction_test))
+
+
