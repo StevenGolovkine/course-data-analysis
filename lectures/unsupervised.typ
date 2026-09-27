@@ -179,6 +179,132 @@ privilégient certaines géométries et peuvent proposer des nombres de groupes
 différents. Leurs résultats doivent être confrontés aux profils des groupes
 et à la question qui motive l'analyse.
 
+=== Comparer deux partitions : l'indice de Rand ajusté <indice-ari>
+
+L'inertie, la silhouette et les indices précédents décrivent la géométrie
+d'une partition à partir des observations. L'*indice de Rand ajusté*
+(*ARI*, _Adjusted Rand Index_) répond à une autre question : *dans quelle
+mesure deux partitions regroupent-elles les mêmes observations ?*
+
+Il peut comparer une partition à des classes de référence connues, ou deux
+résultats de regroupement sans qu'aucun ne soit considéré comme la vérité.
+Les deux partitions doivent porter sur les *mêmes observations*, identifiées
+dans le même ordre ; elles peuvent avoir des nombres de groupes différents.
+Les noms ou numéros attribués aux groupes n'interviennent pas dans le résultat.
+
+*Compter les paires.* Considérons deux partitions
+$cal(C)=(C_1,dots,C_K)$ et $cal(D)=(D_1,dots,D_L)$ de $n>=2$ observations.
+Le tableau croisé de leurs affectations contient les effectifs
+
+$ n_(g h)=abs(C_g ∩ D_h), quad
+  a_g=sum_(h=1)^L n_(g h), quad b_h=sum_(g=1)^K n_(g h). $
+
+Ainsi, $a_g$ et $b_h$ sont les tailles des groupes des deux partitions.
+La quantité $binom(m,2)=m(m-1)/2$ compte les paires non ordonnées d'observations
+distinctes parmi $m$ individus. Posons
+
+$ N=binom(n,2), quad
+  P=sum_(g=1)^K binom(a_g,2), quad Q=sum_(h=1)^L binom(b_h,2), $
+$ S=sum_(g=1)^K sum_(h=1)^L binom(n_(g h),2). $
+
+$N$ est le nombre total de paires, $P$ le nombre de paires réunies dans
+$cal(C)$, $Q$ le nombre de paires réunies dans $cal(D)$, et $S$ le nombre
+de paires réunies dans *les deux* partitions. Il y a aussi
+$N-P-Q+S$ paires séparées dans les deux partitions.
+
+L'*indice de Rand non ajusté* compte ces deux formes d'accord :
+
+$ "RI"=(N-P-Q+2S)/N. $
+
+Il peut être élevé même pour des partitions peu concordantes, notamment si
+beaucoup de paires sont séparées dans chacune. L'ajustement prend pour
+référence une permutation aléatoire des affectations d'une partition,
+*en conservant les tailles des groupes des deux partitions*. Sous ce modèle,
+le nombre moyen de paires réunies dans les deux partitions vaut $P Q/N$.
+
+#definition(title: [Indice de Rand ajusté])[
+  Avec les notations précédentes, et lorsque le dénominateur est non nul,
+
+  $ "ARI"(cal(C),cal(D))=
+    (S-(P Q)/N)/(1/2 (P+Q)-(P Q)/N). $
+
+  L'indice mesure l'accord entre les deux partitions après soustraction
+  de l'accord attendu sous le modèle aléatoire à tailles de groupes fixées.
+]
+
+L'ARI est symétrique : échanger les deux partitions ne change pas sa valeur.
+Son interprétation est la suivante :
+
+- $1$ : les partitions sont identiques, à une renumérotation des groupes près ;
+- $0$ : niveau de référence de l'accord aléatoire ; l'espérance de l'ARI sous
+  le modèle précédent est nulle ;
+- une valeur négative : un accord inférieur à cette référence.
+
+Il ne s'agit ni d'une probabilité ni d'un pourcentage d'observations bien
+classées. Un ARI élevé indique un accord entre partitions, sans démontrer
+à lui seul l'existence de groupes naturels. Si les deux partitions sont
+identiques et dégénérées — toutes les observations ensemble ou toutes
+en singletons — la formule donne $0/0$ ; on adopte usuellement la convention
+$"ARI"=1$.#footnote[Voir la
+#link("https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html")[documentation
+de `adjusted_rand_score`], fondée sur l'indice de Hubert et Arabie.]
+
+#example(title: [Comparer les partitions A et B])[
+  Reprenons les partitions des six valeurs $0,1,2,8,9,10$ :
+  *A* réunit $\{0,1,2\}$ et $\{8,9,10\}$ ; *B* réunit
+  $\{0,1,8\}$ et $\{2,9,10\}$. Le tableau croisé est
+
+  #table(
+    columns: (1.5fr, 1fr, 1fr, 0.7fr), align: center,
+    table.header([*A / B*], [$\{0,1,8\}$], [$\{2,9,10\}$], [*Total*]),
+    [$\{0,1,2\}$], [2], [1], [3],
+    [$\{8,9,10\}$], [1], [2], [3],
+    [*Total*], [3], [3], [6],
+  )
+
+  On compte $N=binom(6,2)=15$ paires,
+  $P=Q=2 binom(3,2)=6$ et
+  $S=binom(2,2)+binom(1,2)+binom(1,2)+binom(2,2)=2$.
+  L'accord attendu vaut $P Q/N=36/15=2.4$, d'où
+
+  $ "ARI"("A","B")=(2-2.4)/(6-2.4)=-1/9 approx -0.111. $
+
+  Le score est négatif : les deux partitions réunissent moins de paires
+  communes que la moyenne sous le modèle de permutation. L'indice de Rand
+  non ajusté vaut pourtant $7/15 approx 0.467$, car cinq paires sont séparées
+  dans les deux partitions, en plus des deux paires réunies dans les deux.
+]
+
+Pour la partition *C*, qui réunit $\{0\}$, $\{1,2\}$ et $\{8,9,10\}$,
+la comparaison avec A donne $P=6$, $Q=4$ et $S=4$, soit
+$"ARI"("A","C")=12/17 approx 0.706$. L'accord est positif, mais imparfait :
+C conserve le second groupe de A et scinde le premier. Comparer A à elle-même,
+ou simplement renommer ses deux groupes, donne un ARI de $1$.
+
+En R, le paquet `mclust` permet de retrouver ces valeurs :#footnote[
+  Voir la #link("https://mclust-org.github.io/mclust/reference/adjustedRandIndex.html")[documentation
+  de `mclust::adjustedRandIndex`]. Les vecteurs contiennent des étiquettes,
+  numériques ou textuelles, alignées observation par observation.
+]
+
+```r
+# Affectations dans l'ordre des valeurs : 0, 1, 2, 8, 9, 10.
+a <- c(1, 1, 1, 2, 2, 2)
+b <- c(1, 1, 2, 1, 2, 2)
+c <- c(1, 2, 2, 3, 3, 3)
+mclust::adjustedRandIndex(a, b)  # -0.1111111
+mclust::adjustedRandIndex(a, c)  #  0.7058824
+mclust::adjustedRandIndex(a, 3 - a)  # 1 : mêmes groupes renommés
+```
+
+*Bien choisir la comparaison.* Avec des classes de référence, l'ARI est un
+*critère externe*. Maximiser l'ARI par rapport à ces classes pour choisir $K$
+utilise leurs étiquettes et ne constitue plus une sélection purement non
+supervisée. Sans classes de référence, on peut comparer deux méthodes ou
+plusieurs ajustements pour étudier leur accord. L'ARI complète alors les
+critères internes ; il ne permet pas, à partir d'une seule partition, de
+choisir automatiquement un nombre de groupes.
+
 === Stabilité, interprétation et démarche pratique
 
 Une partition utile doit être suffisamment stable pour que son interprétation
@@ -189,7 +315,7 @@ ne dépende pas d'une observation arbitraire. Il faut distinguer deux vérificat
 
 Des initialisations qui donnent toujours la même solution ne prouvent pas à elles seules une stabilité aux variations des données.
 
-Pour comparer deux partitions, on doit tenir compte du caractère arbitraire de leurs numéros. On peut notamment examiner quels couples d'observations restent regroupés, plutôt que comparer directement les étiquettes des groupes « 1 », « 2 », etc. Une visualisation aide également, mais une projection en deux ou trois dimensions peut masquer des séparations ou des chevauchements présents dans l'espace complet.
+Pour comparer deux partitions, on doit tenir compte du caractère arbitraire de leurs numéros. L'ARI compare les couples d'observations qui restent regroupés, sans comparer directement les étiquettes « 1 », « 2 », etc. Si les ajustements portent sur des sous-échantillons différents, on calcule cet accord sur les observations communes, correctement alignées. Une visualisation aide également, mais une projection en deux ou trois dimensions peut masquer des séparations ou des chevauchements présents dans l'espace complet.
 
 Une démarche d'analyse en apprentissage non supervisée suit ainsi plusieurs étapes :
 
@@ -500,6 +626,12 @@ tandis que le groupe 2 contient les $123$ `Gentoo`. Les deux groupes ne
 reproduisent donc pas les trois espèces. Ils résument une séparation
 morphologique forte pour les variables et la pondération choisies, sans
 obligation de retrouver une classification biologique donnée.
+
+L'ARI entre cette partition en deux groupes et les trois classes de `species`
+vaut environ $0.655$. Il quantifie l'accord avec les espèces, tandis que la
+silhouette de $0.532$ décrit la séparation dans les mesures réduites.
+Ces scores évaluent donc deux aspects différents. L'ARI n'atteint pas $1$,
+notamment parce que les groupes réunissent ici les `Adelie` et les `Chinstrap`.
 
 
 === Limites et variantes
