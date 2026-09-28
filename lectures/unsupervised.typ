@@ -4,10 +4,7 @@
 
 == Introduction
 
-Dans le cadre non supervisé de @def-apprentissage-non-supervise, ce chapitre
-porte sur le *regroupement* (_clustering_). Il complète le chapitre consacré
-à la réduction de dimension en étudiant les partitions et les hiérarchies
-d'observations.
+Ce chapitre porte sur le *regroupement* (_clustering_). Il complète le chapitre consacré à la réduction de dimension en étudiant les partitions et les hiérarchies d'observations.
 
 Le regroupement cherche à réunir des observations similaires et à distinguer
 des ensembles qui présentent des profils différents. Cette similarité n'est
@@ -182,14 +179,14 @@ et à la question qui motive l'analyse.
 === Comparer deux partitions : l'indice de Rand ajusté <indice-ari>
 
 L'inertie, la silhouette et les indices précédents décrivent la géométrie
-d'une partition à partir des observations. L'*indice de Rand ajusté*
-(*ARI*, _Adjusted Rand Index_) répond à une autre question : *dans quelle
-mesure deux partitions regroupent-elles les mêmes observations ?*
+d'une partition à partir des observations. L'indice de Rand ajusté
+(ARI, _Adjusted Rand Index_) répond à une autre question : dans quelle
+mesure deux partitions regroupent-elles les mêmes observations ?
 
 Il peut comparer une partition à des classes de référence connues, ou deux
 résultats de regroupement sans qu'aucun ne soit considéré comme la vérité.
-Les deux partitions doivent porter sur les *mêmes observations*, identifiées
-dans le même ordre ; elles peuvent avoir des nombres de groupes différents.
+Les deux partitions doivent porter sur les mêmes observations, identifiées
+dans le même ordre. Elles peuvent cependant avoir des nombres de groupes différents.
 Les noms ou numéros attribués aux groupes n'interviennent pas dans le résultat.
 
 *Compter les paires.* Considérons deux partitions
@@ -200,27 +197,23 @@ $ n_(g h)=abs(C_g ∩ D_h), quad
   a_g=sum_(h=1)^L n_(g h), quad b_h=sum_(g=1)^K n_(g h). $
 
 Ainsi, $a_g$ et $b_h$ sont les tailles des groupes des deux partitions.
-La quantité $binom(m,2)=m(m-1)/2$ compte les paires non ordonnées d'observations
-distinctes parmi $m$ individus. Posons
+Posons
 
 $ N=binom(n,2), quad
-  P=sum_(g=1)^K binom(a_g,2), quad Q=sum_(h=1)^L binom(b_h,2), $
-$ S=sum_(g=1)^K sum_(h=1)^L binom(n_(g h),2). $
+  P=sum_(g=1)^K binom(a_g,2), quad Q=sum_(h=1)^L binom(b_h,2), quad "et" quad
+  S=sum_(g=1)^K sum_(h=1)^L binom(n_(g h),2). $
 
-$N$ est le nombre total de paires, $P$ le nombre de paires réunies dans
-$cal(C)$, $Q$ le nombre de paires réunies dans $cal(D)$, et $S$ le nombre
-de paires réunies dans *les deux* partitions. Il y a aussi
-$N-P-Q+S$ paires séparées dans les deux partitions.
+$N$ est le nombre total de paires, $P$ le nombre de paires réunies dans $cal(C)$, $Q$ le nombre de paires réunies dans $cal(D)$, et $S$ le nombre de paires réunies dans les deux partitions. Il y a donc $N-P-Q+S$ paires séparées dans les deux partitions.
 
-L'*indice de Rand non ajusté* compte ces deux formes d'accord :
+L'indice de Rand non ajusté compte ces deux formes d'accord :
 
 $ "RI"=(N-P-Q+2S)/N. $
 
 Il peut être élevé même pour des partitions peu concordantes, notamment si
 beaucoup de paires sont séparées dans chacune. L'ajustement prend pour
 référence une permutation aléatoire des affectations d'une partition,
-*en conservant les tailles des groupes des deux partitions*. Sous ce modèle,
-le nombre moyen de paires réunies dans les deux partitions vaut $P Q/N$.
+en conservant les tailles des groupes des deux partitions. Sous ce modèle,
+le nombre moyen de paires réunies dans les deux partitions vaut $(P Q)/N$.
 
 #definition(title: [Indice de Rand ajusté])[
   Avec les notations précédentes, et lorsque le dénominateur est non nul,
@@ -243,11 +236,8 @@ Son interprétation est la suivante :
 Il ne s'agit ni d'une probabilité ni d'un pourcentage d'observations bien
 classées. Un ARI élevé indique un accord entre partitions, sans démontrer
 à lui seul l'existence de groupes naturels. Si les deux partitions sont
-identiques et dégénérées — toutes les observations ensemble ou toutes
-en singletons — la formule donne $0/0$ ; on adopte usuellement la convention
-$"ARI"=1$.#footnote[Voir la
-#link("https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html")[documentation
-de `adjusted_rand_score`], fondée sur l'indice de Hubert et Arabie.]
+identiques et dégénérées (toutes les observations ensemble ou toutes
+en singletons), la formule donne $0/0$. Dans ce cas, on adopte usuellement la convention $"ARI"=1$.#footnote[Voir la #link("https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html")[documentation de `adjusted_rand_score`], fondée sur l'indice de Hubert et Arabie.]
 
 #example(title: [Comparer les partitions A et B])[
   Reprenons les partitions des six valeurs $0,1,2,8,9,10$ :
@@ -265,7 +255,7 @@ de `adjusted_rand_score`], fondée sur l'indice de Hubert et Arabie.]
   On compte $N=binom(6,2)=15$ paires,
   $P=Q=2 binom(3,2)=6$ et
   $S=binom(2,2)+binom(1,2)+binom(1,2)+binom(2,2)=2$.
-  L'accord attendu vaut $P Q/N=36/15=2.4$, d'où
+  L'accord attendu vaut $(P Q)/N=36/15=2.4$, d'où
 
   $ "ARI"("A","B")=(2-2.4)/(6-2.4)=-1/9 approx -0.111. $
 
@@ -276,33 +266,17 @@ de `adjusted_rand_score`], fondée sur l'indice de Hubert et Arabie.]
 ]
 
 Pour la partition *C*, qui réunit $\{0\}$, $\{1,2\}$ et $\{8,9,10\}$,
-la comparaison avec A donne $P=6$, $Q=4$ et $S=4$, soit
+la comparaison avec *A* donne $P=6$, $Q=4$ et $S=4$, soit
 $"ARI"("A","C")=12/17 approx 0.706$. L'accord est positif, mais imparfait :
-C conserve le second groupe de A et scinde le premier. Comparer A à elle-même,
+*C* conserve le second groupe de *A* et scinde le premier. Comparer *A* à elle-même,
 ou simplement renommer ses deux groupes, donne un ARI de $1$.
 
-En R, le paquet `mclust` permet de retrouver ces valeurs :#footnote[
-  Voir la #link("https://mclust-org.github.io/mclust/reference/adjustedRandIndex.html")[documentation
-  de `mclust::adjustedRandIndex`]. Les vecteurs contiennent des étiquettes,
-  numériques ou textuelles, alignées observation par observation.
-]
-
-```r
-# Affectations dans l'ordre des valeurs : 0, 1, 2, 8, 9, 10.
-a <- c(1, 1, 1, 2, 2, 2)
-b <- c(1, 1, 2, 1, 2, 2)
-c <- c(1, 2, 2, 3, 3, 3)
-mclust::adjustedRandIndex(a, b)  # -0.1111111
-mclust::adjustedRandIndex(a, c)  #  0.7058824
-mclust::adjustedRandIndex(a, 3 - a)  # 1 : mêmes groupes renommés
-```
-
 *Bien choisir la comparaison.* Avec des classes de référence, l'ARI est un
-*critère externe*. Maximiser l'ARI par rapport à ces classes pour choisir $K$
+critère externe. Maximiser l'ARI par rapport à ces classes pour choisir $K$
 utilise leurs étiquettes et ne constitue plus une sélection purement non
 supervisée. Sans classes de référence, on peut comparer deux méthodes ou
 plusieurs ajustements pour étudier leur accord. L'ARI complète alors les
-critères internes ; il ne permet pas, à partir d'une seule partition, de
+critères internes. Il ne permet pas, à partir d'une seule partition, de
 choisir automatiquement un nombre de groupes.
 
 === Stabilité, interprétation et démarche pratique

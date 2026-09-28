@@ -4,7 +4,7 @@
 
 == Introduction
 
-Ce chapitre met en œuvre le cadre supervisé de @def-apprentissage-supervise.
+Ce chapitre met en œuvre le cadre supervisé.
 Il compare plusieurs façons d'apprendre une règle de prédiction à partir
 d'observations étiquetées.
 
@@ -33,9 +33,7 @@ Avant de choisir une méthode, il faut définir l'unité observée, la populatio
 
 === Régression et classification
 
-La distinction entre régression et classification est donnée dans
-@def-regression-classification. Pour la classification, on note les classes
-$1,dots,K$ : ces nombres sont des étiquettes, sans ordre ni distance numérique
+Pour la classification, on note les classes $1,dots,K$ : ces nombres sont des étiquettes, sans ordre ni distance numérique
 imposés.
 
 Un classificateur peut produire deux sortes de résultats :
@@ -247,7 +245,7 @@ L'exactitude vaut $98/102 approx 0.96$, soit 96~%. Les quatre erreurs concernent
 
 === Forces et limites
 
-*Une règle locale simple et flexible.* La méthode des k-NN ne suppose ni une relation linéaire, ni des distributions normales dans les classes. Il peut suivre des frontières irrégulières et permet d'expliquer une prédiction en examinant les voisins qui y participent. Cette explication dépend toutefois de la pertinence des variables et de la distance choisies.
+*Une règle locale simple et flexible.* La méthode des $k$-NN ne suppose ni une relation linéaire, ni des distributions normales dans les classes. Il peut suivre des frontières irrégulières et permet d'expliquer une prédiction en examinant les voisins qui y participent. Cette explication dépend toutefois de la pertinence des variables et de la distance choisies.
 
 *La difficulté des grandes dimensions.* Lorsque $p$ augmente, il devient
 souvent difficile de trouver assez d'observations réellement proches. Pour
@@ -262,7 +260,7 @@ peuvent dégrader les distances même après standardisation. Une sélection de
 variables ou une réduction de dimension peut aider, à condition d'être
 apprise dans les plis d'entraînement et évaluée pour l'objectif prédictif.
 
-*Classes rares et régions peu observées.* Un grand voisinage peut être dominé par une classe fréquente et masquer une petite région d'une classe rare. Il faut examiner les sensibilités par classe, pas seulement l'exactitude globale. Par ailleurs, la méthode des k-NN donne une prédiction même si les voisins les plus proches sont très éloignés. Ainso, une majorité nette de voix n'est pas une garantie de fiabilité hors des régions bien couvertes par l'entraînement.
+*Classes rares et régions peu observées.* Un grand voisinage peut être dominé par une classe fréquente et masquer une petite région d'une classe rare. Il faut examiner les sensibilités par classe, pas seulement l'exactitude globale. Par ailleurs, la méthode des $k$-NN donne une prédiction même si les voisins les plus proches sont très éloignés. Ainso, une majorité nette de voix n'est pas une garantie de fiabilité hors des régions bien couvertes par l'entraînement.
 
 *Une extrapolation limitée en régression.* Avec des poids non négatifs, la prédiction est comprise entre les réponses minimale et maximale des voisins. La méthode ne prolonge donc pas une tendance au-delà des valeurs observées comme peut le faire un modèle de régression paramétrique. L'effet est particulièrement visible près des bords du domaine des données.
 
