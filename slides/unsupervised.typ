@@ -407,6 +407,41 @@ qui restent dans un même groupe.
 #v(0.4em)
 #small([En cas de sous-échantillonnage, comparer les observations communes.])
 
+== L'indice de Rand ajusté (ARI)
+
+// Source : lectures/unsupervised.typ, « Comparer deux partitions ».
+#formula([
+  $ "ARI"(cal(C),cal(D))=(S-(P Q)/N)/(1/2 (P+Q)-(P Q)/N) $
+])
+#grid(
+  columns: (1fr, 1fr), gutter: 0.8em,
+  card([Compter les paires], [
+    $N=binom(n,2)$ : toutes les paires.
+
+    $P$, $Q$ : paires réunies dans $cal(C)$ et dans $cal(D)$, respectivement.
+
+    $S$ : paires réunies dans les deux.
+
+    $(P Q)/N$ : moyenne sous permutation à tailles de groupes fixées.
+  ], height: 2.5in),
+  card([Interprétation de l'accord], [
+    *1* : mêmes groupes, à une renumérotation près.
+
+    *0* : niveau de référence de l'accord aléatoire.
+
+    *Valeur négative* : accord inférieur à cette référence.
+
+    L'ARI n'est pas un taux de bonnes classifications.
+  ], fill: pale-blue, height: 2.5in),
+)
+#takeaway([
+  Exemple A/B : $N=15$, $P=Q=6$, $S=2$.
+  Donc $"ARI"=(2-2.4)/(6-2.4)=-1/9 approx -0.111$.
+])
+#small([
+  Convention : ARI = 1 pour deux partitions identiques donnant $0/0$.
+])
+
 == La démarche d'analyse
 
 #enum(
@@ -419,4 +454,3 @@ qui restent dans un même groupe.
 )
 #v(0.65em)
 #takeaway([Effectifs, centres et dispersions rendent la partition interprétable.])
-
