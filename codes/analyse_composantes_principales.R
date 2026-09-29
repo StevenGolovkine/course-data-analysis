@@ -6,12 +6,6 @@ set.seed(graine_defaut)
 # FONCTIONS ---------------------------------------
 
 choisir_q <- function(valeurs, seuil = 0.95) {
-  stopifnot(
-    is.numeric(valeurs), length(valeurs) > 0L,
-    all(is.finite(valeurs)), all(valeurs >= 0), sum(valeurs) > 0,
-    all(diff(valeurs) <= 0),
-    length(seuil) == 1L, is.finite(seuil), seuil > 0, seuil <= 1
-  )
   cumul <- cumsum(valeurs) / sum(valeurs)
   # Tolérance pour les arrondis, notamment quand le cumul devrait valoir 1.
   which(cumul >= seuil - 10 * .Machine$double.eps)[1]
@@ -44,11 +38,6 @@ tracer_variance <- function(valeurs, titre) {
 
 diagnostics_acp_normee <- function(z, acp) {
   # z contient les données centrées réduites qui ont servi à calculer acp.
-  stopifnot(
-    nrow(z) == nrow(acp$x), ncol(z) == nrow(acp$rotation),
-    max(abs(colMeans(z))) < 1e-8,
-    max(abs(apply(z, 2, sd) - 1)) < 1e-8
-  )
   valeurs <- acp$sdev[seq_len(ncol(acp$x))]^2
   axes_actifs <- valeurs > max(valeurs) * 1e-12
   scores2 <- acp$x^2
@@ -99,9 +88,6 @@ tracer_cercle <- function(rho, etiquettes, positions, titre) {
 # Chemins pris en charge : exécution depuis la racine ou depuis codes/.
 chemins <- c("assets/penguins.csv", "../assets/penguins.csv")
 chemin_donnees <- chemins[file.exists(chemins)][1]
-if (is.na(chemin_donnees)) {
-  stop("Fichier absent : lancer le script depuis la racine du dépôt.")
-}
 penguins <- read.csv(chemin_donnees, na.strings = "NA")
 penguins$ligne_originale <- seq_len(nrow(penguins))
 variables <- c(
@@ -216,8 +202,6 @@ print(data.frame(
 
 
 reconstruire <- function(acp, q, scores = acp$x) {
-  stopifnot(length(q) == 1L, is.finite(q), q == as.integer(q),
-            q >= 1, q <= ncol(acp$rotation))
   z_reconstruit <- tcrossprod(
     scores[, seq_len(q), drop = FALSE],
     acp$rotation[, seq_len(q), drop = FALSE]

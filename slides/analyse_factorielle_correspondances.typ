@@ -26,12 +26,12 @@
   card([Une représentation des associations], [
     Quels programmes ont des profils d'admission semblables ?
 
-    Quelles modalités caractérisent les différences ?
+    Quelles modalités des variables caractérisent les différences ?
   ], fill: pale-blue, height: 2.3in),
 )
 
 #v(0.65em)
-#takeaway([Les points du plan sont des modalités, et non des étudiants.])
+#takeaway([Ici, les points du plan sont des modalités des variables.])
 
 == Un exemple fil conducteur : 200 étudiants
 
@@ -58,7 +58,7 @@
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Profil-ligne], [
-    Répartition des admissions *dans un programme*.
+    Répartition des admissions dans un programme.
 
     $ a_(i j) = n_(i j) / n_(i +) $
 
@@ -67,7 +67,7 @@
     La somme sur $j$ vaut 1.
   ], height: 3.1in),
   card([Profil-colonne], [
-    Répartition des programmes *pour une admission*.
+    Répartition des programmes pour une admission.
 
     $ b_(i j) = n_(i j) / n_(+ j) $
 
@@ -139,9 +139,6 @@
   ], fill: pale-blue, height: 2.6in),
 )
 
-#v(0.65em)
-#takeaway([Les moyennes sont pondérées par les masses, pas calculées à poids égaux.])
-
 = Indépendance et géométrie
 
 == L'indépendance fournit la situation de référence
@@ -195,17 +192,13 @@
       (a_(i j) - a_(ell j))^2 / c_j $
 
     Comparer les répartitions des admissions de deux programmes.
-
-    Pondération par $1 / c_j$.
-  ], height: 3.15in),
+  ], height: 2.5in),
   card([Entre deux colonnes], [
     $ d_(chi^2)^2(j, h) = sum_(i=1)^I
       (b_(i j) - b_(i h))^2 / r_i $
 
     Comparer les répartitions des programmes de deux admissions.
-
-    Pondération par $1 / r_i$.
-  ], fill: pale-blue, height: 3.15in),
+  ], fill: pale-blue, height: 2.5in),
 )
 
 #v(0.55em)
@@ -213,7 +206,7 @@
 
 == Pourquoi les modalités rares pèsent-elles davantage ?
 
-Un écart de *10 points de pourcentage* contribue différemment selon la masse.
+Un écart de 10 points de pourcentage contribue différemment selon la masse.
 
 #v(0.55em)
 #grid(
@@ -237,7 +230,7 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 
 #formula([
   $ inertia = sum_(i=1)^I sum_(j=1)^J
-    (p_(i j) - r_i c_j)^2 / (r_i c_j) = chi^2 / n $
+    (p_(i j) - r_i c_j)^2 / (r_i c_j) $
 ])
 
 #v(0.65em)
@@ -257,29 +250,6 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 
 #v(0.6em)
 #takeaway([Les deux nuages ont la même inertie : on ne les additionne pas.])
-
-== Inertie descriptive et statistique du chi-deux
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Dans notre tableau], [
-    $ chi^2 = sum_(i,j) (n_(i j) - e_(i j))^2 / e_(i j) $
-
-    $ chi^2 = 47.75 $
-
-    $ inertia = 47.75 / 200 = 0.23875 $
-  ], height: 2.9in),
-  card([Si tous les effectifs doublent], [
-    Profils et masses inchangés.
-
-    Même inertie et même carte.
-
-    Mais $chi^2$ double : il dépend de la taille de l'échantillon.
-  ], fill: pale-blue, height: 2.9in),
-)
-
-#v(0.65em)
-#takeaway([L'AFC décrit les associations ; elle ne remplace pas un test statistique.])
 
 = Construire les axes factoriels
 
@@ -337,33 +307,33 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 #v(0.55em)
 #small([Si $inertia = 0$, le tableau est indépendant : aucun axe non trivial à interpréter.])
 
-== Les coordonnées principales donnent la carte
+== Les coordonnées principales donnent le plan
 
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Lignes], [
     $ F = D_r^(-1/2) U D $
 
-    $F_(i k)$ est la coordonnée du programme $i$ sur l'axe $k$.
+    $F_(i k)$ est la coordonnée du programme $i$ sur $k$.
 
     Un point par programme.
-  ], height: 2.7in),
+  ], height: 2.5in),
   card([Colonnes], [
     $ G = D_c^(-1/2) V D $
 
-    $G_(j k)$ est la coordonnée de l'admission $j$ sur l'axe $k$.
+    $G_(j k)$ est la coordonnée de l'admission $j$ sur $k$.
 
     Un point par type d'admission.
-  ], fill: pale-blue, height: 2.7in),
+  ], fill: pale-blue, height: 2.5in),
 )
 
 #v(0.65em)
-#takeaway([Avec tous les axes, les distances dans chaque nuage reproduisent celles du chi-deux.])
+#takeaway([Avec tous les axes, les distances dans chaque nuage reproduisent celles du $chi^2$.])
 
 == Chaque axe porte une partie de l'inertie
 
 #formula([
-  $ lambda_k = sigma_k^2, quad
+  $ lambda_k = sigma_k^2, quad "et" quad 
     sum_i r_i F_(i k)^2 = sum_j c_j G_(j k)^2 = lambda_k $
 ])
 
@@ -376,9 +346,7 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
     Les suivants résument la structure restante, dans des directions orthogonales.
   ], height: 2.25in),
   card([Part cumulée sur $q$ axes], [
-    $ sum_(k=1)^(r_S) lambda_k = inertia $
-
-    $ R_q = (sum_(k=1)^q lambda_k) / inertia $
+    $ sum_(k=1)^(r_S) lambda_k = inertia quad "et" quad R_q = 1 / inertia sum_(k=1)^q lambda_k $
   ], fill: pale-blue, height: 2.25in),
 )
 
@@ -453,17 +421,17 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
   card([Une ligne à partir des colonnes], [
     $ F_(i k) = sum_(j=1)^J a_(i j) Gamma_(j k) $
 
-    Coordonnée principale de la ligne = moyenne des coordonnées *standard* des colonnes.
+    Coordonnée principale de la ligne = moyenne des coordonnées standard des colonnes.
 
     Poids : son profil-ligne.
-  ], height: 3.15in),
+  ], height: 2.5in),
   card([Une colonne à partir des lignes], [
     $ G_(j k) = sum_(i=1)^I b_(i j) Phi_(i k) $
 
-    Coordonnée principale de la colonne = moyenne des coordonnées *standard* des lignes.
+    Coordonnée principale de la colonne = moyenne des coordonnées standard des lignes.
 
     Poids : son profil-colonne.
-  ], fill: pale-blue, height: 3.15in),
+  ], fill: pale-blue, height: 2.5in),
 )
 
 #v(0.55em)
@@ -496,17 +464,17 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
   card([Carte symétrique : $F$ et $G$], [
     Deux nuages en coordonnées principales.
 
-    Distances du chi-deux dans chaque nuage, si tous les axes sont gardés.
+    Distances du $chi^2$ dans chaque nuage, si tous les axes sont gardés.
 
     $ F_(i k) = 1 / sigma_k sum_j a_(i j) G_(j k) $
-  ], height: 3.2in),
+  ], height: 2.5in),
   card([Carte asymétrique : $F$ et $Gamma$], [
     Lignes principales, colonnes standard.
 
     Barycentres directement lisibles.
 
     Les distances entre colonnes ne sont plus celles du chi-deux.
-  ], fill: pale-blue, height: 3.2in),
+  ], fill: pale-blue, height: 2.5in),
 )
 
 #v(0.55em)
@@ -555,44 +523,18 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
     Deux admissions proches ont des répartitions de programmes semblables.
 
     Vérifier la qualité sur le plan retenu.
-  ], height: 3.1in),
+  ], height: 2.5in),
   card([Entre les deux nuages], [
-    Une distance programme–admission ne mesure *pas directement* leur association.
+    Une distance programme-admission ne mesure *pas directement* leur association.
 
     Cela reste vrai même si le plan restitue 100 % de l'inertie.
 
     Revenir aux profils et aux effectifs attendus.
-  ], fill: pale-orange, height: 3.1in),
+  ], fill: pale-orange, height: 2.5in),
 )
 
 #v(0.55em)
 #small([Une projection sur moins d'axes réduit les distances : elle peut masquer des différences.])
-
-== Relier les coordonnées à l'association
-
-#formula([
-  $ p_(i j) / (r_i c_j) - 1 =
-    sum_(k=1)^(r_S) (F_(i k) G_(j k)) / sigma_k $
-])
-
-#v(0.65em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Une somme sur les axes], [
-    Même signe : contribution positive.
-
-    Signes opposés : contribution négative.
-
-    Tous les axes donnent le rapport exact.
-  ], height: 2.45in),
-  card([Gestion et reprise d'études], [
-    Observé : 20. Attendu : 10.
-
-    $ n_(i j) / e_(i j) = 2 $
-
-    Une surreprésentation confirmée par le tableau.
-  ], fill: pale-blue, height: 2.45in),
-)
 
 == Être proche du centre : deux situations
 
@@ -622,19 +564,15 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Contribution d'une ligne], [
-    $ ctr_(i k)^r = (r_i F_(i k)^2) / lambda_k $
+    $ ctr_(i k)^r = (r_i F_(i k)^2) / lambda_k quad "et" quad sum_i ctr_(i k)^r = 1 $
 
-    $ sum_i ctr_(i k)^r = 1 $
-
-    Repère moyen : $1 / I$.
-  ], height: 2.7in),
+    Contribution moyenne d'une ligne : $ 1 / I. $
+  ], height: 2.5in),
   card([Contribution d'une colonne], [
-    $ ctr_(j k)^c = (c_j G_(j k)^2) / lambda_k $
+    $ ctr_(j k)^c = (c_j G_(j k)^2) / lambda_k quad "et" quad sum_j ctr_(j k)^c = 1 $
 
-    $ sum_j ctr_(j k)^c = 1 $
-
-    Repère moyen : $1 / J$.
-  ], fill: pale-blue, height: 2.7in),
+    Contribution moyenne d'une colonne : $ 1 / J. $
+  ], fill: pale-blue, height: 2.5in),
 )
 
 #v(0.65em)
@@ -647,19 +585,19 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Qualité sur un axe], [
-    Pour une ligne : $cos^2_(i k) = F_(i k)^2 / d_i^2$.
+    Pour une ligne : $ cos^2_(i k) = F_(i k)^2 / d_i^2 $
 
-    Pour une colonne : $cos^2_(j k) = G_(j k)^2 / delta_j^2$.
+    Pour une colonne : $ cos^2_(j k) = G_(j k)^2 / delta_j^2 $
 
     Part de la distance au carré conservée sur cet axe.
-  ], height: 2.95in),
+  ], height: 3.3in),
   card([Qualité sur un plan], [
     Additionner les cosinus carrés des axes retenus.
 
     Proche de 1 : point bien représenté.
 
     Proche de 0 : l'essentiel de son écart au centre est ailleurs.
-  ], fill: pale-blue, height: 2.95in),
+  ], fill: pale-blue, height: 3.3in),
 )
 
 #v(0.55em)
@@ -685,7 +623,7 @@ Un écart de *10 points de pourcentage* contribue différemment selon la masse.
 )
 
 #v(0.65em)
-#takeaway([Contribution : rôle dans l'axe. Cosinus carré : fidélité pour le point.])
+#takeaway([Contribution : rôle dans l'axe. Qualité : fidélité pour le point.])
 
 == Une bonne inertie globale ne suffit pas pour chaque point
 
@@ -771,7 +709,7 @@ avec $sum_j a_(* j) = 1$.
   ], fill: pale-orange, height: 3.2in),
 )
 
-== Ce que la carte ne permet pas de conclure
+== Ce que le plan ne permet pas de conclure
 
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
@@ -789,62 +727,3 @@ avec $sum_j a_(* j) = 1$.
 
 #v(0.65em)
 #takeaway([L'interprétation dépend du tableau étudié et de la convention de coordonnées.])
-
-== À vous de jouer : Lettres et Passerelle
-
-#course-table(
-  columns: (1.5fr, 1fr, 1fr, 1fr),
-  table.header([*Cellule étudiée*], [*Observé*], [*Total Lettres*], [*Total Passerelle*]),
-  [Lettres × Passerelle], [35], [60], [70],
-)
-
-#v(0.6em)
-L'effectif total vaut 200.
-
-+ Quel est l'effectif attendu sous l'indépendance ?
-+ Quelle est la part de passerelles en Lettres, comparée à la part globale ?
-+ La combinaison est-elle surreprésentée ou sous-représentée ?
-
-== Correction : revenir au tableau
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Effectif attendu et rapport], [
-    $ e_(i j) = (60 times 70) / 200 = 21 $
-
-    $ n_(i j) / e_(i j) = 35 / 21 approx 1.67 $
-
-    La combinaison est surreprésentée.
-  ], height: 2.7in),
-  card([Comparer les proportions], [
-    En Lettres : $35 / 60 approx 58.3 %$.
-
-    Globalement : $70 / 200 = 35 %$.
-
-    Le profil confirme l'association lue dans le tableau.
-  ], fill: pale-blue, height: 2.7in),
-)
-
-#v(0.65em)
-#takeaway([La proximité visuelle ne remplace jamais la vérification des proportions.])
-
-== L'essentiel à retenir
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.65em,
-  card([L'objet], [
-    Résumer les associations entre deux variables qualitatives à partir des profils.
-  ], height: 1.65in),
-  card([La géométrie], [
-    Masses, distance du chi-deux et inertie par rapport à l'indépendance.
-  ], fill: pale-blue, height: 1.65in),
-  card([La lecture], [
-    Oppositions et distances dans un même nuage, avec une qualité suffisante.
-  ], fill: pale-purple, height: 1.65in),
-  card([Les diagnostics], [
-    Contributions pour expliquer les axes ; cosinus carrés pour interpréter les points.
-  ], fill: pale-orange, height: 1.65in),
-)
-
-#v(0.55em)
-#small([Support : chapitre « Réduction de dimension », section « L'analyse factorielle des correspondances ».])
