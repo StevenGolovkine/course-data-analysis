@@ -41,12 +41,12 @@ typst compile --root . slides/introduction.typ
 - [X] Analyse exploratoire (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
 
 - [ ] Réduction de dimension
-    * [ ] ACP (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
-    * [ ] AFC (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
+    * [X] ACP (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
+    * [X] AFC (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
     * [ ] ACM (notes, slides, code, exercices)
 
 - [ ] Apprentissage supervisée
-    * [ ] kNN (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
+    * [X] kNN (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
     * [ ] Analyse discriminante de Fisher (~~notes~~, ~~slides~~, ~~code~~, exercices)
     * [ ] LDA / QDA (notes, slides, code, exercices)
     * [ ] Arbres de classification (notes, slides, code, exercices)
@@ -55,8 +55,8 @@ typst compile --root . slides/introduction.typ
     * [ ] Boosting (notes, slides, code, exercices)
 
 - [ ] Apprentissage non-supervisée
-    * [ ] Concepts (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
-    * [ ] k-means (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
+    * [X] Concepts (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
+    * [X] k-means (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
     * [ ] Modèles hiérarchiques (notes, slides, code, exercices)
     * [ ] Mélanges de Gaussiennes (notes, slides, code, exercices)
 
