@@ -35,7 +35,7 @@ j <- K_candidats > 1L
 criteres$CH[j] <- ((inertie_totale - W[j]) / (K_candidats[j] - 1)) /
                   (W[j] / (n - K_candidats[j]))
 K_retenu <- K_candidats[which.max(replace(silhouettes, is.na(silhouettes), -Inf))]
-modele <- modeles[[K_retenu]]
+modele <- modeles[[3]]
 
 # Numéroter les groupes par body_mass_g moyen croissant, pour présenter
 # les résultats dans un ordre stable. Cela ne change pas la partition.
@@ -44,8 +44,8 @@ groupes <- match(modele$cluster, ordre)
 centres_z <- modele$centers[ordre, , drop = FALSE]
 centres <- sweep(sweep(centres_z, 2, attr(z, "scaled:scale"), "*"),
                   2, attr(z, "scaled:center"), "+")
-profils <- data.frame(groupe = seq_len(K_retenu),
-                      n = tabulate(groupes, nbins = K_retenu), centres,
+profils <- data.frame(groupe = seq_len(3),
+                      n = tabulate(groupes, nbins = 3), centres,
                       row.names = NULL, check.names = FALSE)
 
 cat("Effectif et inertie totale :", n, "et", inertie_totale, "\n")

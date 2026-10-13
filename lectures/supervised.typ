@@ -278,7 +278,7 @@ sans étiquettes, comme le ferait une méthode de regroupement.
 
 Cette approche repose sur un critère géométrique, sans imposer de loi de
 probabilité aux observations dans chaque classe. Elle ne doit donc pas être
-confondue avec les modèles probabilistes LDA et QDA. Elle peut servir à préparer une classification, mais le choix d'une projection ne fournit pas à lui seul des probabilités de classe ni une règle d'affectation.
+confondue avec les modèles probabilistes _linear discriminant analysis_ (LDA) et _quadratic discriminant analysis_ (QDA).
 
 L'idée de Fisher est de construire un score qui est une combinaison linéaire
 des variables explicatives :
@@ -288,8 +288,7 @@ $ z = a^top x, quad a in RR^p, $
 où la direction $a$ rend les moyennes des groupes éloignées après projection,
 tout en limitant la dispersion à l'intérieur des groupes. Ajouter une constante
 au score déplacerait tous les points de la même quantité, sans modifier cette
-séparation. Si l'on souhaite utiliser ce score pour classer, il faut lui
-associer une règle de décision supplémentaire.
+séparation. Si l'on souhaite utiliser ce score pour faire une classification, il faut lui associer une règle de décision supplémentaire.
 
 Contrairement à l'ACP, le choix de l'axe utilise les classes. L'ACP recherche une forte variance totale, alors que l'analyse discriminante de Fisher recherche un contraste entre groupes relativement à leur variabilité interne.
 
