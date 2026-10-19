@@ -1462,32 +1462,19 @@ des données évaluées.
 
 === Principe
 
-Un arbre prédit en posant une suite de questions sur les variables explicatives.
-La famille *CART*, pour _Classification and Regression Trees_, utilise des
-questions binaires : chaque réponse conduit vers l'un de deux descendants.
-L'apprentissage consiste à choisir ces questions et le niveau de détail auquel
-on arrête le découpage.
+Un arbre construit un modèle en posant une suite de questions sur les variables explicatives. La modèle *CART* (_Classification and Regression Trees_) utilise des questions binaires : chaque réponse conduit vers l'un de deux descendants. L'apprentissage consiste à choisir ces questions et le niveau de détail auquel on arrête le découpage.
 
 #definition(title: [Arbre de classification ou de régression])[
-  Un arbre partitionne l'espace des variables explicatives en régions disjointes
-  $R_1,dots,R_M$, associées à ses $M$ *feuilles*. Une nouvelle observation
-  appartient à une seule de ces régions et reçoit la prédiction de cette feuille.
+  Un arbre partitionne l'espace des variables explicatives en régions disjointes $R_1,dots,R_M$, associées à ses $M$ feuilles. Une nouvelle observation appartient à une seule de ces régions et reçoit la prédiction de cette feuille.
 
-  Dans le cadre usuel sans pondération, une feuille prédit la classe la plus
-  fréquente pour la classification à coûts égaux, ou la moyenne des réponses
-  pour la régression avec perte quadratique.
+  Dans le cadre usuel sans pondération, une feuille prédit la classe la plus fréquente pour la classification à coûts égaux, ou la moyenne des réponses pour la régression avec perte quadratique.
 ]
 
-La *racine* contient toutes les observations d'entraînement. Un *nœud interne*
-pose une question ; une *feuille* termine le chemin. La *profondeur* d'un nœud
-est son nombre d'arêtes depuis la racine, dont la profondeur est $0$. Un arbre
-à deux feuilles ne pose ainsi qu'une question et a une profondeur maximale de $1$.
+La racine contient toutes les observations d'entraînement. Un nœud interne pose une question et une feuille termine le chemin. La profondeur d'un nœud est son nombre d'arêtes depuis la racine, dont la profondeur est $0$. Un arbre à deux feuilles ne pose ainsi qu'une question et a une profondeur maximale de $1$.
 
 Pour une variable quantitative, une question prend la forme $x_j <= s$, où
 $j$ désigne la variable et $s$ le seuil. L'autre branche correspond à $x_j>s$.
-Une variable peut être interrogée plusieurs fois le long d'un chemin. Avec des
-coupures de ce type, les régions sont des rectangles en deux dimensions et des
-produits d'intervalles en dimension supérieure, éventuellement non bornés.
+Avec des coupures de ce type, les régions sont des rectangles en deux dimensions et des produits d'intervalles en dimension supérieure, éventuellement non bornés. Pour une variable qualitative à $K$ modalités, la question prend la forme $x_j in S subset {1,dots,K}$, où $S$ est un sous-ensemble des modalités. L'autre branche correspond à $x_j in.not S$. Les régions sont des unions de produits d'intervalles et de sous-ensembles de modalités. Une variable peut être interrogée plusieurs fois le long d'un chemin. 
 
 #example[
   *Lire une règle.* Considérons un arbre à trois feuilles :
@@ -1496,31 +1483,23 @@ produits d'intervalles en dimension supérieure, éventuellement non bornés.
     R_2=\{x:x_1>2, x_2<=1\}, quad
     R_3=\{x:x_1>2, x_2>1\}. $
 
-  Les feuilles $R_1$ et $R_3$ prédisent A, tandis que $R_2$ prédit B. Pour
-  $x=(3,0.6)^top$, la réponse à la première question est « non », puis « oui »
-  à la seconde : on prédit B. La variable $x_2$ intervient uniquement lorsque
-  $x_1>2$. L'arbre représente donc une *interaction* entre les deux variables.
-]
+  Les feuilles $R_1$ et $R_3$ prédisent A, tandis que $R_2$ prédit B. Pour $x=(3,0.6)^top$, la réponse à la première question est « non », puis « oui » à la seconde : on prédit B. La variable $x_2$ intervient uniquement lorsque $x_1>2$. L'arbre représente donc une interaction entre les deux variables.
 
-#figure(
+  #figure(
   image("../figures/cart_partition.svg", width: 100%,
         alt: "Arbre à trois feuilles et partition correspondante : une coupure verticale en x1 égal à 2, puis une coupure horizontale en x2 égal à 1 dans la région de droite."),
-  caption: [Deux représentations du même arbre fictif. La deuxième coupure ne
-    s'applique qu'à la région issue de la branche « non » de la racine.
-    Les couleurs indiquent les classes prédites ; cet arbre est fixé pour
-    illustrer sa lecture.],
+  caption: [Deux représentations du même arbre fictif. La deuxième coupure ne s'applique qu'à la région issue de la branche « non » de la racine. Les couleurs indiquent les classes prédites.],
 )
+]
 
 Les groupes d'un arbre supervisé sont construits en utilisant la réponse $y$.
 Ils ne jouent donc pas le même rôle que les groupes d'une classification non
-supervisée : on cherche ici à rendre les *réponses* homogènes, plutôt qu'à
+supervisée : on cherche ici à rendre les réponses homogènes, plutôt qu'à
 rapprocher les observations selon l'ensemble des variables explicatives.
 
 === Prédire dans une feuille
 
-Notons $cal(I)_t=\{i:x_i in R_t\}$ les indices des observations d'entraînement
-dans une feuille $t$, et $n_t=|cal(I)_t|$ son effectif. En classification, pour
-$g in \{1,dots,K\}$, la proportion de la classe $g$ et la décision sont
+Notons $cal(I)_t=\{i:x_i in R_t\}$, l'ensemble des indices des observations d'entraînement dans une feuille $t$, et $n_t=|cal(I)_t|$ son effectif. En classification, pour $g in \{1,dots,K\}$, la proportion d'observation de la classe $g$ et la décision associée sont
 
 $ hat(p)_(t g)=1/n_t sum_(i in cal(I)_t) ind(y_i=g), quad
   hat(g)(x)=argmax_g hat(p)_(t g) quad "si" x in R_t. $
@@ -1531,15 +1510,12 @@ désigne ici la classe la plus fréquente, même si sa proportion est inférieur
 fournissent aussi les probabilités estimées $hat(eta)_g (x)=hat(p)_(t g)$.
 Elles sont constantes sur toute la région $R_t$.
 
-En régression avec perte quadratique, la meilleure constante dans la feuille est
+En régression avec perte quadratique, la « meilleure constante » dans la feuille est la moyenne empirique des réponses :
 
 $ overline(y)_t=1/n_t sum_(i in cal(I)_t) y_i
   =argmin_(c in RR) sum_(i in cal(I)_t) (y_i-c)^2. $
 
-La fonction de prédiction s'écrit donc
-$hat(f)(x)=sum_(t=1)^M overline(y)_t ind(x in R_t)$ : elle est *constante par
-morceaux*. Cette valeur dépend de la perte retenue ; avec une perte absolue,
-une médiane des réponses minimise la somme des écarts absolus.
+La fonction de prédiction s'écrit donc $hat(f)(x)=sum_(t=1)^M overline(y)_t ind(x in R_t)$ : elle est constante par morceaux. Cette valeur dépend de la perte retenue. Avec une perte absolue, une médiane des réponses minimise la somme des écarts absolus.
 
 #example[
   Une feuille contenant $7$ observations de classe A, $2$ de classe B et $1$
@@ -1557,17 +1533,27 @@ classe prédite, des coûts d'erreur égaux. Des poids, des probabilités a prio
 imposées ou des coûts différents peuvent modifier les proportions utilisées,
 la décision et les coupures apprises.
 
+#example[
+  *Adapter la décision au coût des erreurs.* Pour deux classes codées $0$ et $1$, notons $p=hat(p)_(t 1)$, $c_"FN"$ le coût d'un faux négatif et $c_"FP"$ celui d'un faux positif, tous deux strictement positifs. Si un faux positif à la même coût qu'un faux négatif, prédire $0$ a pour coût moyen estimé $c_"FN" p$, tandis que prédire $1$ coûte $c_"FP" (1-p)$. On prédit donc $1$ lorsque
+
+  $ c_"FP" (1-p)<c_"FN" p
+    quad <=> quad p>c_"FP"/(c_"FP"+c_"FN"). $
+
+  Une feuille contenant neuf $0$ et trois $1$ donne $p=0.25$. À coûts égaux,
+  elle prédit $0$. Avec $c_"FN"=5$ et $c_"FP"=1$, le seuil devient $1/6$ :
+  la feuille prédit $1$, car le coût estimé vaut $0.75$ au lieu de $1.25$.
+]
+
+Dans l'exemple précédent, on modifie la décision d'un arbre déjà construit. Introduire les coûts dès l'apprentissage peut aussi modifier ses coupures. La règle dépend de la fiabilité des probabilités estimées dans les feuilles.
+
 === Algorithme CART
 
-La construction suit une stratégie *gloutonne et récursive*. Au nœud $t$, une
-coupure candidate $(j,s)$ sépare les observations en
+La construction suit une stratégie gloutonne et récursive. Au nœud $t$, une coupure candidate $(j,s)$ sépare les observations en
 
 $ cal(I)_L=\{i in cal(I)_t:x_(i j)<=s\}, quad
   cal(I)_R=\{i in cal(I)_t:x_(i j)>s\}. $
 
-Les indices $L$ et $R$ désignent les descendants gauche et droit. Une coupure
-est admissible si elle respecte notamment l'effectif minimal exigé dans
-chacun des deux descendants.
+Les indices $L$ et $R$ désignent les descendants gauche et droit. Une coupure est admissible si elle respecte notamment l'effectif minimal exigé dans chacun des deux descendants.
 
 1. Pour chaque variable quantitative, trier ses valeurs distinctes présentes
    au nœud. Des seuils situés entre deux valeurs consécutives suffisent pour
@@ -1577,33 +1563,28 @@ chacun des deux descendants.
 4. Appliquer la même procédure séparément aux deux descendants, jusqu'à ce
    qu'un critère d'arrêt soit atteint.
 
-Avec les valeurs distinctes $1$, $2$, $4$ et $7$, on peut par exemple essayer
-les seuils $1.5$, $3$ et $5.5$. Des observations ayant exactement la même valeur
-ne peuvent pas être séparées par une coupure sur cette seule variable. Pour
-une variable qualitative, une question peut prendre la forme « la modalité
-appartient-elle à l'ensemble $A$ ? ». Le traitement de ces variables dépend du
-logiciel ; leur attribuer arbitrairement les codes $1$, $2$, $3$ comme à une
-variable quantitative impose un ordre qui peut être injustifié.
+Avec les valeurs distinctes $1$, $2$, $4$ et $7$, on peut par exemple essayer les seuils $1.5$, $3$ et $5.5$. Des observations ayant exactement la même valeur ne peuvent pas être séparées par une coupure sur cette seule variable. Pour une variable qualitative, une question peut prendre la forme « la modalité appartient-elle à l'ensemble $A$ ? ». Le traitement de ces variables dépend du logiciel ; leur attribuer arbitrairement les codes $1$, $2$, $3$ comme à une variable quantitative impose un ordre qui peut être injustifié.
 
-À chaque étape, CART choisit la meilleure coupure *immédiate*. Il n'examine pas
-tous les arbres que les coupures suivantes pourraient produire. Une première
-coupure légèrement moins bonne peut permettre, plus loin, un meilleur arbre :
-la stratégie gloutonne ne garantit donc pas un optimum global.
+À chaque étape, l'algorithme CART choisit la meilleure coupure immédiate. Il n'examine pas tous les arbres que les coupures suivantes pourraient produire. Une première coupure légèrement moins bonne peut permettre, plus loin, un meilleur arbre : la stratégie gloutonne ne garantit donc pas un optimum global.
 
 === Critères d'homogénéité
 
 *Classification.* Au nœud $t$, on définit les proportions $hat(p)_(t g)$ comme
-dans une feuille. Les trois critères usuels sont
+dans une feuille. Les trois critères usuels sont 
+
+- l'indice de Gini :
 
 $ I_"Gini" (t)=1-sum_(g=1)^K hat(p)_(t g)^2, $
-$ I_"ent" (t)=-sum_(g=1)^K hat(p)_(t g) log(hat(p)_(t g)), quad
-  I_"err" (t)=1-max_g hat(p)_(t g). $
 
-On utilise la convention $0 log(0)=0$. Un nœud *pur* ne contient qu'une seule
-classe : les trois critères y valent $0$. Gini et l'entropie sont maximaux
-lorsque les $K$ classes sont également représentées, avec respectivement
-$1-1/K$ et $log(K)$. L'indice de Gini est aussi la probabilité que deux tirages
-indépendants de classes selon ces proportions donnent des classes différentes.
+- l'entropie de Shannon :
+
+$ I_"ent" (t)=-sum_(g=1)^K hat(p)_(t g) log(hat(p)_(t g)), $
+
+- le taux d'erreur de classification :
+
+$  I_"err" (t)=1-max_g hat(p)_(t g). $
+
+On utilise la convention $0 log(0)=0$. Un nœud pur ne contient qu'une seule classe : les trois critères y valent $0$. L'indice de Gini et l'entropie sont maximaux lorsque les $K$ classes sont également représentées, avec respectivement $1-1/K$ et $log(K)$. L'indice de Gini est aussi la probabilité que deux tirages indépendants de classes selon ces proportions donnent des classes différentes.
 
 Pour un critère d'impureté $I$, le gain local est
 
@@ -1612,7 +1593,9 @@ $ Delta I(t;j,s)=I(t)-n_L/n_t I(L)-n_R/n_t I(R). $
 Les pondérations $n_L/n_t$ et $n_R/n_t$ sont essentielles : une petite feuille
 pure ne compense pas nécessairement une grande feuille qui reste très mélangée.
 Pour comparer des gains intervenant à des nœuds différents, leur contribution
-à l'impureté moyenne de l'arbre est $(n_t/n) Delta I(t;j,s)$.
+à l'impureté moyenne de l'arbre est
+
+$ n_t/n Delta I(t;j,s). $
 
 #example[
   *Calculer un gain de Gini.* Dix observations, ordonnées selon une variable
@@ -1634,15 +1617,10 @@ Pour comparer des gains intervenant à des nœuds différents, leur contribution
   Pour la coupure $x<=2.5$, le nœud gauche contient deux A et le nœud droit
   quatre A et quatre B : le gain est seulement
   $0.48-(2/10 times 0+8/10 times 0.5)=0.08$. La première coupure est donc
-  meilleure que la seconde selon Gini.
+  meilleure que la seconde selon l'indice de Gini.
 ]
 
-L'erreur de classification est moins sensible aux changements de proportions.
-Par exemple, un nœud contenant huit A et deux B commet deux erreurs en prédisant
-A. Le diviser en un nœud de quatre A et un nœud de quatre A et deux B ne change
-pas ce nombre d'erreurs, alors que Gini diminue de $0.32$ à
-$(6/10)(4/9) approx 0.2667$. Gini ou l'entropie peuvent ainsi détecter une
-amélioration utile avant que la classe prédite ne change.
+L'erreur de classification est moins sensible aux changements de proportions. Par exemple, un nœud contenant huit A et deux B commet deux erreurs en prédisant A. Le diviser en un nœud de quatre A et un nœud de quatre A et deux B ne change pas ce nombre d'erreurs, alors que l'indice de Gini diminue de $0.32$ à $6/10 times 4/9 approx 0.2667$. L'indice de Gini ou l'entropie peuvent ainsi détecter une amélioration utile avant que la classe prédite ne change.
 
 *Régression.* Avec une perte quadratique, on utilise la somme des carrés
 résiduels dans le nœud,
@@ -1658,7 +1636,7 @@ $ Delta "SCE"="SCE"(t)-"SCE"(L)-"SCE"(R)
 Cette identité résulte de la décomposition de la dispersion autour de la
 moyenne. Une coupure est utile lorsque les deux moyennes diffèrent, en tenant
 compte de leurs effectifs. Si l'on utilise la variance empirique avec diviseur
-$n_t$ comme impureté, le gain pondéré est $Delta "SCE"/n_t$ : les deux critères
+$n_t$ comme impureté, le gain pondéré est $(Delta "SCE")/n_t$ : les deux critères
 choisissent donc la même coupure dans un nœud donné.
 
 #example[
@@ -1672,17 +1650,102 @@ choisissent donc la même coupure dans un nœud donné.
   $ Delta "SCE"=77.5-(2+2)=73.5= (3 times 3)/6 (2-9)^2. $
 
   Le seuil $s=2.5$ donne les moyennes $1.5$ et $7.5$, avec une somme des carrés
-  totale de $29.5$ : il est moins bon. Parmi les cinq seuils candidats, $3.5$
-  minimise la somme des carrés, qui vaut $4$ après coupure.
-]
+  totale de $29.5$ : il est donc moins bon. Parmi les cinq seuils candidats, le seuil $s = 3.5$ minimise la somme des carrés, qui vaut $4$ après coupure.
 
-#figure(
+  #figure(
   image("../figures/cart_regression.svg", width: 100%,
         alt: "Six observations de régression et prédictions en deux paliers, 2 et 9. La somme des carrés résiduels est minimale au seuil 3,5, où elle vaut 4."),
   caption: [Une coupure en régression. À gauche, les segments verticaux
     représentent les résidus autour des deux moyennes. À droite, on compare
     toutes les coupures possibles entre les valeurs observées de $x$.],
 )
+
+]
+
+
+=== Construire un arbre pas à pas <cart-construction>
+
+Considérons douze observations, avec une seule variable explicative
+$x=1,dots,12$. Les quatre premières observations sont de classe A, les quatre
+suivantes de classe B et les quatre dernières de classe A. On utilise Gini et
+on exige au moins deux observations par feuille. Pour départager deux gains
+identiques, on retient le plus petit seuil.
+
+*Première coupure.* La racine contient huit A et quatre B ; son impureté vaut
+
+$ I(t)=1-(8/12)^2-(4/12)^2=4/9. $
+
+Les seuils admissibles sont $2.5,3.5,dots,10.5$. Pour $s=4.5$, le descendant
+gauche contient quatre A et est pur ; le descendant droit contient quatre A
+et quatre B, donc son impureté vaut $1/2$. Le gain est
+
+$ Delta I(t;4.5)=4/9-(4/12 times 0+8/12 times 1/2)=1/9. $
+
+#block(breakable: false)[
+  Voici quelques-uns des gains obtenus en parcourant les seuils admissibles :
+
+  #table(
+    columns: (1fr, 1fr, 1fr), align: center,
+    table.header([*Seuil $s$*], [*Gain exact*], [*Gain approché*]),
+    [$2.5$], [$2/45$], [0,0444],
+    [$4.5$], [$1/9$], [0,1111],
+    [$6.5$], [$0$], [0],
+    [$8.5$], [$1/9$], [0,1111],
+    [$10.5$], [$2/45$], [0,0444],
+  )
+]
+
+Le maximum sur tous les seuils est atteint en $4.5$ et $8.5$ : la règle de
+départage choisit $4.5$. Le seuil $6.5$ ne donne aucun gain, car chacun de ses
+descendants contient quatre A et deux B, dans les mêmes proportions que la
+racine. Partager les effectifs en deux ne suffit donc pas à améliorer l'impureté.
+
+*Deuxième coupure.* Le descendant gauche est pur : on le conserve comme
+feuille. Dans le descendant droit, la coupure $x<=8.5$ sépare les quatre B
+des quatre A. Son gain local vaut $1/2$, et sa contribution à la diminution
+de l'impureté moyenne de l'arbre vaut $(8/12) times (1/2)=1/3$.
+Les trois feuilles sont désormais pures : on arrête la construction.
+
+#figure(
+  image("../figures/cart_construction.svg", width: 100%,
+        alt: "Arbre appris sur douze observations : x inférieur ou égal à 4,5 prédit A ; sinon, x inférieur ou égal à 8,5 prédit B ; au-delà, on prédit A. Les trois feuilles contiennent chacune quatre observations et sont pures."),
+  caption: [Construction complète d'un arbre de classification. À gauche,
+    chaque nœud indique les effectifs des deux classes. À droite, les points
+    représentent les classes observées et les fonds colorés les régions de
+    prédiction. Une même variable intervient dans les deux questions.],
+)
+
+#example[
+  *Lire le résultat et son erreur.* L'arbre a trois feuilles et une profondeur
+  maximale de deux. Il prédit A si $x<=4.5$, B si $4.5<x<=8.5$, puis A si
+  $x>8.5$. Ainsi, $x=7.2$ conduit à B et $x=10.5$ à A : la classe prédite
+  ne varie pas de façon monotone avec $x$.
+
+  L'impureté moyenne de Gini passe de $4/9$ à $1/3$ après la première coupure,
+  puis à $0$ après la seconde. En revanche, le nombre d'erreurs d'entraînement
+  passe de quatre à quatre, puis à zéro. En effet, après la première coupure,
+  le descendant droit commet encore quatre erreurs, quelle que soit la classe
+  retenue pour départager ses quatre A et ses quatre B.
+
+  La première coupure prépare donc une amélioration qui ne devient visible
+  dans l'erreur de classification qu'à la seconde étape. L'erreur finale nulle
+  décrit l'ajustement de ces douze observations ; elle ne garantit pas une
+  erreur nulle sur de nouvelles données.
+]
+
+#remark(title: [Une interaction peut échapper à la recherche gloutonne])[
+  Considérons quatre observations : $(0,0)$ et $(1,1)$ sont de classe A,
+  tandis que $(0,1)$ et $(1,0)$ sont de classe B. La racine a un Gini de $1/2$.
+  Une coupure sur $x_1$ ou sur $x_2$, au seuil $0.5$, donne deux descendants
+  contenant chacun un A et un B : le gain immédiat est nul.
+
+  Pourtant, si l'on accepte cette première coupure, interroger ensuite l'autre
+  variable dans chaque descendant produit quatre feuilles pures. C'est le
+  schéma du « ou exclusif » (_XOR_) : les classes dépendent de la combinaison
+  des variables. Un arbre de profondeur deux peut le représenter, mais une
+  procédure exigeant un gain strictement positif à chaque étape s'arrête dès
+  la racine, même si des feuilles d'une seule observation sont autorisées.
+]
 
 === Complexité et élagage
 
@@ -1732,6 +1795,59 @@ racine.
   Le sous-arbre à trois feuilles est préféré parmi ces candidats. Passer de
   trois à cinq feuilles réduit l'erreur de $0.05$, mais augmente la pénalité
   de $2 times 0.03=0.06$. La réduction d'erreur ne suffit donc pas.
+]
+
+*Calculer le seuil d'élagage d'une branche.* Pour un nœud interne $t$, notons
+$T_t$ le sous-arbre dont il est la racine et $m_t>=2$ son nombre de feuilles.
+Notons $r(t)$ la contribution à l'erreur si l'on remplace tout $T_t$ par une
+seule feuille. Avec l'erreur de classification définie ci-dessus,
+
+$ r(t)=n_t/n (1-max_g hat(p)_(t g)), quad
+  r(T_t)=sum_(ell in cal(F)(T_t)) r(ell). $
+
+Le diviseur reste l'effectif total $n$, même lorsque $t$ est loin de la racine.
+En régression, on prend de la même façon $r(t)="SCE"(t)/n$. Remplacer $T_t$ par
+une feuille augmente l'erreur de $r(t)-r(T_t)$ et supprime $m_t-1$ feuilles.
+Si $T'$ désigne l'arbre ainsi élagué, alors
+
+$ C_alpha (T')-C_alpha (T)=r(t)-r(T_t)-alpha(m_t-1). $
+
+Cet élagage devient avantageux, ou équivalent en cas d'égalité, lorsque
+
+$ alpha>=alpha_t, quad
+  alpha_t=(r(t)-r(T_t))/(m_t-1). $
+
+Le rapport $alpha_t$ mesure donc l'augmentation d'erreur *par feuille
+supprimée*. L'algorithme du *maillon faible* élague les branches ayant le plus
+petit seuil, puis recalcule ces seuils dans l'arbre restant. Il construit ainsi
+la suite de sous-arbres à comparer par validation. Un même élagage peut enlever
+plusieurs feuilles : toutes les tailles ne figurent pas nécessairement dans
+cette suite.#footnote[Voir la #link("https://scikit-learn.org/stable/modules/tree.html#minimal-cost-complexity-pruning")[documentation de scikit-learn sur l'élagage coût-complexité].
+  La même dérivation s'applique lorsque $C(T)$ est une somme d'impuretés
+  pondérées, comme dans cette implémentation ; les seuils numériques dépendent
+  du critère retenu.]
+
+#example[
+  *Élaguer l'arbre à douze observations.* Reprenons
+  #link(<cart-construction>)[l'arbre à trois feuilles] construit précédemment,
+  avec l'erreur de classification comme critère $C(T)$. Ses feuilles sont
+  pures, donc $C(T)=0$.
+
+  - Remplacer le sous-arbre droit par une feuille fait passer son erreur de
+    $0$ à $4/12=1/3$ et supprime une feuille : $alpha_"droit"=1/3$.
+  - Remplacer l'arbre entier par sa racine fait aussi passer l'erreur de $0$
+    à $1/3$, mais supprime deux feuilles : $alpha_"racine"=1/6$.
+
+  Le maillon faible est donc ici la racine : le chemin d'élagage passe
+  directement de trois feuilles à une. Leurs critères sont respectivement
+  $3 alpha$ et $1/3+alpha$. L'arbre à trois feuilles est préféré pour
+  $alpha<1/6$ ; la racine seule est préférée pour $alpha>1/6$.
+  À l'égalité, on peut retenir l'arbre le plus simple.
+
+  L'arbre intermédiaire à deux feuilles aurait le critère $1/3+2 alpha$ :
+  pour $alpha>0$, il est toujours moins bon que la racine seule. Cet exemple
+  montre pourquoi élaguer ne consiste pas nécessairement à supprimer une
+  feuille à la fois.
 ]
 
 === Choisir la taille par validation
