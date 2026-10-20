@@ -1569,7 +1569,7 @@ Avec les valeurs distinctes $1$, $2$, $4$ et $7$, on peut par exemple essayer le
 
 === Critères d'homogénéité
 
-*Classification.* Au nœud $t$, on définit les proportions $hat(p)_(t g)$ comme
+*Classification.* Un critère d'impureté $I(t)$ mesure l'hétérogénéité des réponses dans un nœud $t$. Au nœud $t$, on définit les proportions $hat(p)_(t g)$ comme
 dans une feuille. Les trois critères usuels sont 
 
 - l'indice de Gini :
@@ -1665,11 +1665,7 @@ choisissent donc la même coupure dans un nœud donné.
 
 === Construire un arbre pas à pas <cart-construction>
 
-Considérons douze observations, avec une seule variable explicative
-$x=1,dots,12$. Les quatre premières observations sont de classe A, les quatre
-suivantes de classe B et les quatre dernières de classe A. On utilise Gini et
-on exige au moins deux observations par feuille. Pour départager deux gains
-identiques, on retient le plus petit seuil.
+Considérons douze observations, avec une seule variable explicative $x=1,dots,12$. Les quatre premières observations sont de classe A, les quatre suivantes de classe B et les quatre dernières de classe A. On utilise le critère Gini et on exige au moins deux observations par feuille. Pour départager deux gains identiques, on retient le plus petit seuil.
 
 *Première coupure.* La racine contient huit A et quatre B ; son impureté vaut
 
@@ -1703,7 +1699,7 @@ racine. Partager les effectifs en deux ne suffit donc pas à améliorer l'impure
 *Deuxième coupure.* Le descendant gauche est pur : on le conserve comme
 feuille. Dans le descendant droit, la coupure $x<=8.5$ sépare les quatre B
 des quatre A. Son gain local vaut $1/2$, et sa contribution à la diminution
-de l'impureté moyenne de l'arbre vaut $(8/12) times (1/2)=1/3$.
+de l'impureté moyenne de l'arbre vaut $8/12 times 1/2 = 1/3$.
 Les trois feuilles sont désormais pures : on arrête la construction.
 
 #figure(
@@ -1716,28 +1712,15 @@ Les trois feuilles sont désormais pures : on arrête la construction.
 )
 
 #example[
-  *Lire le résultat et son erreur.* L'arbre a trois feuilles et une profondeur
-  maximale de deux. Il prédit A si $x<=4.5$, B si $4.5<x<=8.5$, puis A si
-  $x>8.5$. Ainsi, $x=7.2$ conduit à B et $x=10.5$ à A : la classe prédite
-  ne varie pas de façon monotone avec $x$.
+  *Lire le résultat et son erreur.* L'arbre a trois feuilles et une profondeur maximale de deux. Il prédit A si $x<=4.5$, B si $4.5<x<=8.5$, puis A si $x>8.5$. Ainsi, $x=7.2$ conduit à B et $x=10.5$ à A : la classe prédite ne varie pas de façon monotone avec $x$.
 
-  L'impureté moyenne de Gini passe de $4/9$ à $1/3$ après la première coupure,
-  puis à $0$ après la seconde. En revanche, le nombre d'erreurs d'entraînement
-  passe de quatre à quatre, puis à zéro. En effet, après la première coupure,
-  le descendant droit commet encore quatre erreurs, quelle que soit la classe
-  retenue pour départager ses quatre A et ses quatre B.
+  L'impureté moyenne du critère de Gini passe de $4/9$ à $1/3$ après la première coupure, puis à $0$ après la seconde. En revanche, le nombre d'erreurs d'entraînement passe de quatre à quatre, puis à zéro. En effet, après la première coupure, le descendant droit commet encore quatre erreurs, quelle que soit la classe retenue pour départager ses quatre A et ses quatre B.
 
-  La première coupure prépare donc une amélioration qui ne devient visible
-  dans l'erreur de classification qu'à la seconde étape. L'erreur finale nulle
-  décrit l'ajustement de ces douze observations ; elle ne garantit pas une
-  erreur nulle sur de nouvelles données.
+  La première coupure prépare donc une amélioration qui ne devient visible dans l'erreur de classification qu'à la seconde étape. L'erreur finale nulle décrit l'ajustement de ces douze observations. Elle ne garantit pas une erreur nulle sur de nouvelles données.
 ]
 
 #remark(title: [Une interaction peut échapper à la recherche gloutonne])[
-  Considérons quatre observations : $(0,0)$ et $(1,1)$ sont de classe A,
-  tandis que $(0,1)$ et $(1,0)$ sont de classe B. La racine a un Gini de $1/2$.
-  Une coupure sur $x_1$ ou sur $x_2$, au seuil $0.5$, donne deux descendants
-  contenant chacun un A et un B : le gain immédiat est nul.
+  Considérons quatre observations : $(0,0)$ et $(1,1)$ sont de classe A, tandis que $(0,1)$ et $(1,0)$ sont de classe B. La racine de l'arbre a un critère de Gini de $1/2$. Une coupure sur $x_1$ ou sur $x_2$, au seuil $0.5$, donne deux descendants contenant chacun un A et un B : le gain immédiat est nul.
 
   Pourtant, si l'on accepte cette première coupure, interroger ensuite l'autre
   variable dans chaque descendant produit quatre feuilles pures. C'est le
@@ -1755,27 +1738,20 @@ manquer une structure réelle. La profondeur et le nombre de feuilles sont
 deux mesures liées, mais différentes : deux arbres de même profondeur peuvent
 avoir des nombres de feuilles très différents.
 
-Le *pré-élagage* limite la croissance : profondeur maximale, effectif minimal
+Le pré-élagage limite la croissance : profondeur maximale, effectif minimal
 d'un nœud avant de tenter une coupure, effectif minimal dans chaque feuille,
 gain minimal ou nombre maximal de feuilles. Arrêter trop tôt peut empêcher une
 coupure peu utile immédiatement de donner accès à de bonnes coupures suivantes.
 
-Le *post-élagage* part d'un arbre suffisamment développé et remplace certains
-sous-arbres par une feuille. Pour formaliser le compromis, notons $cal(F)(T)$
-l'ensemble des feuilles d'un arbre $T$ et $M(T)=|cal(F)(T)|$. Un critère
-coût-complexité est
+Le post-élagage part d'un arbre suffisamment développé et remplace certain sous-arbres par une feuille. Pour formaliser le compromis, notons $cal(F)(T)$ l'ensemble des feuilles d'un arbre $T$ et $M(T)=|cal(F)(T)|$ le nombre de feuilles. Un critère coût-complexité est
 
 $ C_alpha (T)=C(T)+alpha M(T), quad alpha>=0. $
 
 Par exemple, on peut prendre comme erreur d'entraînement
 
-$ C_"class" (T)=1/n sum_(t in cal(F)(T)) n_t (1-max_g hat(p)_(t g)), $
-$ C_"reg" (T)=1/n sum_(t in cal(F)(T)) "SCE"(t). $
+$ C_"class" (T)=1/n sum_(t in cal(F)(T)) n_t I(t), quad text("ou") quad C_"reg" (T)=1/n sum_(t in cal(F)(T)) "SCE"(t). $
 
-Le critère utilisé pour *élaguer* n'est pas nécessairement celui utilisé pour
-*choisir les coupures*. On peut construire l'arbre avec Gini, puis élaguer
-selon l'erreur de classification. Les conventions de normalisation déterminent
-l'échelle de $alpha$ ; il faut les préciser avant d'en comparer les valeurs.
+Le critère utilisé pour élaguer n'est pas nécessairement celui utilisé pour choisir les coupures. On peut construire l'arbre avec le critère de Gini, puis élaguer selon l'erreur de classification. Les conventions de normalisation déterminent l'échelle de $alpha$, il faut donc les préciser avant d'en comparer les valeurs.
 
 Pour un arbre développé fixé, l'élagage coût-complexité produit une suite de
 sous-arbres emboîtés. Lorsque $alpha$ augmente, on privilégie moins de feuilles.
@@ -1802,8 +1778,7 @@ $T_t$ le sous-arbre dont il est la racine et $m_t>=2$ son nombre de feuilles.
 Notons $r(t)$ la contribution à l'erreur si l'on remplace tout $T_t$ par une
 seule feuille. Avec l'erreur de classification définie ci-dessus,
 
-$ r(t)=n_t/n (1-max_g hat(p)_(t g)), quad
-  r(T_t)=sum_(ell in cal(F)(T_t)) r(ell). $
+$ r(t)=n_t/n I(t), quad text("et") quad r(T_t)=sum_(ell in cal(F)(T_t)) r(ell). $
 
 Le diviseur reste l'effectif total $n$, même lorsque $t$ est loin de la racine.
 En régression, on prend de la même façon $r(t)="SCE"(t)/n$. Remplacer $T_t$ par
@@ -1814,18 +1789,14 @@ $ C_alpha (T')-C_alpha (T)=r(t)-r(T_t)-alpha(m_t-1). $
 
 Cet élagage devient avantageux, ou équivalent en cas d'égalité, lorsque
 
-$ alpha>=alpha_t, quad
-  alpha_t=(r(t)-r(T_t))/(m_t-1). $
+$ alpha>=alpha_t, quad text("avec") quad alpha_t=(r(t)-r(T_t))/(m_t-1). $
 
-Le rapport $alpha_t$ mesure donc l'augmentation d'erreur *par feuille
-supprimée*. L'algorithme du *maillon faible* élague les branches ayant le plus
+Le rapport $alpha_t$ mesure donc l'augmentation d'erreur par feuille
+supprimée. L'algorithme du maillon faible élague les branches ayant le plus
 petit seuil, puis recalcule ces seuils dans l'arbre restant. Il construit ainsi
 la suite de sous-arbres à comparer par validation. Un même élagage peut enlever
 plusieurs feuilles : toutes les tailles ne figurent pas nécessairement dans
-cette suite.#footnote[Voir la #link("https://scikit-learn.org/stable/modules/tree.html#minimal-cost-complexity-pruning")[documentation de scikit-learn sur l'élagage coût-complexité].
-  La même dérivation s'applique lorsque $C(T)$ est une somme d'impuretés
-  pondérées, comme dans cette implémentation ; les seuils numériques dépendent
-  du critère retenu.]
+cette suite.#footnote[Voir la #link("https://scikit-learn.org/stable/modules/tree.html#minimal-cost-complexity-pruning")[documentation de scikit-learn sur l'élagage coût-complexité]. Le même calcul s'applique lorsque $C(T)$ est une somme d'impuretés pondérées, comme dans cette implémentation ; les seuils numériques dépendent du critère retenu.]
 
 #example[
   *Élaguer l'arbre à douze observations.* Reprenons
@@ -1852,19 +1823,9 @@ cette suite.#footnote[Voir la #link("https://scikit-learn.org/stable/modules/tre
 
 === Choisir la taille par validation
 
-La valeur de $alpha$ ne se choisit pas en minimisant l'erreur sur le test.
-On réserve le test et on compare les degrés d'élagage par validation croisée
-sur l'entraînement. Dans chaque pli, il faut *reconstruire l'arbre* sur les
-observations disponibles : élaguer un arbre déjà ajusté sur toutes les données
-ferait intervenir les réponses du pli de validation dans ses coupures.
+La valeur de $alpha$ ne se choisit pas en minimisant l'erreur sur le jeu de test. On réserve le jeu de test et on compare les degrés d'élagage par validation croisée sur le jeu d'entraînement. Dans chaque pli, il faut reconstruire l'arbre sur les observations disponibles : élaguer un arbre déjà ajusté sur toutes les données ferait intervenir les réponses du pli de validation dans ses coupures.
 
-#block(breakable: false)[
-  Une première règle consiste à retenir la complexité de plus faible erreur
-  moyenne de validation, puis à privilégier le modèle le plus simple en cas
-  d'égalité. La *règle d'une erreur standard* préfère le plus petit arbre dont
-  l'erreur ne dépasse pas le minimum augmenté de l'erreur standard estimée
-  en ce minimum.
-]
+Une première règle consiste à retenir la complexité de plus faible erreur moyenne de validation, puis à privilégier le modèle le plus simple en cas d'égalité. La règle d'une erreur standard préfère le plus petit arbre dont l'erreur ne dépasse pas le minimum augmenté de l'erreur standard estimée en ce minimum.
 
 #example[
   *Un minimum peu marqué.* Voici des résultats fictifs de validation pour
@@ -1893,42 +1854,25 @@ plutôt qu'un test formel d'égalité des performances.
 
 Après la sélection, on réajuste la procédure sur tout l'entraînement et on
 évalue une seule fois le modèle retenu sur le test. La mesure dépend du but :
-exactitude et rappels par classe en classification, RMSE ou MAE en régression,
+exactitude et sensibilité par classe en classification, RMSE ou MAE en régression,
 ou coût spécifique si certaines erreurs sont plus graves.
 
-=== Pratique : deux tâches sur Palmer Penguins
+=== Pratique : Palmer Penguins
 
 On reprend les $342$ manchots disposant des quatre mesures quantitatives et de
-`species`, avec le même partage que pour les k-NN et l'analyse discriminante :
-$240$ observations d'entraînement et $102$ de test. Le script
-`codes/arbres_cart.R` reproduit les calculs avec le paquet R `rpart`.
+`species`, avec le même partage que pour les $k$-NN et l'analyse discriminante :
+$240$ observations d'entraînement et $102$ de test.
 
 Deux tâches sont traitées séparément :
 
 - *Classification* : prédire `species` avec `bill_length_mm`, `bill_depth_mm`,
-  `flipper_length_mm` et `body_mass_g` ; les coupures utilisent Gini.
+  `flipper_length_mm` et `body_mass_g` ; les coupures utilisent le critère de Gini.
 - *Régression* : prédire `body_mass_g` avec les trois autres mesures ;
   ni `body_mass_g` ni `species` ne figurent parmi les prédicteurs.
 
-Les arbres sont développés avec au moins cinq observations par feuille,
-au moins dix observations pour tenter une coupure et une profondeur maximale
-de dix. On compare ensuite les valeurs de `cp`
-$0$, $0.001$, $0.005$, $0.01$, $0.02$, $0.05$ et $0.10$ sur les cinq mêmes plis
-stratifiés de l'entraînement. Ces contraintes et cette grille sont fixées
-avant l'évaluation. Chaque pli donne lieu à un nouvel apprentissage.
+Les arbres sont développés avec au moins cinq observations par feuille, au moins dix observations pour tenter une coupure et une profondeur maximale de dix. On compare ensuite les valeurs du paramètre `cp`, $0$, $0.001$, $0.005$, $0.01$, $0.02$, $0.05$ et $0.10$ sur les cinq mêmes plis stratifiés de l'entraînement. Ces contraintes et cette grille sont fixées avant l'évaluation. Chaque pli donne lieu à un nouvel apprentissage.
 
-Dans `rpart`, `cp` exprime la pénalité relativement au risque de l'arbre réduit
-à sa racine. Pour une convention de risque identique, cela correspond à
-$alpha="cp" times C(T_0)$, où $T_0$ est cet arbre sans coupure. La fonction
-`prune` retire les branches selon cette pénalité.#footnote[Voir les documentations
-de #link("https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/rpart.control.html")[`rpart.control`]
-et de #link("https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/prune.rpart.html")[`prune.rpart`].
-Le paramètre `cp` peut aussi limiter la croissance ; le script le fixe à zéro
-à cette étape, puis élague les arbres obtenus. La
-#link("https://cran.r-project.org/web/packages/rpart/vignettes/longintro.pdf")[vignette de Therneau et Atkinson],
-section 6.1, précise sa normalisation par le risque à la racine. Pénaliser le
-nombre de coupures ou le nombre de feuilles conduit au même choix : ces nombres
-diffèrent de un dans un arbre binaire.]
+Dans la librarie `rpart`, le paramètre `cp` exprime la pénalité relativement au risque de l'arbre réduit à sa racine. Pour une convention de risque identique, cela correspond à $alpha="cp" times C(T_0)$, où $T_0$ est cet arbre sans coupure. La fonction `prune` de la librairie `rpart` retire les branches selon cette pénalité.#footnote[Voir les documentations de #link("https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/rpart.control.html")[`rpart.control`] et de #link("https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/prune.rpart.html")[`prune.rpart`]. Le paramètre `cp` peut aussi limiter la croissance ; le script le fixe à zéro à cette étape, puis élague les arbres obtenus. La #link("https://cran.r-project.org/web/packages/rpart/vignettes/longintro.pdf")[vignette de Therneau et Atkinson], section 6.1, précise sa normalisation par le risque à la racine. Pénaliser le nombre de coupures ou le nombre de feuilles conduit au même choix : ces nombres diffèrent de un dans un arbre binaire.]
 
 *Résultats de validation.* Pour la classification, on minimise le nombre total
 d'erreurs sur les plis ; pour la régression, la moyenne de tous les carrés
@@ -1981,7 +1925,7 @@ serait impossible dans la population.
   )
 ]
 
-L'exactitude vaut $96/102 approx 94.12$~%. Le rappel de Chinstrap est de
+L'exactitude vaut $96/102 approx 94.12$~%. La sensibilité de Chinstrap est de
 $16/20=80$~%, ce que l'exactitude globale ne montre pas à elle seule.
 La feuille de cinq observations est également un point à surveiller : sa
 prédiction repose sur peu de données.
@@ -1994,40 +1938,6 @@ mesures apportent donc ici une amélioration par rapport à cette référence.
 Trente feuilles rendent cependant l'arbre nettement moins facile à lire que
 l'arbre de classification à quatre feuilles.
 
-Le fragment suivant montre l'ajustement final des deux modèles, une fois les
-valeurs de `cp` choisies par la boucle de validation du script :
-
-```r
-controle <- rpart::rpart.control(
-  cp = 0, minsplit = 10, minbucket = 5,
-  maxdepth = 10, xval = 0, maxsurrogate = 0
-)
-grand_class <- rpart::rpart(
-  species ~ bill_length_mm + bill_depth_mm +
-    flipper_length_mm + body_mass_g,
-  data = train, method = "class",
-  parms = list(split = "gini"), control = controle
-)
-arbre_class <- rpart::prune(grand_class, cp = 0.02)
-predict(arbre_class, newdata = test, type = "class")
-predict(arbre_class, newdata = test, type = "prob")
-
-grand_reg <- rpart::rpart(
-  body_mass_g ~ bill_length_mm + bill_depth_mm + flipper_length_mm,
-  data = train, method = "anova", control = controle
-)
-arbre_reg <- rpart::prune(grand_reg, cp = 0.001)
-predict(arbre_reg, newdata = test)
-```
-
-La méthode `class` traite la classification, tandis que `anova` utilise les
-carrés résiduels pour la régression.#footnote[Voir la
-#link("https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/rpart.html")[documentation de `rpart`]
-pour les méthodes, les probabilités a priori et les matrices de coûts.]
-On ne standardise pas les mesures pour ces arbres : les coupures comparent les
-valeurs d'une variable à un seuil dans ses propres unités. Les résultats restent
-ceux d'un partage précis ; ils ne garantissent pas la même performance sur une
-autre année ou une autre population de manchots.
 
 === Forces et limites
 
@@ -2061,16 +1971,9 @@ de l'entraînement : l'arbre ne prolonge pas une tendance au-delà des données.
 Des réponses extrêmes peuvent néanmoins déplacer fortement une moyenne de
 feuille et influencer les coupures.
 
-*Effectifs, probabilités et données manquantes.* Une feuille pure sur quelques
-observations ne garantit pas des probabilités fiables. Il faut examiner les
-effectifs, les rappels des classes rares et, si les probabilités sont utilisées,
-leur calibration. Les valeurs manquantes demandent aussi une stratégie explicite :
-imputation apprise sur l'entraînement, branche dédiée ou coupures de remplacement
-selon le logiciel. L'exemple précédent travaille uniquement sur les cas complets.
+*Effectifs, probabilités et données manquantes.* Une feuille pure sur quelques observations ne garantit pas des probabilités fiables. Il faut examiner les effectifs, les sensibilités des classes rares et, si les probabilités sont utilisées, leur calibration. Les valeurs manquantes demandent aussi une stratégie explicite : imputation apprise sur l'entraînement, branche dédiée ou coupures de remplacement selon le logiciel. L'exemple précédent travaille uniquement sur les cas complets.
 
-Ces limites motivent les méthodes ensemblistes : agréger plusieurs arbres peut
-réduire leur instabilité et améliorer les prédictions, au prix d'une règle
-globale moins directement lisible.
+Ces limites motivent les méthodes ensemblistes : agréger plusieurs arbres peut réduire leur instabilité et améliorer les prédictions, au prix d'une règle globale moins directement lisible.
 
 == Méthodes ensemblistes
 

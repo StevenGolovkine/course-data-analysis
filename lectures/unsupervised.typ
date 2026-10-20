@@ -886,6 +886,63 @@ définis au début du chapitre.
     elles ne représentent pas la partition en quatre groupes du zoom.],
 )
 
+=== Exemple : changer la liaison change les groupes <cah-liaisons>
+
+Pour isoler l'effet de la liaison, gardons les mêmes observations et la même
+distance euclidienne, sans standardisation :
+
+$ A=0, quad B=1, quad C=3.2, quad D=5.8. $
+
+Les liaisons simple, complète et moyenne commencent toutes par réunir $A$ et
+$B$, à distance $1$. Il reste alors trois groupes : $"AB"$, $\{C\}$ et
+$\{D\}$. Les distances entre $C$ et les membres de $"AB"$ valent $3.2$ et
+$2.2$, tandis que $d(C,D)=2.6$. Le choix suivant dépend donc du résumé utilisé :
+
+#block(breakable: false)[
+  #table(
+    columns: (1fr, 1fr, 1fr, 1fr, 1.2fr), align: center,
+    table.header([*Liaison*], [*$D("AB",C)$*], [*$D("AB",D)$*],
+      [*$D(C,D)$*], [*Fusion retenue*]),
+    [Simple], [2,2], [4,8], [2,6], [$"AB"$ et $C$],
+    [Complète], [3,2], [5,8], [2,6], [$C$ et $D$],
+    [Moyenne], [2,7], [5,3], [2,6], [$C$ et $D$],
+  )
+]
+
+La liaison simple retient le contact entre $B$ et $C$. Avec deux groupes,
+elle donne $\{A,B,C\}$ et $\{D\}$. Les liaisons complète et moyenne donnent
+$\{A,B\}$ et $\{C,D\}$. Les valeurs n'ont pas changé : c'est la définition
+de la proximité *entre groupes* qui conduit à deux partitions différentes.
+
+Les hauteurs finales diffèrent aussi. Pour la liaison simple, la dernière
+fusion se fait à $2.6$, grâce au contact entre $C$ et $D$. Pour la liaison
+complète, elle se fait à $5.8$, la distance entre les extrémités $A$ et $D$.
+Pour la liaison moyenne, elle vaut
+
+$ D_"moyenne" ("AB","CD")=(3.2+5.8+2.2+4.8)/4=4. $
+
+#figure(
+  image("../figures/cah_liaisons.svg", width: 100%,
+    alt: "Trois dendrogrammes des valeurs 0, 1, 3,2 et 5,8. La liaison simple donne les groupes ABC et D ; les liaisons complète et moyenne donnent AB et CD. Les hauteurs de la dernière fusion sont respectivement 2,6, 5,8 et 4."),
+  caption: [Même distance initiale, trois critères de liaison. Les pointillés
+    indiquent, dans chaque arbre, une coupe en deux groupes ; les couleurs
+    représentent ces groupes. Les hauteurs sont affichées sur la même échelle,
+    mais résument des critères différents.],
+)
+
+*Interpréter l'effet de chaîne.* Pour la liaison simple, une coupe à hauteur
+$h$ peut se lire comme un graphe : on relie deux observations lorsque
+$d_(i ell)<=h$, puis on prend les composantes connexes, c'est-à-dire les
+ensembles reliés par des chemins. À $h=2.4$, les liens $A$--$B$ et $B$--$C$
+suffisent à réunir $A,B,C$, bien que $d(A,C)=3.2>h$. Il n'est pas nécessaire
+que toutes les paires du groupe soient proches.
+
+Avec la liaison complète, au contraire, tous les groupes obtenus à hauteur
+$h$ ont un diamètre au plus égal à $h$. Avec la liaison moyenne, la hauteur
+contrôle une moyenne de distances lors des fusions, sans imposer cette borne
+à chaque paire. Choisir une liaison revient donc aussi à choisir le type
+d'homogénéité recherché.
+
 === Lire un dendrogramme
 
 *Suivre les fusions.* On part des observations, en bas, puis on remonte leurs
@@ -905,7 +962,8 @@ coupe horizontale à une hauteur $h$ regroupe les observations reliées sous
 cette coupe. Si la droite ne passe par aucun nœud, le nombre de branches
 verticales qu'elle traverse est le nombre de groupes $K$.
 
-Dans l'exemple, une coupe à $h=2.5$ produit $\{A,B,C\}$ et $\{D,E,F\}$.
+Dans l'exemple de Ward à six observations, une coupe à $h=2.5$ produit
+$\{A,B,C\}$ et $\{D,E,F\}$.
 Une coupe à $h=1.3$ donne $\{A,B\}$, $\{C\}$, $\{D,E\}$ et $\{F\}$.
 Il s'agit de deux partitions extraites du même arbre, sans nouvel ajustement.
 
@@ -933,6 +991,60 @@ ex æquo donnerait $\{A,B\}$, $\{C\}$ et $\{D,E,F\}$.#footnote[
   complète et moyenne, ni pour Ward dans le cadre euclidien utilisé ici.
 ]
 
+=== Ce que les distances du dendrogramme représentent
+
+Supposons les hauteurs de fusion non négatives et non décroissantes. Pour
+deux observations distinctes $i$ et $ell$, notons $u_(i ell)$ la hauteur de
+leur premier nœud commun, et posons $u_(i i)=0$. La matrice $U=(u_(i ell))$
+contient les *dissimilarités cophénétiques*. Elle décrit les rapprochements
+dans l'arbre, tandis que la matrice initiale $D=(d_(i ell))$ décrit les
+proximités avant le regroupement.
+
+#property(title: [La contrainte ultramétrique])[
+  Pour trois observations quelconques $i,j,ell$, on a
+
+  $ u_(i ell)<=max(u_(i j),u_(j ell)). $
+
+  Cette inégalité est plus forte que l'inégalité triangulaire habituelle.
+  On parle d'une *ultramétrique* lorsque, en plus, $u_(i ell)>0$ pour
+  $i!=ell$. Si des observations distinctes fusionnent à hauteur nulle,
+  la même inégalité reste valable, mais la séparation des points est perdue.
+]
+
+Pour comprendre cette contrainte, coupons l'arbre au niveau
+$h=max(u_(i j),u_(j ell))$, en incluant les fusions de hauteur $h$.
+Les observations $i$ et $j$ sont déjà réunies, ainsi que $j$ et $ell$.
+Elles appartiennent donc toutes au même groupe : $i$ et $ell$ se sont
+nécessairement rejoints à une hauteur inférieure ou égale à $h$.
+
+#example[
+  *Une proximité dans l'arbre n'est pas une distance sur la droite.* Dans
+  #link(<cah-liaisons>)[l'exemple à quatre observations], avec la liaison simple,
+
+  $ u_(A B)=1, quad u_(B C)=2.2, quad u_(A C)=2.2. $
+
+  Le point $C$ rejoint tout le groupe $"AB"$ à la même hauteur. Pourtant,
+  les distances initiales sont $d(A,B)=1$, $d(B,C)=2.2$ et $d(A,C)=3.2$ :
+  elles ne satisfont pas la contrainte ultramétrique. De même,
+  $u_(A D)=2.6$, alors que $d(A,D)=5.8$. Le dendrogramme résume ici une
+  connexion par étapes ; il ne conserve pas toutes les distances initiales.
+]
+
+Un diagnostic consiste à calculer la *corrélation cophénétique* : la
+corrélation de Pearson entre les $n(n-1)/2$ distances $d_(i ell)$ et les
+$n(n-1)/2$ valeurs $u_(i ell)$ correspondantes, pour $i<ell$, lorsque les
+deux séries ont une variance non nulle. En R,
+`cophenetic(arbre)` fournit ces dernières. Une forte corrélation indique
+une bonne concordance linéaire entre les deux ensembles de valeurs ; elle
+ne signifie pas que les distances sont égales.#footnote[Voir la
+  #link("https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cophenetic.html")[documentation de `stats::cophenetic`].]
+
+Ce diagnostic porte sur la représentation des proximités par *l'arbre entier*.
+Il ne choisit pas $K$ et ne garantit pas qu'une coupe soit pertinente.
+Son interprétation dépend aussi du critère de liaison et de la convention
+des hauteurs. On le complète par les silhouettes, les profils et la stabilité
+des partitions que l'on souhaite utiliser.
+
 === Choisir le nombre de groupes
 
 La hiérarchie reporte le choix de $K$ ; elle ne le résout pas automatiquement.
@@ -940,8 +1052,8 @@ Plusieurs niveaux peuvent être utiles selon la question étudiée.
 
 *Examiner les sauts de fusion.* Une forte augmentation du critère indique
 qu'une fusion réunit des groupes nettement moins semblables que les précédents.
-On peut couper juste avant ce saut. Dans l'exemple, le passage de deux groupes
-à un seul coûte $96$ unités d'inertie, contre $1.5$ pour chacune des deux
+On peut couper juste avant ce saut. Dans l'exemple de Ward à six observations,
+le passage de deux groupes à un seul coûte $96$ unités d'inertie, contre $1.5$ pour chacune des deux
 fusions précédentes : une description en deux groupes est naturelle.
 Le saut doit être interprété selon le critère et sa convention d'affichage ;
 les hauteurs de méthodes différentes ne sont pas directement comparables.
@@ -962,6 +1074,68 @@ de fusion n'est, à elle seule, ni une probabilité ni un test de significativit
 Une contrainte d'usage peut enfin fixer le niveau pertinent : deux grandes
 familles pour une synthèse, puis plusieurs sous-groupes pour une description
 plus fine. Ce choix doit rester explicite.
+
+=== Évaluer la stabilité d'une coupe
+
+On peut rendre l'étude de stabilité concrète en fixant une coupe à $K$ groupes,
+puis en examinant ce qu'elle devient lorsque l'on retire une partie des
+observations. Il s'agit d'une perturbation de l'échantillon ; répéter une
+CAH déterministe sur exactement les mêmes données ne fournit pas cette information.
+
+Voici un protocole possible, dont les choix doivent être annoncés :
+
+1. Ajuster la CAH sur toutes les observations disponibles et conserver la
+   partition de référence $cal(C)_K$.
+2. Tirer sans remise un sous-échantillon $S_b$ contenant, par exemple,
+   $80 %$ des observations, puis reconstruire la CAH et la couper en $K$
+   groupes. On garde la même liste de variables, la même distance et la
+   même liaison. Si l'on étudie toute la procédure, les paramètres de
+   standardisation sont réestimés sur ce sous-échantillon.
+3. Restreindre $cal(C)_K$ aux observations de $S_b$ et la comparer à la
+   nouvelle partition avec l'#link(<indice-ari>)[ARI]. Les deux vecteurs
+   d'affectations doivent suivre exactement le même ordre d'observations.
+4. Répéter, par exemple, $B=100$ fois, puis examiner la distribution des ARI :
+   médiane, dispersion et valeurs les plus faibles.
+
+L'ARI compare les regroupements sans exiger que les numéros de groupes
+coïncident. Si un petit groupe de référence disparaît entièrement d'un
+sous-échantillon, la partition restreinte peut contenir moins de $K$ groupes :
+la comparaison reste possible, et cette disparition mérite d'être signalée.
+Un ARI élevé indique une faible sensibilité à *ce protocole* de perturbation,
+sans établir l'existence de catégories naturelles.
+
+*Repérer les observations instables.* Un score global peut masquer une
+frontière fragile. Pour chaque paire $i,ell$, notons $cal(B)_(i ell)$
+l'ensemble des répétitions dans lesquelles les deux observations sont présentes.
+Si $g_i^((b))$ désigne le groupe de $i$ dans la répétition $b$, leur fréquence
+de regroupement est
+
+$ hat(pi)_(i ell)=1/abs(cal(B)_(i ell))
+    sum_(b in cal(B)_(i ell)) ind(g_i^((b))=g_ell^((b))), $
+
+à condition que $abs(cal(B)_(i ell))>0$. Le dénominateur compte uniquement
+les répétitions où la paire est observable. Une valeur proche de $1$ indique
+que les deux observations sont presque toujours réunies lorsqu'elles sont
+présentes ; une valeur proche de $0$ indique qu'elles restent séparées.
+
+#example[
+  *Distinguer un noyau stable d'une frontière.* Dans un exemple fictif de
+  dix sous-échantillonnages, les observations $i$ et $j$ apparaissent ensemble
+  huit fois et sont réunies sept fois : $hat(pi)_(i j)=7/8=0.875$.
+  Les observations $i$ et $ell$ apparaissent ensemble six fois, mais ne sont
+  réunies que trois fois : $hat(pi)_(i ell)=3/6=0.5$.
+
+  La seconde paire est plus sensible aux retraits d'observations. Ces fréquences
+  décrivent les regroupements obtenus ; ce ne sont pas des probabilités
+  d'appartenir à une « vraie » classe. Il faut aussi regarder le nombre de
+  répétitions disponibles : une fréquence de $1$ calculée sur une seule
+  apparition commune apporte peu d'information.
+]
+
+On peut refaire ce diagnostic pour plusieurs $K$. Il complète le choix par
+silhouette : une coupe géométriquement convaincante mais instable appelle
+une interprétation prudente. À l'inverse, la stabilité seule ne suffit pas ;
+la coupe triviale réunissant toutes les observations est toujours stable.
 
 === Étude de cas : Palmer Penguins
 
