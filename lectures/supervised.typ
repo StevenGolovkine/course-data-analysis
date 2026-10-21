@@ -1975,103 +1975,600 @@ feuille et influencer les coupures.
 
 Ces limites motivent les méthodes ensemblistes : agréger plusieurs arbres peut réduire leur instabilité et améliorer les prédictions, au prix d'une règle globale moins directement lisible.
 
-== Méthodes ensemblistes
+== Méthodes ensemblistes <methodes-ensemblistes>
 
-=== Principe
+=== Principe : combiner plusieurs prédictions
 
-Les méthodes ensemblistes combinent plusieurs modèles simples pour produire une
-prédiction plus robuste. Elles améliorent souvent la performance au prix d'une
-interprétation moins directe.
+Les résultats peuvent changer fortement après une petite modification de l'échantillon. Les méthodes ensemblistes construisent plusieurs modèles, puis combinent leurs prédictions. Elles cherchent à tirer parti de leurs qualités et de la diversité de leurs erreurs. En effet, répéter exactement le même arbre ne produit aucun gain.
 
-Trois grandes familles apparaissent dans le cours :
+On distingue ici deux démarches : le _bagging_ (_bootstrap aggregating_) et les forêts aléatoires ajustent des arbres que l'on agrège ensuite et le _boosting_ construit une succession de corrections du modèle courant. Les modèles de base ne sont pas nécessairement des arbres, mais ceux-ci permettent de représenter facilement des relations non linéaires et des interactions.
 
-- le bagging;
-- les forêts aléatoires;
-- le boosting.
+En régression, pour $B$ modèles de régression $hat(f)_1,dots,hat(f)_B$, la moyenne est
 
-L'idée générale est qu'un ensemble de modèles imparfaits peut être meilleur
-qu'un seul modèle, à condition que leurs erreurs ne soient pas toutes les mêmes.
+$ hat(f)_"ens" (x)=1/B sum_(b=1)^B hat(f)_b (x). $
 
-=== Bagging
+En classification à $K$ classes, deux agrégations courantes sont possibles.
+
+*Le vote.* Chaque modèle $b$ prédit une classe $hat(g)_b (x)$. On retient la classe qui recueille le plus de voix :
+
+$ hat(g)_"vote" (x)=argmax_g sum_(b=1)^B ind(hat(g)_b (x)=g). $
+
+*La moyenne des probabilités.* On moyenne les probabilités estimées pour chaque classe, puis on choisit la plus probable :
+
+  $ hat(eta)_g (x)=1/B sum_(b=1)^B hat(eta)_(b g) (x), quad text("et") quad hat(g)_"prob" (x)=argmax_g hat(eta)_g (x). $
+
+On fixe une règle de départage en cas d'égalité. Dans un problème à plusieurs
+classes, le vote retient la classe la plus fréquente, sans exiger qu'elle
+obtienne plus de la moitié des voix. La règle d'agrégation dépend de la méthode
+et du logiciel.
+
+#example(title: [Vote et moyenne des probabilités])[
+  Trois arbres estiment la probabilité de la classe $1$ à $0.51$, $0.51$ et
+  $0.01$. À coûts égaux, deux arbres prédisent $1$ : le vote choisit donc $1$.
+  La moyenne des probabilités vaut pourtant
+
+  $ (0.51+0.51+0.01)/3 approx 0.343<0.5, $
+
+  et conduit à la classe $0$. Le vote ne conserve que la décision de chaque
+  arbre ; la moyenne tient aussi compte de ses probabilités estimées.
+  Aucune de ces deux règles ne garantit, à elle seule, leur calibration.
+
+  En régression, des prédictions $8$, $10$ et $12$ donnent simplement $10$.
+  On moyenne les réponses prédites, et non les seuils ou les structures des arbres.
+]
+
+=== Pourquoi la moyenne peut réduire la variance
+
+Fixons un point $x$. Les prédictions sont aléatoires parce que l'échantillon
+d'entraînement et les tirages de l'algorithme peuvent varier. Pour comprendre
+l'effet de l'agrégation, supposons que chaque prédiction $hat(f)_b (x)$ ait la même
+variance $sigma^2$, et que deux prédictions distinctes aient une corrélation
+commune $rho$. Dans ce modèle simplifié,
+
+$ Var(hat(f)_"ens" (x))
+  =1/B^2 (B sigma^2+B(B-1) rho sigma^2)
+  =sigma^2 (rho+(1-rho)/B). $
+
+Le premier terme de la somme vient des $B$ variances ; le second vient des
+$B(B-1)$ covariances. Pour $0<=rho<=1$, on distingue trois situations :
+
+- si $rho=0$, la variance est divisée par $B$ ;
+- si $rho=1$, moyenner ne change pas la variance ;
+- si $0<rho<1$, augmenter $B$ rapproche la variance de $rho sigma^2$.
+
+Les modèles entraînés à partir d'un même jeu de données ont des sources d'erreur
+communes. Des tirages _bootstrap_ indépendants, conditionnellement à ce jeu,
+ne rendent donc pas leurs prédictions indépendantes lorsque l'on tient aussi
+compte de la variabilité du jeu initial.
+
+#example(title: [La diversité compte autant que le nombre d'arbres])[
+  Supposons $sigma^2=100$ et $B=100$. Avec $rho=0.8$, la variance de la moyenne
+  vaut $100(0.8+0.2/100)=80.2$. Avec $rho=0.1$, elle vaut
+  $100(0.1+0.9/100)=10.9$.
+
+  Dans le premier cas, multiplier encore les arbres apporte peu : la limite
+  est $80$. Réduire leur corrélation peut être plus utile, à condition de
+  conserver des arbres individuellement informatifs.
+]
+
+#figure(
+  image("../figures/ensembles_variance.svg", width: 90%,
+    alt: "Variance relative d'une moyenne de B prédictions pour des corrélations de 0, 0,1, 0,5 et 0,8. Les courbes décroissent vers leur corrélation respective ; leur limite n'est nulle que pour une corrélation nulle."),
+  caption: [Effet théorique de l'agrégation sous les hypothèses de variances
+    et de corrélations communes. L'ordonnée est la variance de la moyenne
+    divisée par celle d'un modèle ; l'abscisse est logarithmique. Les pointillés
+    indiquent les limites lorsque $B$ augmente.],
+)
+
+Ce calcul concerne la variance, pas toute l'erreur de prédiction. Si les
+modèles ont la même espérance, leur moyenne conserve leur biais. Elle
+n'élimine pas non plus le bruit de la réponse.
+
+=== Bagging : perturber l'échantillon, puis agréger
 
 #definition(title: [Bagging])[
-  Le bagging, ou *bootstrap aggregating*, construit plusieurs modèles sur des
-  échantillons bootstrap des données d'entraînement. Pour la classification, on
-  combine ensuite les prédictions par vote majoritaire ou par moyenne des
-  probabilités.
+  Le bagging (_bootstrap aggregating_) ajuste $B$ modèles sur des
+  échantillons _bootstrap_ du jeu d'entraînement, puis agrège leurs prédictions.
+  Chaque échantillon est obtenu par $n$ tirages avec remise parmi les $n$
+  couples $(x_i,y_i)$ disponibles.
+] <def-bagging>
+
+Pour chaque $b=1,dots,B$, on tire les indices de l'échantillon _bootstrap_, on ajuste un modèle sur les observations correspondantes. Les répétitions d'une observation comptent dans l'apprentissage. Les modèles peuvent être construits en parallèle : aucun n'utilise les prédictions d'un modèle précédent. À la fin, on applique la règle de moyenne ou de vote choisie.#footnote[Voir L. Breiman,
+  #link("https://www.stat.berkeley.edu/~breiman/bagging.pdf")[_Bagging Predictors_],
+  pour le principe d'agrégation par rééchantillonnage.]
+
+#example(title: [Un tirage bootstrap à six observations])[
+  Avec six observations numérotées de $1$ à $6$, un tirage possible est
+
+  $ (1,1,2,4,4,6). $
+
+  Il contient six lignes, mais seulement quatre observations distinctes :
+  $1$ et $4$ sont répétées ; $3$ et $5$ sont absentes. Un autre modèle reçoit
+  un autre tirage. Cette variation peut modifier les coupures, même si tous
+  les modèles suivent le même algorithme.
 ]
 
-Le bagging réduit la variance et stabilise les prédictions, en particulier pour
-des modèles instables comme les arbres.
+Pour une observation donnée, la probabilité de ne pas être sélectionnée lors
+d'un tirage vaut $1-1/n$. La probabilité d'être absente des $n$ tirages est donc
 
-Si l'on ajuste beaucoup d'arbres profonds sur des échantillons bootstrap, chaque
-arbre peut surajuster son propre échantillon, mais la moyenne ou le vote réduit
-la variabilité globale.
+$ q_n=(1-1/n)^n approx exp(-1) approx 0.368. $
 
-=== Forêts aléatoires
+L'approximation vaut pour $n$ suffisamment grand. Le nombre moyen
+d'observations distinctes dans un échantillon _bootstrap_ est $n(1-q_n)$,
+soit environ $63.2 %$ de l'effectif initial. Cela ne signifie pas que l'on
+tire seulement $0.632 n$ lignes : on tire bien $n$ lignes avec remise.
+
+On utilise souvent des modèles assez développés, dont la faible stabilité
+est compensée par l'agrégation. Attention, les autres contraintes peuvent rester importantes. En effet, la moyenne ne rend pas inoffensif n'importe quel surajustement.
+
+=== Évaluation hors bootstrap : l'erreur OOB
+
+Une observation absente du tirage ayant servi à construire un modèle est dite _out-of-bag_ (OOB) pour ce modèle. Cette observation peut servir à évaluer le modèle sans avoir participé à son apprentissage. Notons $cal(B)_i$ l'ensemble des indices des modèles dont l'échantillon _bootstrap_ ne contient pas l'observation $i$.
+
+En régression, la prédiction OOB de $i$ est
+
+$ hat(y)_i^"OOB"=1/abs(cal(B)_i) sum_(b in cal(B)_i) hat(f)_b (x_i), quad text("si") abs(cal(B)_i)>0. $
+
+En classification, on vote ou on moyenne les probabilités en utilisant seulement ces mêmes modèles.
+
+Pour une perte $L$, si chaque observation dispose d'au moins un modèle OOB, l'erreur estimée est
+$ hat(R)_"OOB"=1/n sum_(i=1)^n L(y_i,hat(y)_i^"OOB"). $
+
+Avec $B=500$ et un effectif $n$ suffisamment grand, une observation reçoit en moyenne $500 times 0.368=184$ prédictions OOB. Si certains ensembles $cal(B)_i$ sont vides, il faut augmenter $B$ ou signaler que le diagnostic ne porte que sur les observations effectivement évaluées.
+
+#example(title: [Prédire une observation avec ses seuls modèles OOB])[
+  Pour une observation de réponse $y_i=10$, seuls trois modèles sont OOB. Ils prédisent $9$, $11$ et $12$. Sa prédiction OOB est $32/3 approx 10.67$, et sa perte quadratique est $(10-32/3)^2=4/9$.
+
+  Les autres modèles ont utilisé cette observation. Les inclure dans cette moyenne mélangerait prédictions d'entraînement et prédictions OOB.
+]
+
+L'OOB fournit un diagnostic interne utile pour le _bagging_ et les forêts
+aléatoires. Il ne remplace pas une évaluation finale indépendante si on l'a
+utilisé pour choisir de nombreux réglages. Les traitements appris sur les
+données, notamment une sélection supervisée de variables, ne doivent pas
+réintroduire les réponses OOB dans l'apprentissage. Des observations liées
+par individu, site ou date demandent également un schéma de validation adapté.
+
+=== Forêts aléatoires : diversifier les coupures
+
+Si on utilise des arbres pour le _bagging_, une variable très prédictive peut être retenue à la racine de presque tous les arbres. Les tirages diffèrent, mais les arbres restent semblables. Les forêts aléatoires ajoutent une contrainte sur les variables candidates à la construction de chaque nœud. Cela réduit la corrélation entre arbres et peut améliorer l'agrégation.
 
 #definition(title: [Forêt aléatoire])[
-  Les forêts aléatoires ajoutent une source d'aléa au bagging. À chaque coupure
-  d'un arbre, l'algorithme ne considère qu'un sous-ensemble aléatoire de variables.
-  Cette contrainte décorrèle les arbres et améliore l'agrégation.
+  Chaque arbre est construit sur son propre échantillon _bootstrap_. À chaque nœud, on tire sans remise $m$ variables parmi les $p$ disponibles, puis on cherche la meilleure coupure parmi ces variables, avec $1<=m<=p$.
+] <def-foret-aleatoire>
+
+Le tirage de variables est renouvelé à chaque nœud. Il ne s'agit pas de choisir une fois pour toutes les variables d'un arbre, ni de tirer au hasard le seuil de coupure. Dans le cadre décrit ici, $m=p$ redonne le _bagging_ d'arbres, si tous les autres réglages sont identiques.
+
+Diminuer $m$ peut réduire la corrélation entre arbres, mais peut aussi priver
+un nœud de ses variables les plus informatives. Il faut équilibrer diversité
+et qualité individuelle. En classification, $m$ proche de $sqrt(p)$ est un
+point de départ courant, à comparer à d'autres valeurs.#footnote[Voir
+  L. Breiman, #link("https://www.stat.berkeley.edu/~breiman/randomforest2001.pdf")[_Random Forests_],
+  pour le rôle de la sélection de variables, de la dépendance entre arbres
+  et de l'évaluation OOB.]
+
+#example(title: [Deux variables candidates parmi quatre])[
+  Pour prédire `species` dans Palmer Penguins à partir des quatre mesures
+  quantitatives, prenons $p=4$ et $m=2$. Il existe $binom(4,2)=6$ paires
+  possibles. Si elles sont tirées uniformément, une variable donnée est
+  candidate avec probabilité $m/p=1/2$ à chaque nœud.
+
+  Un nœud peut comparer `bill_length_mm` à `bill_depth_mm`, tandis qu'un
+  autre compare `flipper_length_mm` à `body_mass_g`. Même si une variable
+  domine le premier choix sur toutes les données, elle n'est pas toujours
+  disponible. Les autres variables ont ainsi l'occasion de produire des
+  coupures utiles.
 ]
 
-Un choix courant consiste à considérer environ $sqrt(p)$ variables candidates à
-chaque coupure en classification, où $p$ est le nombre total de variables.
+Augmenter $B$ stabilise l'agrégation et l'estimation OOB, avec un coût de calcul croissant. Cela ne rend pas chaque arbre plus profond. À réglages fixés, les prédictions tendent vers celles d'une forêt de taille infinie. Les performances mesurées peuvent cependant fluctuer pour des valeurs finies de $B$. Une forêt mal réglée ne devient pas automatiquement bonne en ajoutant des arbres.
 
-Les forêts aléatoires fournissent souvent de bonnes performances par défaut.
-Elles permettent aussi de mesurer l'importance des variables, par exemple en
-observant la perte de performance lorsque les valeurs d'une variable sont
-permutées.
-
-=== Boosting
+=== Boosting : construire des corrections successives
 
 #definition(title: [Boosting])[
-  Le boosting construit les modèles de manière séquentielle. Chaque nouveau modèle
-  se concentre davantage sur les erreurs des modèles précédents. L'objectif est de
-  combiner plusieurs classificateurs faibles pour obtenir un modèle global très
-  performant.
+  Le _boosting_ construit un modèle additif par étapes. À l'étape $t$, un
+  nouveau modèle de base est ajusté en tenant compte du modèle déjà obtenu.
+  Sa contribution est ajoutée aux précédentes pour réduire une fonction
+  de perte.
+] <def-boosting>
+
+Un arbre à une seule coupure, donc à deux feuilles, est appelé une souche (_stump_). Chaque ajout d'arbre est simple, mais leur combinaison peut représenter une fonction beaucoup plus détaillée. Les étapes sont dépendantes : on doit connaître le modèle courant pour construire la correction suivante.
+
+*Cas de la régression quadratique.* Avec $L(y,z)=frac((y-z)^2, 2, style:"horizontal")$, on part de la meilleure prédiction constante, $F^((0))(x)=overline(y)$. Pour $t=1,dots,T$ :
+
+1. Calculer les résidus $r_i^((t))=y_i-F^((t-1))(x_i)$.
+2. Ajuster un arbre de régression $h_t$ aux couples $(x_i,r_i^((t)))$. Dans chaque feuille, sa prédiction est la moyenne des résidus qui y arrivent.
+3. Mettre à jour le modèle :
+
+   $ F^((t))(x)=F^((t-1))(x)+nu h_t (x), quad 0<nu<=1. $
+
+Le paramètre $nu$ est le taux d'apprentissage. Il réduit l'amplitude de chaque correction. Après $T$ étapes, on obtient
+
+$ F^((T))(x)=overline(y)+nu sum_(t=1)^T h_t (x). $
+
+On additionne des corrections, qui peuvent être négatives. Il ne s'agit pas
+de la moyenne de $T$ arbres ajustés séparément aux réponses initiales.
+
+#example(title: [Deux étapes de boosting calculées à la main])[
+  Reprenons $x=(1,2,3,4,5,6)$ et $y=(1,2,3,8,9,10)$.
+  On utilise des souches et $nu=0.5$. Le modèle initial prédit $5.5$ partout.
+  Les premiers résidus sont
+
+  $ r^((1))=(-4.5,-3.5,-2.5,2.5,3.5,4.5). $
+
+  La meilleure coupure est $x<=3.5$ : $h_1$ prédit $-3.5$ à gauche
+  et $3.5$ à droite. Le nouveau modèle prédit donc $3.75$ et $7.25$.
+  Les résidus deviennent
+
+  $ r^((2))=(-2.75,-1.75,-0.75,0.75,1.75,2.75). $
+
+  La deuxième souche choisit encore $3.5$, avec les corrections $-1.75$
+  et $1.75$. Après réduction par $nu$, le modèle prédit $2.875$ à gauche
+  et $8.125$ à droite.
+
+  La somme des carrés d'erreurs passe de $77.5$ à $22.375$, puis à
+  $8.59375$. On réduit progressivement l'erreur d'entraînement. Ces valeurs
+  ne mesurent pas la performance sur de nouvelles observations.
+
+  #figure(
+  image("../figures/ensembles_boosting.svg", width: 100%,
+    alt: "À gauche, les résidus du modèle constant sont ajustés par une souche de valeurs moins 3,5 et plus 3,5. À droite, les prédictions passent de 5,5 partout à deux paliers de 3,75 et 7,25, puis de 2,875 et 8,125."),
+  caption: [Le boosting ajuste les résidus, puis ajoute une fraction de la
+    correction au modèle courant. Avec $nu=0.5$, on ne prend que la moitié
+    de chaque correction. Dans cet exemple, les deux premières souches ont
+    le même seuil ; en général, leurs coupures peuvent être différentes.],
+)
+
 ]
 
-AdaBoost ajuste des poids sur les observations. Le gradient boosting formule
-l'apprentissage comme une minimisation itérative d'une fonction de perte.
+=== Gradient boosting : adapter la correction à la perte
 
-Le boosting peut être très précis, mais il demande un réglage soigné du nombre
-d'itérations, de la profondeur des arbres, du taux d'apprentissage et parfois du
-sous-échantillonnage.
+Pour une perte différentiable $L(y,z)$, on remplace les résidus ordinaires par les pseudo-résidus, c'est-à-dire l'opposé du gradient par rapport à la prédiction :
 
-Contrairement au bagging, qui réduit surtout la variance par moyenne, le
-boosting peut réduire le biais en ajoutant progressivement des corrections. En
-contrepartie, il peut surajuster si l'on ajoute trop d'itérations ou si les
-arbres de base sont trop complexes.
+$ r_i^((t))=-(partial L(y_i,z))/(partial z) quad "évalué en" quad z=F^((t-1))(x_i). $
+
+On ajuste un arbre à ces valeurs, puis on ajoute une correction au modèle.
+L'arbre cherche ainsi à approcher une direction de diminution de la perte.
+Selon la méthode, les valeurs des feuilles et la longueur du pas $nu$ sont
+réoptimisées pour cette perte. Pour la perte quadratique précédente,
+$-(partial L)/(partial z)=y-z$ : on retrouve exactement les résidus ordinaires.
+
+En classification binaire, codons cette fois $y_i in \{0,1\}$. Le modèle
+$F$ représente un score réel, transformé en probabilité par
+
+$ p(x)=1/(1+exp(-F(x))). $
+
+Avec la perte logistique $L(y,F)=log(1+exp(F))-y F$, le pseudo-résidu vaut
+$y_i-p^((t-1))(x_i)$. Les arbres prédisent donc des corrections numériques
+du score, même si la tâche finale est une classification. On ne soustrait
+pas simplement des étiquettes de classes.#footnote[Voir la
+  #link("https://scikit-learn.org/stable/modules/ensemble.html#mathematical-formulation")[formulation mathématique du gradient boosting]
+  pour les liens entre perte, corrections et transformation du score.]
+
+#example(title: [Corriger une probabilité mal ajustée])[
+  Pour une observation de classe $1$, une probabilité courante de $0.2$
+  donne un pseudo-résidu de $1-0.2=0.8$. Si la probabilité vaut déjà $0.9$,
+  il vaut seulement $0.1$. Pour une observation de classe $0$ prédite avec
+  probabilité $0.9$ pour la classe $1$, il vaut $-0.9$.
+
+  Les signes indiquent dans quel sens corriger le score. La taille de la
+  correction finale dépend aussi de l'arbre ajusté, de la perte et du taux
+  d'apprentissage.
+]
+
+Pour plusieurs classes, on utilise plusieurs scores et une transformation
+en probabilités dont la somme vaut un. Une étape peut alors construire
+plusieurs arbres : le nombre d'étapes de boosting et le nombre total
+d'arbres ne sont pas toujours identiques.
+
+=== AdaBoost : donner plus de poids aux erreurs
+
+AdaBoost est une autre construction séquentielle. Présentons sa version binaire avec $y_i in \{-1,+1\}$ et des classificateurs $h_t (x) in \{-1,+1\}$. On initialise les poids par $w_i^((1))=1/n$. À l'étape $t$, on ajuste $h_t$ avec les poids courants, dont la somme vaut $1$, puis on calcule son erreur pondérée :
+
+$ epsilon_t=sum_(i=1)^n w_i^((t)) ind(h_t (x_i) != y_i). $
+
+Si $0<epsilon_t<1/2$, on lui attribue le coefficient
+
+$ alpha_t=1/2 log((1-epsilon_t)/epsilon_t). $
+
+Les poids pour l'étape suivante sont
+
+$ w_i^((t+1))=(w_i^((t)) exp(-alpha_t y_i h_t (x_i)))/Z_t, $
+
+où $Z_t$ normalise leur somme à $1$. Une erreur donne $y_i h_t (x_i)=-1$
+et multiplie le poids par $exp(alpha_t)$ avant normalisation ; une bonne
+prédiction le multiplie par $exp(-alpha_t)$.
+La décision finale est le signe de $sum_(t=1)^T alpha_t h_t (x)$, avec
+une convention fixée si cette somme est nulle.#footnote[Voir Y. Freund et
+  R. E. Schapire, #link("https://doi.org/10.1006/jcss.1997.1504")[_A Decision-Theoretic Generalization of On-Line Learning and an Application to Boosting_],
+  pour la construction par repondération et vote pondéré.]
+
+#example(title: [Deux erreurs sur dix observations])[
+  Au premier tour, les dix observations ont chacune un poids de $0.1$.
+  Si deux sont mal classées, $epsilon_1=0.2$ et
+  $alpha_1=1/2 log(4)=log(2) approx 0.693$.
+
+  Avant normalisation, chaque erreur reçoit le poids $0.1 times 2=0.2$
+  et chaque bonne prédiction le poids $0.1/2=0.05$. La somme vaut
+  $Z_1=2 times 0.2+8 times 0.05=0.8$.
+
+  Après normalisation, chacune des deux erreurs pèse $0.25$ et chacune des
+  huit bonnes prédictions $0.0625$. Les deux erreurs représentent maintenant
+  la moitié du poids total. Le prochain classificateur doit tenir compte
+  de cette nouvelle répartition.
+]
+
+Un classificateur parfait ou une erreur pondérée d'au moins $1/2$ demandent un traitement particulier : arrêt, rejet ou adaptation de l'étape, plutôt que l'application aveugle de la formule. Des observations mal étiquetées peuvent recevoir des poids importants. L'attention portée aux erreurs rend le contrôle du bruit et de la complexité particulièrement utile.
 
 === Hyperparamètres et validation
 
-Les méthodes supervisées comportent souvent des paramètres qui ne sont pas appris
-directement par le modèle :
+#block(breakable: false)[
+  La taille des arbres de base, le nombre de modèles et les paramètres
+  d'agrégation remplissent des rôles différents.
 
-- profondeur maximale d'un arbre;
-- nombre minimal d'observations dans une feuille;
-- nombre d'arbres dans une forêt;
-- nombre de variables candidates à chaque coupure;
-- taux d'apprentissage en boosting;
-- pénalité de complexité.
+  #set par(justify: false)
+  #table(
+    columns: (1fr, 1.5fr, 2.1fr),
+    table.header([*Méthode*], [*Réglage*], [*Effet principal*]),
+    [Toutes], [Profondeur et taille minimale des feuilles],
+      [Contrôle la finesse des règles et la sensibilité aux petites populations.],
+    [Forêt aléatoire], [Nombre d'arbres $B$],
+      [Stabilise la moyenne ou le vote ; augmente le temps de calcul.],
+    [Forêt aléatoire], [Variables candidates $m$],
+      [Modifie la diversité et la qualité des arbres.],
+    [Boosting], [Étapes $T$ et taux $nu$],
+      [Contrôle l'accumulation des corrections ; les deux paramètres se règlent ensemble.],
+    [Boosting], [Fraction d'observations par étape],
+      [Ajoute une perturbation de l'apprentissage et peut régulariser l'ajustement.],
+  )
+]
 
-Ces hyperparamètres doivent être choisis à l'aide d'un protocole de validation
-qui évite de réutiliser le jeu de test pour prendre des décisions.
+En _boosting_, un petit $nu$ demande généralement davantage d'étapes pour
+obtenir un ajustement comparable. Des arbres plus profonds permettent des
+interactions plus complexes. Une somme de souches reste additive dans les
+variables sur l'échelle du score : augmenter seulement $T$ ne suffit pas
+à représenter toutes les interactions.
 
-=== Comparaison rapide
+L'arrêt précoce suit une perte sur un ensemble de validation et retient
+une étape avant sa dégradation, éventuellement avec une tolérance et un
+nombre d'étapes d'attente. Cet ensemble appartient au processus de réglage ;
+il ne doit pas être le test final. L'erreur d'entraînement, qui peut continuer
+à diminuer, ne suffit pas à choisir l'arrêt.
 
-- Bagging : plusieurs modèles indépendants ajustés sur des échantillons bootstrap.
-- Forêts aléatoires : bagging d'arbres avec sélection aléatoire de variables à
-  chaque coupure.
-- Boosting : modèles ajoutés séquentiellement pour corriger les erreurs
-  précédentes.
+#example(title: [Une grille de validation sur Palmer Penguins])[
+  Pour prédire `species` avec `bill_length_mm`, `bill_depth_mm`,
+  `flipper_length_mm` et `body_mass_g`, on peut reprendre les $240$
+  observations d'entraînement et les $102$ observations de test de la section CART.
+  Une grille illustrative, fixée avant toute comparaison, serait :
 
-En pratique, les méthodes ensemblistes sont souvent très performantes, mais leur
-interprétation doit passer par des outils complémentaires : importance des
-variables, profils de dépendance partielle, validation croisée et analyse des
-erreurs.
+  - forêt de $500$ arbres : $m in \{1,2,4\}$ et taille minimale des feuilles
+    dans $\{1,5\}$, soit six configurations ;
+  - gradient boosting : $T in \{50,100,200\}$, $nu in \{0.03,0.1\}$ et
+    profondeur maximale dans $\{1,2,3\}$, soit dix-huit configurations.
+
+  On compare ces réglages sur les cinq mêmes plis stratifiés de l'entraînement,
+  en reconstruisant tous les arbres dans chaque pli. Le choix peut minimiser
+  l'erreur de classification ou une perte sur les probabilités, selon le but.
+  Après sélection, on réajuste sur les $240$ observations, puis on évalue
+  sur le test réservé : matrice de confusion, sensibilité par espèce et mesure
+  globale choisie. Cette grille illustre les réglages. Elle ne constitue
+  pas un résultat de performance.
+]
+
+Les règles de départage, les graines aléatoires et les traitements des valeurs
+manquantes doivent être reproductibles. Si l'on compare plusieurs méthodes,
+on utilise les mêmes observations de validation. Un meilleur résultat sur
+quelques observations seulement ne suffit pas à conclure à une supériorité
+générale.
+
+=== Importance des variables et limites d'interprétation <importance-variables-ensembles>
+
+Après avoir évalué les prédictions d'un ensemble, on souhaite souvent savoir sur quelles variables il s'appuie. Par exemple, pour prédire `species` dans Palmer Penguins, quelle place occupent `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` et `body_mass_g` dans le modèle appris ? Une forêt contient des centaines de règles : leur lecture une à une ne donne pas facilement une réponse globale.
+
+#definition(title: [Importance d'une variable])[
+  Une importance de variable est un score qui résume le rôle d'une variable
+  explicative dans un modèle prédictif, selon une règle de mesure précisée.
+  Elle peut quantifier sa contribution à la construction du modèle ou la
+  dégradation des prédictions lorsque l'information qu'elle apporte est
+  perturbée.
+
+  L'importance dépend donc du modèle ajusté, des autres variables disponibles,
+  des données considérées et du critère retenu. Il n'existe pas un score
+  universel attaché à chaque variable.
+] <def-importance-variable>
+
+Les mesures présentées ici sont globales : elles résument un ensemble
+d'observations. Elles permettent de classer les variables et d'examiner
+le comportement du modèle. Expliquer la prédiction d'un individu particulier
+demande une analyse locale, qui peut faire ressortir d'autres variables.
+
+Une importance élevée n'indique pas le sens d'une relation. Une variable peut
+intervenir par un seuil, par une relation non monotone ou en interaction avec
+une autre. Son importance ne se réduit donc ni au signe d'un coefficient
+ni à sa corrélation avec la réponse.
+
+*Importance par diminution d'impureté.*
+On attribue à chaque variable les gains des coupures des arbres qui l'utilisent.
+Un gain concernant beaucoup d'observations pèse davantage qu'un gain
+identique dans un petit nœud. Cette mesure décrit la construction des arbres
+sur leurs données d'apprentissage.
+
+Pour l'arbre $b$, notons $cal(T)_(b j)$ l'ensemble des nœuds internes utilisant la variable $j$, $n_b$ l'effectif à la racine et $n_(b t)$ l'effectif du nœud $t$. Les répétitions _bootstrap_ sont comptées dans ces effectifs. Si $Delta I_b (t)$ est la diminution locale d'impureté définie dans la section sur les arbres de classification et de régression, l'importance brute moyenne sur $B$ arbres est
+
+$ A_j=1/B sum_(b=1)^B sum_(t in cal(T)_(b j))
+  n_(b t)/n_b Delta I_b (t). $
+
+On parle de _mean decrease in impurity_ (MDI), ou d'importance de Gini, lorsque les coupures utilisent l'indice de Gini.#footnote[Cette somme de gains pondérés est définie dans G. Louppe et al., #link("https://proceedings.neurips.cc/paper_files/paper/2013/file/e3796ae838835da0b6f6ea37bcf8bcb7-Paper.pdf")[_Understanding variable importances in forests of randomized trees_], section 2.2.]
+Avec des observations pondérées, les effectifs sont remplacés par les sommes
+de poids correspondantes.
+
+Une convention de normalisation consiste à poser, si le dénominateur est positif,
+
+$ a_j=A_j/(sum_(ell=1)^p A_ell), quad sum_(j=1)^p a_j=1. $
+
+Ainsi, $a_j=0.30$ signifie que la variable $j$ reçoit $30 %$ du gain total attribué aux variables selon ce calcul. Cela ne signifie pas qu'elle explique $30 %$ de la réponse ou qu'elle assure à elle seule $30 %$ des bonnes prédictions. Certains logiciels normalisent chaque arbre avant de moyenner ; il faut préciser la convention pour comparer des valeurs. En _boosting_, les pondérations et les gains peuvent aussi dépendre de l'algorithme.
+
+#example(title: [Répartir le gain de Gini entre deux variables])[
+  Un arbre est construit sur $100$ observations : $50$ A et $50$ B.
+  L'impureté de la racine vaut $0.5$. Une coupure sur $X_1$ crée deux nœuds
+  de $50$ observations, contenant respectivement $40$ A et $10$ B, puis
+  $10$ A et $40$ B. Leur impureté vaut $1-0.8^2-0.2^2=0.32$.
+
+  Le gain attribué à $X_1$ est donc
+
+  $ A_1=0.5-0.5 times 0.32-0.5 times 0.32=0.18. $
+
+  Supposons qu'une coupure sur $X_2$ sépare ensuite parfaitement les deux
+  classes dans chacun de ces nœuds. Chaque gain local vaut $0.32$, avec
+  une pondération de $50/100$. On obtient
+
+  $ A_2=0.5 times 0.32+0.5 times 0.32=0.32. $
+
+  Le gain total est $0.18+0.32=0.5$, puisque toutes les feuilles sont pures.
+  Les importances normalisées sont $a_1=36 %$ et $a_2=64 %$.
+  La variable choisie à la racine n'est donc pas nécessairement la plus
+  importante au total.
+]
+
+Cette mesure est rapide à calculer, mais une variable offrant beaucoup de
+seuils ou de modalités donne davantage d'occasions de trouver un gain fortuit.
+Un identifiant presque unique peut ainsi recevoir un score élevé dans des
+arbres surajustés. Compter seulement le nombre de coupures ne résout pas
+ce problème et ignore leur gain ainsi que leur effectif.#footnote[Voir
+  l'#link("https://scikit-learn.org/stable/auto_examples/ensemble/plot_forest_importances.html")[exemple de scikit-learn sur les importances dans une forêt]
+  pour la comparaison des mesures par impureté et par permutation.]
+
+*Importance par permutation.*
+On pose une autre question : de combien la perte augmente-t-elle si l'on
+brouille une variable, en conservant le modèle appris ? La méthode peut
+s'appliquer à tout prédicteur. On utilise de préférence des observations
+réservées à l'évaluation pour étudier son comportement hors entraînement.
+
+Notons $hat(f)$ le modèle fixé, $L$ la perte choisie et $n_"val"$ l'effectif
+d'évaluation. Sa perte de référence est
+
+$ hat(R)_0=1/n_"val" sum_(i=1)^(n_"val") L(y_i,hat(f)(x_i)). $
+
+Pour chaque variable $j$, on répète les étapes suivantes $M$ fois :
+
+1. Permuter au hasard les valeurs de la colonne $j$ entre les observations,
+   sans déplacer les réponses ni les autres colonnes.
+2. Calculer les prédictions du même modèle sur ces nouvelles lignes.
+3. Mesurer l'augmentation de perte par rapport à $hat(R)_0$.
+
+#block(breakable: false)[
+  Si $x_i^((j,r))$ désigne la ligne $i$ après la permutation $r$ de la
+  colonne $j$, on calcule
+
+  $ hat(R)_j^((r))=1/n_"val" sum_(i=1)^(n_"val")
+      L(y_i,hat(f)(x_i^((j,r)))), $
+
+  puis l'importance moyenne
+
+  $ P_j=1/M sum_(r=1)^M (hat(R)_j^((r))-hat(R)_0). $
+]
+
+La permutation conserve les valeurs de la variable, mais brouille leur
+correspondance avec la réponse et les autres variables. On ne réentraîne
+pas le modèle. Supprimer une variable puis réajuster un modèle mesure
+une autre chose : la capacité d'un nouvel apprentissage à se passer d'elle.
+Pour un score à maximiser, comme l'exactitude, on inverse la différence :
+score initial moins score après permutation.#footnote[Voir la
+  #link("https://scikit-learn.org/stable/modules/permutation_importance.html")[documentation sur l'importance par permutation]
+  pour l'algorithme et le choix de la mesure d'évaluation.]
+
+#example(title: [Lire une importance en points de pourcentage])[
+  Un classificateur fictif commet $5$ erreurs sur $100$ observations
+  d'évaluation. Pour chacune de trois variables, on effectue cinq permutations.
+  Le tableau donne le nombre d'erreurs obtenu à chaque répétition.
+
+  #block[
+    #set par(justify: false)
+    #table(
+      columns: (0.7fr, 2fr, 1fr, 1.2fr),
+      table.header([*Variable*], [*Erreurs après permutation*],
+        [*Moyenne*], [*Importance*]),
+      [$X_1$], [$11,12,13,12,12$], [$12 %$], [$+7$ points],
+      [$X_2$], [$5,6,7,6,6$], [$6 %$], [$+1$ point],
+      [$X_3$], [$4,5,5,4,6$], [$4.8 %$], [$-0.2$ point],
+    )
+  ]
+
+  Pour $X_1$, $P_1=0.12-0.05=0.07$ : brouiller cette variable coûte en
+  moyenne sept points d'erreur à ce modèle. Cela ne représente pas $7 %$
+  de variance expliquée. L'importance ne renseigne pas non plus sur le
+  sens de l'effet d'une hausse de $X_1$.
+
+  La petite valeur négative pour $X_3$ signifie que les permutations ont
+  légèrement amélioré les prédictions sur cet échantillon. Elle peut venir
+  des fluctuations ou d'une utilisation nuisible de la variable par le modèle ;
+  elle ne suffit pas à justifier sa suppression.
+]
+
+Les importances par permutation ne somment généralement pas à $1$.
+Leur unité est celle de la perte : points de taux d'erreur, unités au carré
+pour une erreur quadratique, etc. Leur classement peut changer si l'on
+évalue les probabilités plutôt que les classes prédites, ou si l'on donne
+plus de poids aux erreurs d'une classe rare.
+
+*Variables liées et information redondante.*
+Deux variables peuvent porter presque la même information. Les arbres
+peuvent privilégier l'une ou répartir leurs coupures entre les deux.
+Une faible importance individuelle n'établit donc pas que la variable
+est dépourvue d'information prédictive.
+
+#example(title: [Une variable informative mais inutilisée])[
+  Supposons que $X_2=X_1$ et qu'un arbre ait choisi d'utiliser uniquement
+  $X_1$. L'importance par impureté de $X_2$ est nulle. Permuter $X_2$ ne
+  modifie aucune prédiction : son importance par permutation est aussi nulle.
+
+  Pourtant, $X_2$ contient exactement la même information que $X_1$.
+  Après suppression de $X_1$ et réentraînement, un nouvel arbre pourrait
+  reproduire les mêmes règles à partir de $X_2$. Le score nul décrivait
+  le modèle ajusté, et non l'utilité potentielle de la variable.
+]
+
+La permutation séparée peut aussi créer des combinaisons de valeurs
+peu plausibles lorsque les variables sont liées. Pour étudier l'information
+portée par un groupe, on peut permuter ses colonnes ensemble, avec la
+même permutation des lignes. Cela conserve leurs relations internes,
+mais rompt leurs liens avec le reste des données. L'importance obtenue
+est celle du groupe. Elle ne se répartit donc pas automatiquement entre
+ses variables.
+
+*Stabilité et démarche pratique.*
+On rapporte la moyenne des permutations et leur dispersion. Cette dispersion
+décrit l'aléa des permutations pour un modèle et un échantillon fixés ;
+elle ne constitue pas, à elle seule, un intervalle de confiance sur la
+population. Pour étudier la stabilité du classement, il faut aussi répéter
+les ajustements sur plusieurs partitions ou rééchantillonnages adaptés.
+Une importance n'est pas une valeur-$p$.
+
+Par exemple, dans Palmer Penguins, on peut commencer par vérifier la qualité de
+prédiction de `species`, puis calculer les importances des quatre mesures
+sur les plis de validation. Chaque permutation est évaluée avec le modèle
+entraîné sans le pli concerné. On compare ensuite les classements obtenus,
+les mesures d'erreur choisies et les relations entre variables.
+Si ce diagnostic sert à sélectionner les variables, cette sélection fait
+partie du réglage : le test final doit rester réservé à l'évaluation du
+modèle finalement retenu. Une évaluation par permutation OOB est aussi
+possible, en utilisant pour chaque observation ses seuls arbres OOB.
+
+*Portée de l'interprétation.*
+Une importance décrit le comportement prédictif du modèle. Elle ne démontre
+pas un effet causal : une variable peut servir de marqueur d'une autre
+caractéristique ou d'un biais de collecte. Une grande importance de
+`body_mass_g` pour prédire `species` ne signifierait pas qu'une modification
+de la masse ferait changer l'espèce d'un manchot.
+
+Enfin, le classement des variables ne suffit pas à évaluer un ensemble.
+Les probabilités agrégées demandent une vérification de calibration ; une
+classe rare peut rester mal prédite malgré une bonne exactitude globale.
+En régression, le _bagging_ et les forêts moyennant des valeurs de feuilles
+restent entre les réponses minimale et maximale de l'entraînement.
+Un modèle de _boosting_ peut sortir de cet intervalle grâce à ses corrections,
+sans garantie d'extrapolation pertinente. L'importance des variables apporte
+ainsi une lecture synthétique, à compléter par l'examen des erreurs et des
+prédictions individuelles.
 
 == Méthodes supervisées modernes
 
@@ -2157,22 +2654,3 @@ prédictions sur de petits jeux de données. C'est une ouverture importante, mai
 pour un cours général d'analyse des données, ces modèles doivent surtout servir
 à discuter des références, des hypothèses et des limites des méthodes
 automatisées.
-
-#exercises[
-
-  1. Expliquez le rapport entre variabilité inter-groupe et intra-groupe dans
-     l'analyse discriminante de Fisher.
-  2. Pourquoi un arbre non élagué risque-t-il de surajuster ?
-  3. Comparez bagging et boosting en une phrase.
-  4. Proposez un protocole de validation pour choisir la profondeur maximale d'un
-     arbre.
-  5. Dans quel cas préféreriez-vous une forêt aléatoire à un arbre unique ?
-  6. Pourquoi le choix de la mesure d'erreur dépend-il du problème étudié ?
-  7. Pourquoi XGBoost, LightGBM et CatBoost sont-ils des références utiles pour
-     les données tabulaires ?
-  8. Que signifie une probabilité de classification bien calibrée ?
-  9. Quelle différence y a-t-il entre prédire une valeur moyenne et prédire un
-     intervalle de prédiction ?
-  10. Pourquoi une explication SHAP ne suffit-elle pas à établir une relation
-      causale ?
-]

@@ -49,7 +49,7 @@ typst compile --root . slides/introduction.typ
     * [X] kNN (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
     * [X] Analyse discriminante de Fisher (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
     * [ ] LDA / QDA (notes, slides, code, exercices)
-    * [ ] Arbres de classification (notes, slides, code, exercices)
+    * [ ] Arbres de classification (~~notes~~, slides, code, exercices)
     * [ ] Foréts aléatoires (notes, slides, code, exercices)
     * [ ] Bagging (notes, slides, code, exercices)
     * [ ] Boosting (notes, slides, code, exercices)
@@ -57,7 +57,7 @@ typst compile --root . slides/introduction.typ
 - [ ] Apprentissage non-supervisée
     * [X] Concepts (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
     * [X] k-means (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
-    * [ ] Modèles hiérarchiques (notes, slides, code, exercices)
+    * [ ] Modèles hiérarchiques (~~notes~~, slides, code, exercices)
     * [ ] Mélanges de Gaussiennes (notes, slides, code, exercices)
 
 - [ ] Données manquantes 
