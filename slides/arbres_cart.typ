@@ -201,13 +201,14 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
 
     Seuils possibles : $1.5$, $3$ et $5.5$.
 
+    #v(1em)
     Un milieu entre valeurs consécutives suffit pour chaque partition.
-  ], height: 2.6in),
+  ], height: 2in),
   card([Vérifier l'admissibilité], [
     Chaque descendant doit respecter l'effectif minimal demandé.
     #v(1em)
     Deux observations de même valeur restent ensemble sur cette variable.
-  ], fill: pale-blue, height: 2.6in),
+  ], fill: pale-blue, height: 2in),
 )
 
 == Une construction gloutonne et récursive
@@ -216,16 +217,16 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.65em,
   card([1. Énumérer], [
     Examiner les coupures admissibles de chaque variable au nœud courant.
-  ], height: 1.6in),
+  ], height: 1.2in),
   card([2. Évaluer], [
     Calculer le gain d'homogénéité de chaque coupure.
-  ], fill: pale-blue, height: 1.6in),
+  ], fill: pale-blue, height: 1.2in),
   card([3. Choisir], [
     Garder le gain maximal, avec une règle d'égalité fixée.
-  ], fill: pale-purple, height: 1.6in),
+  ], fill: pale-purple, height: 1.2in),
   card([4. Recommencer], [
     Traiter les deux descendants jusqu'au critère d'arrêt.
-  ], fill: pale-orange, height: 1.6in),
+  ], fill: pale-orange, height: 1.2in),
 )
 #v(0.55em)
 #takeaway([La meilleure coupure immédiate ne garantit pas le meilleur arbre final.])
@@ -237,20 +238,22 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   table.header([*Critère*], [*Formule au nœud $t$*], [*Maximum*]),
   [Gini], [$1 - sum_(g=1)^K hat(p)_(t g)^2$], [$1 - 1/K$],
   [Entropie], [$-sum_(g=1)^K hat(p)_(t g) log(hat(p)_(t g))$], [$log(K)$],
-  [Erreur], [$1 - max_g hat(p)_(t g)$], [$1 - 1/K$],
+  [Erreur de classification], [$1 - max_g hat(p)_(t g)$], [$1 - 1/K$],
 )
 #v(0.6em)
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Nœud pur], [
     Une seule classe : les trois critères valent 0.
-  ], height: 1.4in),
+  ], height: 1in),
   card([Classes également représentées], [
-    Les impuretés sont maximales. Convention : $0 log(0) = 0$.
-  ], fill: pale-blue, height: 1.4in),
+    Les impuretés sont maximales.
+  ], fill: pale-blue, height: 1in),
 )
 
-== Un gain pondéré par les effectifs
+Convention : $0 log(0) = 0$.
+
+== Un gain d'homogénéité pondéré par les effectifs
 
 #formula([
   $ Delta I(t; j, s) = I(t) - n_L/n_t I(L) - n_R/n_t I(R) $
@@ -260,19 +263,19 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Gain local], [
     Comparer le parent à la moyenne pondérée des impuretés des descendants.
-
+    #v(1em)
     Une petite feuille pure peut laisser une grande feuille très mélangée.
   ], height: 2.5in),
   card([Contribution à l'arbre entier], [
     $ n_t/n Delta I(t; j, s) $
-
+    #v(1em)
     Le poids du nœud intervient lorsqu'on compare des gains à des endroits différents.
   ], fill: pale-blue, height: 2.5in),
 )
 
-== Exemple : comparer deux coupures avec Gini
+== Exemple : comparer deux coupures avec l'indice de Gini
 
-#small([$x = 1, dots, 10$ et classes $("A", "A", "A", "A", "B", "A", "B", "B", "A", "B")$.])
+$x = 1, dots, 10$ et classes $("A", "A", "A", "A", "B", "A", "B", "B", "A", "B")$.
 #v(0.4em)
 #formula([$ I(t) = 1 - (6/10)^2 - (4/10)^2 = 0.48 $])
 #v(0.6em)
@@ -282,14 +285,14 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
     Gauche : 4 A. Droite : 2 A et 4 B.
 
     $ Delta I = 0.48 - 4/10 times 0 - 6/10 times 4/9 $
-
+  #v(1em)
     Gain : *0,2133*.
   ], height: 2.45in),
   card([Seuil 2,5], [
     Gauche : 2 A. Droite : 4 A et 4 B.
 
     $ Delta I = 0.48 - 2/10 times 0 - 8/10 times 0.5 $
-
+    #v(1em)
     Gain : *0,08*.
   ], fill: pale-blue, height: 2.45in),
 )
@@ -302,19 +305,19 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
     Un nœud contient 8 A et 2 B.
 
     Prédire A commet *2 erreurs*.
-
+  #v(1em)
     Gini : $1 - 0.8^2 - 0.2^2 = 0.32$.
-  ], height: 2.7in),
+  ], height: 2in),
   card([Après la coupure], [
     Deux nœuds : 4 A, puis 4 A et 2 B.
 
     Prédire A partout commet encore *2 erreurs*.
-
+    #v(1em)
     Gini pondéré : $6/10 times 4/9 approx 0.2667$.
-  ], fill: pale-blue, height: 2.7in),
+  ], fill: pale-blue, height: 2in),
 )
 #v(0.65em)
-#takeaway([Gini et l'entropie détectent des changements de proportions avant un changement de classe prédite.])
+#takeaway([L'ndice de Gini et l'entropie détectent des changements de proportions avant un changement de classe prédite.])
 
 == Régression : réduire les carrés résiduels
 
@@ -330,13 +333,13 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
     Des moyennes de réponses différentes dans les descendants, en tenant compte de leurs effectifs.
   ], height: 1.65in),
   card([Lien avec la variance], [
-    Avec le diviseur $n_t$, le gain d'impureté vaut $Delta sce / n_t$.
+    Avec le diviseur $n_t$, le gain d'impureté vaut $ (Delta sce) / n_t. $
   ], fill: pale-blue, height: 1.65in),
 )
 
 == Exemple : une réponse en deux paliers
 
-#small([$x = (1, 2, 3, 4, 5, 6)$ et $y = (1, 2, 3, 8, 9, 10)$.])
+$x = (1, 2, 3, 4, 5, 6)$ et $y = (1, 2, 3, 8, 9, 10)$.
 #align(center)[
   #image("../figures/cart_regression.svg", width: 100%, height: 3.65in,
     fit: "contain",
@@ -360,12 +363,11 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Racine], [
     8 A et 4 B.
-
     $ I(t) = 1 - (8/12)^2 - (4/12)^2 = 4/9 $
   ], height: 2in),
   card([Règles de construction], [
     Au moins 2 observations par feuille.
-
+    #v(1em)
     À gain égal, choisir le plus petit seuil.
   ], fill: pale-blue, height: 2in),
 )
@@ -383,8 +385,6 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
 )
 #v(0.65em)
 #takeaway([Le maximum est atteint en 4,5 et 8,5. La règle d'égalité retient 4,5.])
-#v(0.4em)
-#small([Extrait des seuils admissibles. En 6,5, chaque descendant garde les proportions de la racine.])
 
 == Deuxième coupure dans la branche droite
 
@@ -392,14 +392,14 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.8em,
   card([À gauche], [
     Les quatre premières observations sont A.
-
+    #v(1em)
     Le nœud est pur : on conserve cette feuille.
   ], height: 2.6in),
   card([À droite : seuil 8,5], [
     Séparer les 4 B des 4 A donne deux feuilles pures.
-
+    #v(1em)
     Gain local : $1/2$.
-
+    #v(1em)
     Gain pour l'arbre : $8/12 times 1/2 = 1/3$.
   ], fill: pale-blue, height: 2.6in),
 )
@@ -430,39 +430,13 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Une amélioration préparatoire], [
-    La première coupure améliore Gini avant de réduire le nombre d'erreurs.
+    La première coupure améliore l'indice de Gini avant de réduire le nombre d'erreurs.
   ], height: 1.65in),
   card([Une erreur d'entraînement], [
     Zéro erreur sur ces douze observations ne garantit pas zéro erreur sur de nouvelles données.
   ], fill: pale-orange, height: 1.65in),
 )
 
-== Une interaction peut échapper à la recherche gloutonne
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  [
-    #course-table(
-      columns: (1fr, 1fr, 1fr),
-      table.header([*$x_1$*], [*$x_2$*], [*Classe*]),
-      [0], [0], [A],
-      [0], [1], [B],
-      [1], [0], [B],
-      [1], [1], [A],
-    )
-    #v(0.4em)
-    #small([Exemple du « ou exclusif » : XOR.])
-  ],
-  card([Aucun gain immédiat], [
-    Une coupure sur $x_1$ ou $x_2$ donne un A et un B dans chaque descendant.
-
-    Gini reste à $1/2$.
-
-    Pourtant, une seconde question sur l'autre variable sépare les classes.
-  ], fill: pale-blue, height: 3.15in),
-)
-#v(0.5em)
-#takeaway([Exiger un gain strictement positif bloque ici la croissance, même si les singletons sont autorisés.])
 
 = Complexité et élagage
 
@@ -472,17 +446,15 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Arbre trop petit], [
     Peu de régions et une structure simple.
-
+    #v(1em)
     Risque de manquer des différences importantes entre les réponses.
-  ], height: 2.4in),
+  ], height: 2in),
   card([Arbre très développé], [
     Plus de détails et une faible erreur d'entraînement.
-
+    #v(1em)
     Risque d'ajuster le bruit et de créer de petites feuilles instables.
-  ], fill: pale-orange, height: 2.4in),
+  ], fill: pale-orange, height: 2in),
 )
-#v(0.65em)
-#takeaway([La profondeur et le nombre de feuilles mesurent deux aspects différents de la complexité.])
 
 == Pré-élagage et post-élagage
 
@@ -490,14 +462,14 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Limiter la croissance], [
     Profondeur maximale, effectifs minimaux, gain minimal ou nombre maximal de feuilles.
-
+    #v(1em)
     Un arrêt précoce peut empêcher des coupures utiles plus loin.
-  ], height: 2.8in),
+  ], height: 2in),
   card([Réduire un arbre développé], [
     Remplacer certains sous-arbres par une feuille.
-
+    #v(1em)
     L'élagage supprime des branches existantes. Il ne remplace pas une mauvaise coupure à la racine.
-  ], fill: pale-blue, height: 2.8in),
+  ], fill: pale-blue, height: 2in),
 )
 
 == Le critère coût-complexité
@@ -508,17 +480,17 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Erreur ou impureté $C(T)$], [
     Mesurer l'ajustement sur l'entraînement.
-
+    #v(1em)
     Par exemple : taux d'erreur de classification ou somme des carrés divisée par $n$.
-  ], height: 2.4in),
+  ], height: 2in),
   card([Pénalité $alpha M(T)$], [
     $M(T)$ est le nombre de feuilles.
-
+    #v(1em)
     Une valeur de $alpha$ plus élevée favorise un arbre plus petit.
-  ], fill: pale-blue, height: 2.4in),
+  ], fill: pale-blue, height: 2in),
 )
 #v(0.45em)
-#small([Le critère d'élagage peut différer du critère de coupure. La normalisation fixe l'échelle de $alpha$.])
+Le critère d'élagage peut différer du critère de coupure. La normalisation fixe l'échelle de $alpha$.
 
 == Exemple : comparer trois sous-arbres
 
@@ -534,10 +506,10 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Passer de 3 à 5 feuilles], [
     Réduction d'erreur : $0.15 - 0.10 = 0.05$.
-  ], height: 1.5in),
+  ], height: 1in),
   card([Pénalité supplémentaire], [
     $2 times 0.03 = 0.06$ : elle dépasse le gain.
-  ], fill: pale-blue, height: 1.5in),
+  ], fill: pale-blue, height: 1in),
 )
 
 == Le seuil d'élagage d'une branche
@@ -550,25 +522,21 @@ Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi mo
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Augmentation d'erreur], [
     $r(t)$ : contribution si le nœud devient une feuille.
-
+    #v(1em)
     $r(T_t)$ : contribution actuelle de son sous-arbre.
-
-    Le diviseur reste l'effectif total $n$.
-  ], height: 2.75in),
+  ], height: 2in),
   card([Feuilles supprimées], [
     Le sous-arbre a $m_t$ feuilles.
-
+    #v(1em)
     L'élagage supprime #box[$m_t - 1$] feuilles.
-
-    Élaguer devient avantageux dès $alpha >= alpha_t$.
-  ], fill: pale-blue, height: 2.75in),
+  ], fill: pale-blue, height: 2in),
 )
-#v(0.4em)
-#small([Maillon faible : élaguer au plus petit seuil, puis recalculer les seuils dans l'arbre restant.])
+
+Élaguer devient avantageux dès $alpha >= alpha_t$.
 
 == L'élagage peut sauter une taille intermédiaire
 
-Pour l'arbre à douze observations, on utilise le *taux d'erreur de classification*.
+$x = 1, dots, 12$ et classes $("A", "A", "A", "A", "B", "B", "B", "B", "A", "A", "A", "A")$. On utilise le *taux d'erreur de classification*.
 
 #v(0.4em)
 #course-table(
@@ -584,14 +552,14 @@ Pour l'arbre à douze observations, on utilise le *taux d'erreur de classificati
 #v(0.55em)
 #takeaway([Le chemin passe de 3 feuilles à 1. Au seuil $alpha = 1/6$, les deux candidats sont équivalents.])
 
-= Choisir la taille par validation
+= Choisir $alpha$ par validation
 
 == Une sélection sans utiliser le test
 
 #grid(
   columns: (1fr, 1fr), gutter: 0.65em,
   card([1. Réserver le test], [
-    Fixer les candidats et les contraintes sur l'entraînement.
+    Fixer les seuils candidats et les contraintes sur le jeu d'entraînement.
   ], height: 1.55in),
   card([2. Reconstruire dans chaque pli], [
     Apprendre les coupures sans les réponses du pli de validation.
@@ -621,218 +589,19 @@ Pour l'arbre à douze observations, on utilise le *taux d'erreur de classificati
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Règle du minimum], [
     Erreur minimale : $0.17$.
-
+    #v(1em)
     Retenir *8 feuilles*.
   ], height: 1.6in),
   card([Règle d'une erreur standard], [
     Seuil : $0.17 + 0.03 = 0.20$.
-
+    #v(1em)
     Le plus petit candidat admissible a *4 feuilles*.
   ], fill: pale-blue, height: 1.6in),
 )
-#v(0.35em)
-#small([Résultats fictifs. L'erreur standard porte sur l'erreur de validation, pas sur les réponses.])
 
-== Le paramètre cp de rpart
-
-#formula([$ alpha = "cp" times C(T_0) $])
-#v(0.65em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Une pénalité relative], [
-    $T_0$ est l'arbre réduit à sa racine.
-
-    `cp` exprime la pénalité relativement à son risque, pour une même convention de $C$.
-  ], height: 2.55in),
-  card([Croissance puis élagage], [
-    Dans le script, `cp = 0` pendant la croissance.
-
-    `prune` compare ensuite les élagages. `cp` peut aussi limiter la croissance si on l'y utilise.
-  ], fill: pale-blue, height: 2.55in),
-)
-#v(0.45em)
-#small([Le risque à la racine change entre apprentissages. Une valeur de `cp` n'est pas un nombre de feuilles.])
-
-= Étude de cas : Palmer Penguins
-
-== Deux tâches sur les mêmes manchots
-
-On conserve 342 cas complets : *240 pour l'entraînement* et *102 pour le test*.
-
-#v(0.55em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Classification], [
-    Réponse : `species`.
-
-    Prédicteurs : longueur et profondeur du bec, longueur de la nageoire et masse corporelle.
-
-    Critère de coupure : Gini.
-  ], height: 2.7in),
-  card([Régression], [
-    Réponse : `body_mass_g`.
-
-    Prédicteurs : les trois autres mesures corporelles.
-
-    La masse et `species` restent hors des prédicteurs.
-  ], fill: pale-blue, height: 2.7in),
-)
-#v(0.4em)
-#small([Même partage que les exemples k-NN et d'analyse discriminante du cours.])
-
-== Un protocole fixé avant l'évaluation
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Contraintes de croissance], [
-    Au moins 5 observations par feuille.
-
-    Au moins 10 pour tenter une coupure.
-
-    Profondeur maximale : 10.
-
-    `cp = 0` à cette étape.
-  ], height: 2.8in),
-  card([Validation croisée], [
-    Cinq plis stratifiés sur l'entraînement, identiques pour les deux tâches.
-
-    Reconstruire l'arbre dans chaque pli.
-
-    Minimiser la perte, puis choisir le plus grand `cp` en cas d'égalité.
-  ], fill: pale-blue, height: 2.8in),
-)
-#v(0.6em)
-#takeaway([Cet exemple utilise la règle du minimum, pas la règle d'une erreur standard.])
-
-== Résultats de validation croisée
-
-#course-table(
-  columns: (0.8fr, 1.8fr, 1.6fr),
-  table.header([*cp*], [*Classification : erreurs sur 240*], [*Régression : RMSE (g)*]),
-  [0], [14], [378,1],
-  [0,001], [14], [*376,0*],
-  [0,005], [14], [378,4],
-  [0,01], [11], [400,1],
-  [0,02], [*11*], [416,1],
-  [0,05], [12], [446,0],
-  [0,10], [12], [487,7],
-)
-#v(0.55em)
-#takeaway([Classification : `cp = 0.02`. Régression : `cp = 0.001`.])
-#v(0.35em)
-#small([Agrégation sur toutes les observations de validation. RMSE : racine de la moyenne des carrés d'erreur.])
-
-== Les quatre feuilles de classification
-
-#small([Nageoire et mesures du bec en mm. Inégalités affichées par `rpart`.])
-#v(0.35em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.65em,
-  card([Adelie], [
-    Nageoire $< 207.5$ et longueur du bec $< 44.65$.
-
-    104 observations, dont 102 Adelie.
-  ], height: 1.75in),
-  card([Chinstrap], [
-    Nageoire $< 207.5$ et longueur du bec $>= 44.65$.
-
-    46 observations, dont 42 Chinstrap.
-  ], fill: pale-blue, height: 1.75in),
-  card([Chinstrap : petite feuille], [
-    Nageoire $>= 207.5$ et profondeur du bec #box[$>= 17.65$].
-
-    5 observations, dont 4 Chinstrap.
-  ], fill: pale-orange, height: 1.75in),
-  card([Gentoo], [
-    Nageoire $>= 207.5$ et profondeur du bec #box[$< 17.65$].
-
-    85 observations, toutes Gentoo.
-  ], fill: pale-purple, height: 1.75in),
-)
-
-== Une prédiction et ses proportions de feuille
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Première observation du test], [
-    Nageoire : 195 mm, donc $< 207.5$.
-
-    Longueur du bec : 40,3 mm, donc $< 44.65$.
-
-    Prédiction : *Adelie*.
-  ], height: 2.65in),
-  card([Dans la feuille d'entraînement], [
-    102 Adelie, 2 Chinstrap, aucun Gentoo.
-
-    $ (102/104, 2/104, 0) approx (0.9808, 0.0192, 0) $
-
-    Les proportions sont identiques pour tous les points de cette feuille.
-  ], fill: pale-blue, height: 2.65in),
-)
-#v(0.65em)
-#takeaway([Une proportion empirique nulle ne prouve pas qu'une classe est impossible dans la population.])
-
-== Classification : résultats sur le test
-
-#course-table(
-  columns: (1.3fr, 1fr, 1.2fr, 1fr),
-  table.header([*Espèce réelle*], [*Prédit Adelie*], [*Prédit Chinstrap*], [*Prédit Gentoo*]),
-  [Adelie], [44], [1], [0],
-  [Chinstrap], [4], [16], [0],
-  [Gentoo], [0], [1], [36],
-)
-#v(0.65em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Exactitude globale], [
-    $ (44 + 16 + 36)/102 approx 94.12 % $
-  ], height: 1.45in),
-  card([Sensibilité de Chinstrap], [
-    $ 16/20 = 80 % $
-  ], fill: pale-orange, height: 1.45in),
-)
-#v(0.45em)
-#small([L'exactitude globale masque des différences entre classes. La feuille de cinq observations reste à surveiller.])
-
-== Régression : précision et lisibilité
-
-#course-table(
-  columns: (2fr, 1fr),
-  table.header([*Résultat sur le test*], [*Valeur*]),
-  [RMSE de l'arbre], [363,7 g],
-  [MAE de l'arbre], [278,4 g],
-  [RMSE de la moyenne d'entraînement], [800,3 g],
-)
-#v(0.65em)
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Une amélioration prédictive], [
-    Les trois mesures prédisent mieux la masse que la référence constante.
-  ], height: 1.65in),
-  card([Un arbre plus détaillé], [
-    `cp = 0.001` donne 30 feuilles, contre 4 en classification.
-  ], fill: pale-blue, height: 1.65in),
-)
 
 = Interprétation et limites
 
-== Unités de mesure et orientation des axes
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Ordre des observations], [
-    Passer de mm à cm conserve les partitions candidates en arithmétique exacte.
-
-    Une transformation strictement croissante conserve aussi l'ordre des valeurs.
-  ], height: 2.8in),
-  card([Géométrie des coupures], [
-    Une rotation change les coupures accessibles.
-
-    Une frontière oblique peut nécessiter de nombreux rectangles pour être approchée.
-  ], fill: pale-blue, height: 2.8in),
-)
-#v(0.5em)
-#small([Après une transformation non linéaire, les seuils placés aux milieux peuvent classer autrement de nouveaux points.])
 
 == Instabilité et importance des variables
 
@@ -840,12 +609,12 @@ On conserve 342 cas complets : *240 pour l'entraînement* et *102 pour le test*.
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Des coupures presque ex æquo], [
     Une petite modification des données peut changer la racine et toutes les branches suivantes.
-
+    #v(1em)
     Une variable corrélée peut remplacer une autre dans l'arbre.
   ], height: 2.8in),
   card([Des importances à contextualiser], [
     Une variable absente n'est pas nécessairement inutile.
-
+    #v(1em)
     Les gains peuvent favoriser les variables offrant beaucoup de coupures candidates.
   ], fill: pale-orange, height: 2.8in),
 )
@@ -858,35 +627,18 @@ On conserve 342 cas complets : *240 pour l'entraînement* et *102 pour le test*.
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Régression], [
     Deux points proches de part et d'autre d'un seuil peuvent recevoir des prédictions différentes.
-
+    #v(1em)
     Les moyennes des feuilles restent entre les réponses extrêmes d'entraînement.
   ], height: 2.85in),
   card([Classification], [
     Deux A sur deux observations donnent une proportion empirique de 1.
-
+    #v(1em)
     Ce faible effectif ne permet pas de conclure à une certitude. Examiner la calibration si nécessaire.
   ], fill: pale-orange, height: 2.85in),
 )
 #v(0.6em)
 #takeaway([Un arbre de régression à moyennes de feuilles ne prolonge pas une tendance au-delà des données.])
 
-== Données manquantes et démarche pratique
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Une stratégie explicite], [
-    Cas complets dans l'exemple du cours.
-
-    Selon le contexte : imputation apprise sur l'entraînement, branche dédiée ou coupures de remplacement.
-  ], height: 2.6in),
-  card([Un modèle à examiner], [
-    Contrôler les effectifs des feuilles et les performances par classe.
-
-    Choisir la perte selon l'usage, puis vérifier la stabilité de l'interprétation.
-  ], fill: pale-blue, height: 2.6in),
-)
-#v(0.65em)
-#takeaway([Agréger plusieurs arbres peut réduire l'instabilité, au prix d'une règle globale moins facile à lire.])
 
 == L'essentiel à retenir
 
@@ -905,5 +657,3 @@ On conserve 342 cas complets : *240 pour l'entraînement* et *102 pour le test*.
     Vérifier les effectifs, la stabilité et les erreurs sur de nouvelles observations.
   ], fill: pale-orange, height: 1.6in),
 )
-#v(0.5em)
-#small([Pour la séance R : `codes/arbres_cart.R`. Support : chapitre « Apprentissage supervisé », section CART.])
