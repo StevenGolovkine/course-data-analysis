@@ -9,7 +9,7 @@
 
 #show: course-slides.with(
   title: [Arbres de classification et de régression],
-  footer-title: [Arbres CART],
+  footer-title: [CART],
 )
 
 #title-slide()
@@ -22,15 +22,15 @@
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Des questions binaires], [
     Chaque nœud pose une question sur une variable explicative.
-
+    #v(1em)
     La réponse détermine l'un des deux descendants, jusqu'à une feuille.
   ], height: 2.4in),
   card([Une prédiction locale], [
-    *Classification* : une classe et des proportions de classes.
+    *Classification* : une classe.
 
     *Régression* : une valeur numérique.
-
-    La prédiction reste constante dans chaque feuille.
+    #v(1em)
+    La prédiction reste la même dans chaque feuille.
   ], fill: pale-blue, height: 2.4in),
 )
 #v(0.65em)
@@ -77,12 +77,13 @@
     Première question : $3 <= 2$ ? Non.
 
     Seconde question : $0.6 <= 1$ ? Oui.
-
+    #v(1em)
     On arrive dans $R_2$ : prédiction *B*.
   ], height: 2.45in),
   card([Une interaction], [
     La variable $x_2$ intervient seulement lorsque $x_1 > 2$.
 
+    #v(1em)
     Une même variable peut aussi revenir plusieurs fois le long du chemin.
   ], fill: pale-blue, height: 2.45in),
 )
@@ -94,95 +95,95 @@
   card([Variable quantitative], [
     Question : $x_j <= s$ ?
 
+    #v(1em)
     L'autre branche correspond à $x_j > s$.
 
+    #v(1em)
     Les régions sont des produits d'intervalles, éventuellement non bornés.
   ], height: 2.8in),
   card([Variable qualitative], [
     Question : $x_j in S$ ?
 
+    #v(1em)
     $S$ est un sous-ensemble des modalités.
 
+    #v(1em)
     Un codage arbitraire 1, 2, 3 peut imposer un ordre injustifié.
   ], fill: pale-blue, height: 2.8in),
 )
-#v(0.65em)
-#takeaway([Pour des variables quantitatives, les coupures délimitent des rectangles en 2D.])
 
 = Prédire dans une feuille
 
 == Classification : proportions et classe prédite
 
-#small([$cal(I)_t = \{i : x_i in R_t\}$, $n_t = abs(cal(I)_t)$ et $K$ classes.])
+$cal(I)_t = \{i : x_i in R_t\}$, $n_t = abs(cal(I)_t)$ et $K$ classes.
 #v(0.45em)
 #formula([
-  $ hat(p)_(t g) = 1/n_t sum_(i in cal(I)_t) ind(y_i = g), quad
-    hat(g)(x) = argmax_g hat(p)_(t g) quad "si" x in R_t $
+  $ hat(p)_(t g) = 1/n_t sum_(i in cal(I)_t) ind(y_i = g), quad text("et")quad
+    hat(g)(x) = argmax_g hat(p)_(t g) quad "si" x in R_t. $
 ])
 #v(0.6em)
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Une feuille de dix observations], [
-    7 A, 2 B et 1 C.
-
+    Soit une feuille avec 7 A, 2 B et 1 C.
+    #v(1em)
     Probabilités estimées : $(0.7, 0.2, 0.1)$.
-
+    #v(1em)
     Classe prédite : A.
   ], height: 2.1in),
   card([Une décision à préciser], [
     Retenir la classe la plus fréquente et fixer une règle d'égalité.
-
+    #v(1em)
     Avec plusieurs classes, elle peut avoir moins de 50~% des voix.
   ], fill: pale-blue, height: 2.1in),
 )
-#v(0.35em)
-#small([Cadre usuel : observations de même poids et coûts d'erreur égaux.])
 
 == Régression : la meilleure constante dépend de la perte
 
+$cal(I)_t = \{i : x_i in R_t\}$ et $n_t = abs(cal(I)_t)$.
+
 #formula([
   $ overline(y)_t = 1/n_t sum_(i in cal(I)_t) y_i
-    = argmin_(c in RR) sum_(i in cal(I)_t) (y_i - c)^2 $
+    = argmin_(c in RR) sum_(i in cal(I)_t) (y_i - c)^2. $
 ])
 #v(0.65em)
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Perte quadratique], [
     La feuille prédit la *moyenne*.
-
-    Pour les réponses 8, 9 et 10, elle prédit 9 partout dans sa région.
-  ], height: 2.15in),
+  ], height: 1in),
   card([Perte absolue], [
-    Une *médiane* minimise la somme des écarts absolus.
-
-    La constante optimale change lorsque la perte change.
-  ], fill: pale-blue, height: 2.15in),
+    La feuille prédit la *médiane*.
+  ], fill: pale-blue, height: 1in),
 )
 #v(0.55em)
-#small([$hat(f)(x) = sum_(t=1)^M overline(y)_t ind(x in R_t)$ : une fonction constante par morceaux.])
+$hat(f)(x) = sum_(t=1)^M overline(y)_t ind(x in R_t)$ : une fonction constante par morceaux.
 
 == Des coûts différents modifient la décision
 
+Soit $c_"FP"$ le coût d'un faux positif et $c_"FN"$ le coût d'un faux négatif.
+
 #formula([
   $ "Prédire 1 si" quad c_"FP" (1-p) < c_"FN" p
-    quad <=> quad p > c_"FP" / (c_"FP" + c_"FN") $
+    quad <=> quad p > c_"FP" / (c_"FP" + c_"FN"). $
 ])
 #v(0.6em)
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Neuf 0 et trois 1], [
     La feuille estime $p = 3/12 = 0.25$.
-
+    #v(1em)
     À coûts égaux, le seuil vaut $0.5$ : on prédit 0.
-  ], height: 2.35in),
+  ], height: 2in),
   card([Faux négatif plus coûteux], [
     $c_"FN" = 5$, $c_"FP" = 1$ : seuil $1/6$.
-
-    Prédire 1 coûte $0.75$, contre $1.25$ pour prédire 0.
-  ], fill: pale-orange, height: 2.35in),
+    #v(1em)
+    Prédire 1 coûte $0.75$, mais $1.25$ pour prédire 0.
+  ], fill: pale-orange, height: 2in),
 )
 #v(0.45em)
-#small([Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi modifier les coupures.])
+Ici, l'arbre est fixé. Introduire des coûts dès l'apprentissage peut aussi modifier les coupures.
 
 = Apprendre les coupures
 
@@ -204,7 +205,7 @@
   ], height: 2.6in),
   card([Vérifier l'admissibilité], [
     Chaque descendant doit respecter l'effectif minimal demandé.
-
+    #v(1em)
     Deux observations de même valeur restent ensemble sur cette variable.
   ], fill: pale-blue, height: 2.6in),
 )
