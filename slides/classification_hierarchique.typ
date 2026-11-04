@@ -376,6 +376,35 @@ $ A=0, quad B=1, quad C=2, quad D=8, quad E=9, quad F=10. $
 #v(0.5em)
 #takeaway([Une coupe horizontale traverse autant de branches qu'il reste de groupes, hors des nœuds et sans inversion.])
 
+== La hauteur de fusion avec Ward
+
+#small([Convention de `hclust` avec `method = "ward.D2"` et des distances
+  euclidiennes ordinaires en entrée.])
+#v(0.45em)
+#formula([
+  $ h(A,B)=sqrt(2 Delta W(A,B)), quad text("et") quad Delta W(A,B)=h(A,B)^2/2 $
+])
+#v(0.55em)
+#grid(
+  columns: (1fr, 1fr), gutter: 0.8em,
+  card([Lecture du nœud], [
+    Lire $h$ sur l'axe vertical, au nœud où les deux groupes se rejoignent.
+    #v(0.6em)
+    $h^2/2$ donne l'augmentation d'inertie intra-groupe due à cette fusion,
+    et non l'inertie cumulée.
+  ], height: 2.2in),
+  card([Exemple : les six observations], [
+    $h=1$ correspond à $Delta W=0.5$.
+    #v(0.6em)
+    $h=sqrt(3)$ correspond à $Delta W=1.5$.
+    #v(0.6em)
+    Dernière fusion : $Delta W=96$, donc
+    #box[$h=sqrt(192) approx 13.86$].
+  ], fill: pale-blue, height: 2.2in),
+)
+#v(0.45em)
+#takeaway([La transformation conserve l'ordre des fusions, mais change l'échelle verticale.])
+
 == Couper par hauteur ou par nombre de groupes
 
 #course-table(
@@ -490,7 +519,7 @@ Pour étudier toute la procédure, réestimer la standardisation sur chaque sous
 
 == Les fréquences de regroupement des paires
 
-$cal(B)_(i ell)$ contient les répétitions où les deux observations sont présentes. On suppose $abs(cal(B)_(i ell))>0$ ; $g_i^((b))$ est le groupe de $i$ à la répétition $b$.
+$cal(B)_(i ell)$ contient les répétitions où les deux observations sont présentes. On suppose $abs(cal(B)_(i ell))>0$. Notons $g_i^((b))$, le groupe de $i$ à la répétition $b$.
 #v(0.35em)
 #formula([
   $ hat(pi)_(i ell)=1/abs(cal(B)_(i ell))
@@ -499,69 +528,20 @@ $cal(B)_(i ell)$ contient les répétitions où les deux observations sont prés
 #v(0.5em)
 #grid(
   columns: (1fr, 1fr), gutter: 0.8em,
-  card([Un noyau plus stable], [
+  card([Un groupement plus stable], [
     La paire apparaît ensemble 8 fois et reste réunie 7 fois.
-
-    $hat(pi)_(i j)=7/8=0.875$.
-  ], height: 1.6in),
+    #v(1em)
+    $ hat(pi)_(i ell)=7/8=0.875. $
+  ], height: 2in),
   card([Une frontière plus fragile], [
     La paire apparaît ensemble 6 fois et reste réunie 3 fois.
-
-    $hat(pi)_(i ell)=3/6=0.5$.
-  ], fill: pale-orange, height: 1.6in),
-)
-
-
-== Ce qu'une stabilité élevée permet de conclure
-
-#grid(
-  columns: (1fr, 1fr), gutter: 0.8em,
-  card([Résistance à une perturbation], [
-    Un ARI élevé indique des regroupements peu sensibles au protocole choisi.
-
-    L'ARI ne dépend pas des numéros attribués aux groupes.
-
-    Un petit groupe absent d'un sous-échantillon mérite d'être signalé.
-  ], height: 2.85in),
-  card([Précautions d'interprétation], [
-    Les fréquences de regroupement ne sont pas des probabilités de « vraies » classes.
-
-    Une fréquence de 1 sur une seule apparition commune renseigne peu.
-
-    La coupe en un seul groupe est toujours stable.
-  ], fill: pale-orange, height: 2.85in),
+    #v(1em)
+    $ hat(pi)_(i ell)=3/6=0.5. $
+  ], fill: pale-orange, height: 2in),
 )
 
 
 = Mise en pratique et limites
-
-== Les opérations essentielles dans R
-
-#grid(
-  columns: (1.15fr, 1fr), gutter: 0.8em,
-  card([Une hiérarchie, plusieurs coupes], [
-    ```r
-    z <- scale(x)
-    distances <- dist(z)
-    arbre <- hclust(
-      distances, method = "ward.D2"
-    )
-    groupes <- cutree(arbre, k = 2)
-    u <- cophenetic(arbre)
-    ```
-  ], height: 3.1in),
-  card([Les objets à interpréter], [
-    `x` contient seulement les mesures choisies.
-
-    `arbre$merge` enregistre les fusions.
-
-    `arbre$height` contient leurs hauteurs.
-
-    `cutree(arbre, h = ...)` demande une coupe par hauteur.
-  ], fill: pale-blue, height: 3.1in),
-)
-#v(0.35em)
-#small([La silhouette se calcule avec `distances`, pas avec `u`.])
 
 == Le coût en mémoire
 
@@ -573,16 +553,16 @@ $cal(B)_(i ell)$ contient les répétitions où les deux observations sont prés
   columns: (1fr, 1fr), gutter: 0.8em,
   card([Exemple : 10 000 observations], [
     $49 thin 995 thin 000$ distances.
-
+    #v(1em)
     À huit octets chacune, près de *400 Mo* avant les autres structures de calcul.
-  ], height: 2.15in),
+  ], height: 2.5in),
   card([Des limites de calcul], [
     Le stockage complet croît comme $n^2$.
-
-    Le temps dépend de l'algorithme et de la liaison.
-
+    #v(1em)
+    Le temps de calcul dépend de l'algorithme et de la distance.
+    #v(1em)
     Pré-regrouper ou approximer modifie la hiérarchie recherchée.
-  ], fill: pale-orange, height: 2.15in),
+  ], fill: pale-orange, height: 2.5in),
 )
 
 == Géométrie, valeurs extrêmes et nouvelles observations
@@ -592,14 +572,14 @@ $cal(B)_(i ell)$ contient les répétitions où les deux observations sont prés
   card([Une proximité construite], [
     Les variables corrélées peuvent donner plusieurs fois du poids
     à une même caractéristique.
-
+    #v(1em)
     Une valeur extrême peut former une petite branche ou modifier les fusions.
   ], height: 2.8in),
   card([Une affectation à définir], [
     Ajouter une observation et reconstruire l'arbre peut changer les groupes existants.
-
+    #v(1em)
     L'affecter au centroïde le plus proche est une règle supplémentaire.
-
+    #v(1em)
     Cette règle ne reproduit pas forcément la nouvelle CAH.
   ], fill: pale-orange, height: 2.8in),
 )
