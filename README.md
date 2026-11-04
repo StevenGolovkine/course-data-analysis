@@ -55,7 +55,7 @@ typst compile --root . slides/introduction.typ
 - [ ] Apprentissage non-supervisée
     * [X] Concepts (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
     * [X] k-means (~~notes~~, ~~slides~~, ~~code~~, ~~exercices~~)
-    * [ ] Modèles hiérarchiques (~~notes~~, slides, code, exercices)
+    * [ ] Modèles hiérarchiques (~~notes~~, ~~slides~~, code, exercices)
     * [ ] Mélanges de Gaussiennes (notes, slides, code, exercices)
 
 - [ ] Données manquantes 
