@@ -598,9 +598,7 @@ $cal(B)_(i ell)$ contient les répétitions où les deux observations sont prés
     de proximité entre groupes.
   ], fill: pale-blue, height: 1.7in),
   card([Une hauteur à lire correctement], [
-    L'axe horizontal ne mesure pas une distance.
-
-    Avec `ward.D2` dans R, $h^2/2=Delta W$.
+    Avec `ward.D2` dans R, $ h=sqrt(2Delta W). $
   ], fill: pale-purple, height: 1.7in),
   card([Une coupe à justifier], [
     Silhouettes, profils et stabilité complètent la lecture du dendrogramme.
