@@ -2,10 +2,12 @@
 
 Depuis la racine : python figures/classification_hierarchique.py
 NumPy, Matplotlib, Rscript et le paquet R cluster sont nécessaires.
-Les fusions sont calculées par le script R du cours, puis dessinées ici.
+L'exemple à six points est calculé ici. Le script R fournit uniquement
+les résultats de l'analyse Palmer Penguins.
 """
 
 import csv
+from math import sqrt
 from pathlib import Path
 import subprocess
 import tempfile
@@ -85,6 +87,29 @@ def save(fig, name):
     plt.close(fig)
 
 
+def example_data():
+    """Reproduce the chapter's six-point Ward example with explicit tie order."""
+    values = [0, 1, 2, 8, 9, 10]
+    points = [{"nom": name, "x": value}
+              for name, value in zip("ABCDEF", values)]
+    # R's indexing convention: negative = leaf, positive = earlier merge.
+    merges = [(-1, -2), (-4, -5), (-3, 1), (-6, 2), (3, 4)]
+    members = {-(i + 1): [value] for i, value in enumerate(values)}
+    rows = []
+    for step, (left, right) in enumerate(merges, 1):
+        a, b = members[left], members[right]
+        n_a, n_b = len(a), len(b)
+        gain = n_a * n_b / (n_a + n_b) * (
+            sum(a) / n_a - sum(b) / n_b
+        ) ** 2
+        rows.append({
+            "gauche": left, "droite": right, "hauteur": sqrt(2 * gain),
+            "gain": gain, "effectif": n_a + n_b,
+        })
+        members[step] = a + b
+    return rows, points
+
+
 def example(rows, points):
     labels = [f'{p["nom"]}\n{float(p["x"]):g}' for p in points]
     groups = [1, 1, 1, 2, 2, 2]
@@ -156,8 +181,7 @@ def main():
         subprocess.run(["Rscript", "codes/classification_hierarchique.R", output],
                        cwd=ROOT, check=True, stdout=subprocess.PIPE, text=True)
         output = Path(output)
-        example(read_rows(output / "exemple_fusions.csv"),
-                read_rows(output / "exemple_points.csv"))
+        example(*example_data())
         penguins(read_rows(output / "penguins_fusions.csv"),
                  read_rows(output / "penguins_groupes.csv"),
                  read_rows(output / "criteres.csv"))
