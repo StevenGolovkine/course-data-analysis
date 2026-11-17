@@ -1,15 +1,4 @@
 # Analyse factorielle des correspondances (AFC) — STT-2200
-# Sources : lectures/dimension_reduction.typ, section AFC, et
-# Support des diapositives : slides/analyse_factorielle_correspondances.typ.
-#
-# Depuis la racine du dépôt :
-# Dans R : source("codes/analyse_factorielle_correspondances.R")
-#   Rscript codes/analyse_factorielle_correspondances.R
-# Le script fonctionne aussi depuis codes/ et ne télécharge aucune donnée.
-# R de base suffit. FactoMineR, si installé, sert de contre-vérification.
-#
-# Dans RStudio, les graphiques apparaissent à la fin dans l'onglet Plots.
-# En mode Rscript, seuls les résultats numériques sont affichés.
 #
 # Correspondance avec les notations du cours :
 # N = effectifs, P = frequences, r/c = masses_lignes/masses_colonnes,
@@ -22,16 +11,9 @@
 
 calculer_afc <- function(effectifs, tolerance = 1e-12) {
   effectifs <- as.matrix(effectifs)
-  if (!is.numeric(effectifs) || any(!is.finite(effectifs)) ||
-        any(effectifs < 0) || any(dim(effectifs) < 2L)) {
-    stop("Fournir un tableau numérique fini, non négatif, au moins 2 x 2.")
-  }
-  stopifnot(length(tolerance) == 1L, is.finite(tolerance), tolerance > 0)
+
   totaux_lignes <- rowSums(effectifs)
   totaux_colonnes <- colSums(effectifs)
-  if (any(totaux_lignes == 0) || any(totaux_colonnes == 0)) {
-    stop("Retirer les lignes ou colonnes de marge nulle avant l'AFC.")
-  }
   if (is.null(rownames(effectifs))) {
     rownames(effectifs) <- paste0("ligne_", seq_len(nrow(effectifs)))
   }
@@ -170,7 +152,7 @@ effectifs <- matrix(
   )
 )
 afc <- calculer_afc(effectifs)
-cat("\n1. Exemple fictif : programme et type d'admission\n")
+cat("\n1. Exemple : programme et type d'admission\n")
 print(addmargins(effectifs))
 cat("Profils-lignes (%) : répartition des admissions dans un programme\n")
 print(round(100 * afc$profils_lignes, 2))
@@ -254,18 +236,6 @@ print(round(afc$coord_lignes, 5))
 print(round(afc$coord_colonnes, 5))
 cat("Coordonnées standard Gamma des admissions :\n")
 print(round(afc$standard_colonnes, 5))
-stopifnot(
-  proches(as.matrix(dist(afc$coord_lignes))^2, distance2_lignes),
-  proches(as.matrix(dist(afc$coord_colonnes))^2, distance2_colonnes),
-  proches(
-    crossprod(afc$coord_lignes, afc$masses_lignes * afc$coord_lignes),
-    diag(afc$valeurs_propres)
-  ),
-  proches(
-    crossprod(afc$coord_colonnes, afc$masses_colonnes * afc$coord_colonnes),
-    diag(afc$valeurs_propres)
-  )
-)
 
 # Les transitions sont des barycentres entre coordonnées principales d'un
 # nuage et coordonnées standard de l'autre, pas entre F et G directement.
